@@ -1,0 +1,12 @@
+Package: RASCHplot
+Type: Package
+Title: Graphical investigation of itemfit for dichotomous and polytomous Rasch models
+Version: 1.0
+Date: 2021-09-14
+Author: Author
+Maintainer: Who to complain to <yourfault@somewhere.net>
+Description: Construction of plots for graphically investigation of itemfit dichotomous and polytomous Rasch models estimated using eRm-package.
+License: GPL (>= 2)
+RoxygenNote: 7.1.2
+Imports: eRm, ggpubr, ggplot2, Rcpp (>= 1.0.7)
+LinkingTo: Rcpp
