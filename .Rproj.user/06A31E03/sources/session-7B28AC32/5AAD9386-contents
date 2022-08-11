@@ -1,0 +1,276 @@
+#' Create CICC plot
+#'
+#' @param model Object of class `Rm`.
+#' @param which.item Item to plot. Default is 1.
+#' @param lower.groups A vector used for grouping the set of total scores into intervals. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zeroincluded, it will be added automatically. It is also possible to state `lower.groups="all"` (default) to have empirical expected item-scores for every possible total score in the figure.
+#' @param all.items Logical flag for constructing CICC plots for all items in the data. Default is `all.items = FALSE`.
+#' @param grid.items Grid
+#' @param error.bar Default is `error.bar = TRUE`.
+#' @param col.cicc The color of the CICC. NULL by default, in which case the CICC is black.
+#' @param col.error.bar The color of the error bars. NULL by default, in which case the error bars are red.
+#'
+#' @import ggplot2
+#' @import memoise
+#' @import ggpubr
+#' @import stats
+#'
+#' @return CICC plot
+#'
+#' @examples
+#' library(iarm)
+#' str(amts)
+#' it.AMTS <- amts[, 4:13]
+#' it.AMTS.complete <- it.AMTS[complete.cases(it.AMTS), ]
+#' model.AMTS <- RM(it.AMTS.complete, sum0 = FALSE)
+#' CICCplot(model = model.AMTS, lower.groups = "all")
+#' CICCplot(model = model.AMTS, lower.groups = "all", error.bar = FALSE)
+#'
+#' @export CICCplot
+#'
+CICCplot <- function(model, which.item = 1, lower.groups = NULL, all.items = FALSE, grid.items = TRUE, error.bar = TRUE,  col.cicc = NULL, col.error.bar = NULL){
+
+  data <- model$X
+  betas <- model$betapar
+  k <- ncol(data)
+  m_i <- sapply(1:k, FUN = function(i) length(unique(data[,i]))-1)
+  parsidx <- rep(1:k, m_i)
+  #parsList <- split(betas, parsidx)
+
+  n.itemcat <- apply(data, 2, FUN = function(x){max(x, na.rm = T) - min(x, na.rm = T)})
+  par.itemgrp <- rep(1:ncol(data), times = n.itemcat)
+
+  #phi <- NULL
+  #for(x in 1:ncol(model$X)){phi <- c(phi,-cumsum(betas[par.itemgrp==x]))}
+
+  if (is.double(lower.groups)|is.integer(lower.groups)) {if(any(lower.groups>length(betas))){ message("\n lower.group index greater that maximum possible score \n"); return(NA) }}
+  if (any(which.item>dim(data)[2])){ message("\n which.item index greater that number of items in the model \n"); return(NA) }
+
+
+  if( length(which.item)==1 & is.double(which.item)){
+
+    #Tot.val <- 0:length(phi)
+    Tot.val <- 0:length(betas)
+
+    exp.val <- sapply(Tot.val, FUN = function(R){
+      l <- par.itemgrp[par.itemgrp!=which.item]
+      par.itemgrp_noitem <- ifelse( l > which.item, l-1, l)
+      g1 <- gamma_r_rec_pcm(betas, R, par.itemgrp)
+      return( sum( sapply( 1:sum(par.itemgrp==which.item), FUN = function(X){
+        g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=which.item], R-X, par.itemgrp_noitem)
+        return( X*exp(betas[par.itemgrp==which.item][X])*g2/g1)})))
+    })
+
+    #exp.val <- sapply(Tot.val, FUN = function(R){
+    #  l <- par.itemgrp[par.itemgrp!=which.item]
+    #  par.itemgrp_noitem <- ifelse( l > which.item, l-1, l)
+    #  g1 <- gamma_r_rec_pcm(betas, R, par.itemgrp)
+    #  return( sum( sapply( 1:sum(par.itemgrp==which.item), FUN = function(X){
+    #    g2 <- gamma_r_rec_pcm(betas[parsidx != which.item], R-X, par.itemgrp_noitem)
+    #    return( X*exp(betas[parsidx == which.item][X])*g2/g1)})))
+    #})
+
+    data_exp <- data.frame(Tot.val, exp.val)
+
+    if (!is.double(lower.groups) & !is.integer(lower.groups)){
+      if (lower.groups == "all"){
+
+        #Tot.val_grp <- 0:length(phi)
+        Tot.val_grp <- 0:length(betas)
+        obs.val_grp <- sapply(Tot.val_grp, FUN = function(x){ mean( data[which(rowSums(data) == x), which.item] )})
+        var.val_grp <- sapply(Tot.val_grp, FUN = function(x){ var( data[which(rowSums(data) == x), which.item] )})
+        n.val_grp <- sapply(Tot.val_grp, FUN = function(x){ length( data[which(rowSums(data) == x), which.item] )})
+      }}
+
+    if (is.double(lower.groups)|is.integer(lower.groups)){
+
+      breaks <- sort(x = unique(c(floor(lower.groups), min(Tot.val))))
+      n.groups <- length(breaks)
+
+      Tot.val_grp <- rep(NA, times = n.groups)
+      obs.val_grp <- rep(NA, times = n.groups)
+      var.val_grp <- rep(NA, times = n.groups)
+      n.val_grp <- rep(NA, times = n.groups)
+
+      for (i in seq_along(breaks)){
+
+        if(i != n.groups){
+
+          obs.val_grp[i] <- mean( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), which.item])
+          var.val_grp[i] <- var( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), which.item])
+          n.val_grp[i] <- length( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), which.item])
+          Tot.val_grp[i] <- mean( rowSums(data)[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1))])
+
+        } else{
+
+          obs.val_grp[i] <- mean( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), which.item])
+          var.val_grp[i] <- var( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), which.item])
+          n.val_grp[i] <- length( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), which.item])
+          Tot.val_grp[i] <- mean( rowSums(data)[which(rowSums(data) %in% breaks[i]:max(Tot.val))])
+        }
+      }}
+
+    data_obs <- data.frame(Tot.val_grp, obs.val_grp, var.val_grp, n.val_grp, CI.bound = NA)
+
+    if(error.bar){data_obs$CI.bound <- 1.96*sqrt(data_obs[,3]/data_obs[,4])}
+
+    col <- c("Expected" = "black", "Observed" = "red")
+    if (!is.null(col.cicc)) col[1] <- col.cicc
+    if (!is.null(col.error.bar)) col[2] <- col.error.bar
+
+    p <- ggplot(data = data_exp, aes(x = Tot.val, y= exp.val, color = "Expected")) +
+      geom_line(linetype = "dashed") +
+      geom_point() +
+      geom_point(data = data_obs, aes(x = Tot.val_grp, y = obs.val_grp, color = "Observed"), size = 2) +
+      theme(legend.title = element_blank(), plot.title = element_text(size = 15,hjust = 0.5)) +
+      scale_colour_manual(values = col) +
+      ggtitle(paste0("Item ", which.item)) +
+      xlab("Total Score") +
+      ylab("Conditional Item-Score") +
+      geom_errorbar(data = data_obs, aes(x = Tot.val_grp, y = obs.val_grp,
+                                         ymin = obs.val_grp - CI.bound, ymax = obs.val_grp + CI.bound,
+                                         color = "Observed"),
+                    width = 0.2, size = 1) +
+      scale_x_continuous(breaks=Tot.val)
+
+    P <- p
+  }
+
+  if (all.items | length(which.item)>1 ){
+
+    which.item.arg <- which.item
+
+    if(all.items){
+      n.items <- dim(data)[2]
+      pp <- list(rep(NA, n.items))
+      ii <- 1:n.items}
+
+    if((!all.items) & (length(which.item)>1) ){
+      pp <- list(rep(NA, length(which.item)))
+      ii <- which.item}
+
+    j <- 1
+
+    # Tot.val <- 0:length(phi)
+    Tot.val <- 0:length(betas)
+
+    # g_r <- sapply(Tot.val, FUN = function(x) gamma_r_rec(betas,x))
+
+    for (k in ii) {
+
+      which.item <- k
+      l <- par.itemgrp[par.itemgrp!=which.item]
+      par.itemgrp_noitem <- ifelse( l > which.item, l-1, l)
+
+      exp.val <- sapply(Tot.val, FUN = function(R){
+        g1 <- gamma_r_rec_pcm(betas, R, par.itemgrp)
+        return( sum( sapply( 1:sum(par.itemgrp==which.item), FUN = function(X){
+          g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=which.item], R-X, par.itemgrp_noitem)
+          return( X*exp(betas[par.itemgrp==which.item][X])*g2/g1)})))
+      })
+      data_exp <- data.frame(Tot.val, exp.val)
+
+      if (!is.double(lower.groups) & !is.integer(lower.groups)){
+
+        if (lower.groups == "all"){
+
+          # Tot.val_grp <- 0:length(phi)
+          Tot.val_grp <- 0:length(betas)
+          obs.val_grp <- sapply(Tot.val_grp, FUN = function(x){ mean( data[which(rowSums(data) == x), which.item] )})
+          var.val_grp <- sapply(Tot.val_grp, FUN = function(x){ var( data[which(rowSums(data) == x), which.item] )})
+          n.val_grp <- sapply(Tot.val_grp, FUN = function(x){ length( data[which(rowSums(data) == x), which.item] )})
+        }}
+
+      if (is.double(lower.groups)|is.integer(lower.groups)){
+
+        breaks <- sort(x=unique(c(floor(lower.groups),min(Tot.val))))
+        n.groups <- length(breaks)
+
+        Tot.val_grp <- rep(NA, times = n.groups)
+        obs.val_grp <- rep(NA, times = n.groups)
+        var.val_grp <- rep(NA, times = n.groups)
+        n.val_grp <- rep(NA, times = n.groups)
+
+        for (i in seq_along(breaks)){
+
+          if(i != n.groups){
+
+            obs.val_grp[i] <- mean( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), which.item])
+            var.val_grp[i] <- var( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), which.item])
+            n.val_grp[i] <- length( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), which.item])
+            Tot.val_grp[i] <- mean( rowSums(data)[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1))])
+
+          } else{
+
+            obs.val_grp[i] <- mean( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), which.item])
+            var.val_grp[i] <- var( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), which.item])
+            n.val_grp[i] <- length( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), which.item])
+            Tot.val_grp[i] <- mean( rowSums(data)[which(rowSums(data) %in% breaks[i]:max(Tot.val))])
+          }
+        }}
+
+
+      data_obs <- data.frame(Tot.val_grp, obs.val_grp, var.val_grp, n.val_grp, CI.bound = NA)
+
+      if (error.bar){ data_obs$CI.bound <- 1.96*sqrt(data_obs[,3]/data_obs[,4]) }
+
+      col <- c("Expected" = "black", "Observed" = "red")
+      if (!is.null(col.cicc)) col[1] <- col.cicc
+      if (!is.null(col.error.bar)) col[2] <- col.error.bar
+
+      p <- ggplot(data = data_exp, aes(x = Tot.val, y= exp.val, color = "Expected")) +
+        geom_line(linetype = "dashed") + geom_point() +
+        geom_point(data = data_obs, aes(x = Tot.val_grp, y = obs.val_grp, color = "Observed"), size = 2) +
+        theme(legend.title = element_blank(), plot.title = element_text(size = 15,hjust = 0.5)) +
+        scale_colour_manual(values = col) +
+        ggtitle(paste0("Item ", which.item)) +
+        xlab("Total Score") +
+        ylab("Conditional Item-Score")  +
+        scale_x_continuous(breaks=Tot.val) +
+        geom_errorbar(data = data_obs,
+                      aes(x = Tot.val_grp, y = obs.val_grp,
+                          ymin = obs.val_grp - CI.bound,
+                          ymax = obs.val_grp + CI.bound,
+                          color = "Observed"),
+                      width = 0.2, size = 1)
+
+      pp[[j]] <- p
+      j <- j+1
+
+    }
+
+    if (grid.items){
+
+      if (all.items){ P <- ggpubr::ggarrange(plotlist= pp, common.legend = T, legend = "bottom", ncol = min(2, n.items), nrow = min(2 ,ceiling(n.items/2)), align = "hv")}
+      if (!all.items){P <- ggpubr::ggarrange(plotlist= pp, common.legend = T, legend = "bottom", ncol = 2, nrow = min(2 ,ceiling(length(which.item.arg)/2)), align = "hv")}
+    }
+    if (!grid.items){ P <- pp}
+
+  }
+  P
+}
+#' Gamma polynomials (recursive formula)
+#' @param pars A vector of item parameters
+#' @param r The total score
+#' @param par.grp The grouping of scores
+#' @noRd
+gamma_r_rec_pcm <- memoise::memoise(function(pars, r, par.grp){
+
+  if (r == 0)
+    return(1)
+
+  if (r > length(pars) | r<0)
+    return(0)
+
+  if (r != 0 | r <= length(pars)) {
+
+    A <- exp(pars[par.grp==1])
+    B <- sapply(1:length(pars[par.grp==1]), FUN = function(x){
+      gamma_r_rec_pcm(pars = pars[par.grp!=1],
+                           r = r-x,
+                           par.grp = par.grp[par.grp!=1]-1)})
+    C <- gamma_r_rec_pcm(pars = pars[par.grp!=1], r = r, par.grp = par.grp[par.grp!=1]-1)
+
+    return({sum(A * B) + C})
+
+  }
+})
