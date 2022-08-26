@@ -1,17 +1,16 @@
-#' This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model. These plots can be used to investigate item misfit.
+#' This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model and allows for stratification on categorical variables. These plots can be used to investigate item misfit.
 #'
 #' @param model A model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.
 #' @param which.item An integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. The argument will not be used if `all.items = TRUE`.
+#' @param strat.vars List of categorical variables for stratification.
 #' @param lower.groups A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score.
 #' @param all.items Logical flag for constructing CICC plots for all items in the data. Default value is `FALSE`.
-#' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.
 #' @param grid.items  Logical flag for arranging the items selected by which.item or all.items in grids with at most four plots per grid. Default value is `FALSE`.
-#' @param ... Arguments to be passed to `ggarrange`.
+#' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.
 #'
 #' @import ggplot2
 #' @import memoise
 #' @import ggpubr
-#' @import scales
 #' @import stats
 #'
 #' @return CICC plot
@@ -22,24 +21,25 @@
 #' it.AMTS <- amts[, 4:13]
 #' it.AMTS.complete <- it.AMTS[complete.cases(it.AMTS), ]
 #' model.AMTS <- RM(it.AMTS.complete, sum0 = FALSE)
-#' CICCplot(model = model.AMTS, lower.groups = "all")
-#' p <- CICCplot(model = model.AMTS, lower.groups = "all")
-#' p + scale_colour_manual(values = c("blue","orange"))
-#' CICCplot(model = model.AMTS, all.items = TRUE)
-#' CICCplot(model = model.AMTS, lower.groups = c(0, 1, 2,5,8,10))
+#' strat.vars = list(amts[, "sex"], amts[, "agegrp"])
 #'
-#' @export CICCplot
+#' @export DIFplot
 #'
-CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FALSE, grid.items = FALSE, error.bar = TRUE, ...){
+DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "all", all.items = FALSE, grid.items = FALSE, error.bar = TRUE){
 
   itmidx <- suppressWarnings(as.numeric(which.item))
   if(anyNA(itmidx)){
     stop("all values of which.item can not be converted to numeric")
   }
 
+  if(is.null(strat.vars)) {
+    stop("no variables for stratification")
+  }
+
   data <- model$X
   betas <- model$betapar
   k <- ncol(data)
+  N <- nrow(data)
   m_i <- sapply(1:k, FUN = function(i) length(unique(data[,i]))-1)
   parsidx <- rep(1:k, m_i)
 
@@ -56,10 +56,12 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FA
   if (any(itmidx < 1)) {
     stop("some values of which.item < 1")
   }
+  if(!all(sapply(strat.vars, length) == N)) {
+    stop("lengths of stratification variables must equal number of rows in data input of RM")
+  }
 
   if (all(length(itmidx)==1 & is.double(itmidx) & !all.items)) {
 
-    #Tot.val <- 0:length(phi)
     Tot.val <- 0:length(betas)
 
     exp.val <- sapply(Tot.val, FUN = function(R){
@@ -119,7 +121,7 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FA
     col <- c("Expected" = "darkgrey", "Observed" = "orange")
     itmtit <- colnames(data)[itmidx]
 
-    P <- ciccplot(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col)
+    P <- difplot(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col)
   }
 
   if (all.items | length(itmidx)>1 ){
@@ -200,15 +202,15 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FA
       col <- c("Expected" = "darkgrey", "Observed" = "orange")
       itmtit <- colnames(model$X)[itmidx]
 
-      pp[[j]] <- ciccplot(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col)
+      pp[[j]] <- difplot(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col)
       j <- j+1
 
     }
 
     if (grid.items){
 
-      if (all.items){ P <- ggpubr::ggarrange(plotlist= pp, ...)}
-      if (!all.items){P <- ggpubr::ggarrange(plotlist= pp, ...)}
+      if (all.items){ P <- ggpubr::ggarrange(plotlist= pp, common.legend = T, legend = "bottom", ncol = min(2, n.items), nrow = min(2 ,ceiling(n.items/2)), align = "hv")}
+      if (!all.items){P <- ggpubr::ggarrange(plotlist= pp, common.legend = T, legend = "bottom", ncol = 2, nrow = min(2 ,ceiling(length(which.item.arg)/2)), align = "hv")}
     }
     if (!grid.items){ P <- pp}
 
@@ -233,15 +235,15 @@ gamma_r_rec_pcm <- memoise::memoise(function(pars, r, par.grp){
     A <- exp(pars[par.grp==1])
     B <- sapply(1:length(pars[par.grp==1]), FUN = function(x){
       gamma_r_rec_pcm(pars = pars[par.grp!=1],
-                           r = r-x,
-                           par.grp = par.grp[par.grp!=1]-1)})
+                      r = r-x,
+                      par.grp = par.grp[par.grp!=1]-1)})
     C <- gamma_r_rec_pcm(pars = pars[par.grp!=1], r = r, par.grp = par.grp[par.grp!=1]-1)
 
     return({sum(A * B) + C})
 
   }
 })
-#' Internal CICC plot function
+#' Internal DIF plot function
 #' @param data_exp data_exp
 #' @param Tot.val Tot.val
 #' @param exp.val exp.val
@@ -252,34 +254,23 @@ gamma_r_rec_pcm <- memoise::memoise(function(pars, r, par.grp){
 #' @param CI.bound CI.bound
 #' @param col col
 #' @noRd
-ciccplot <- function(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col) {
-
-  # A function factory for getting integer y-axis values.
-  integer_breaks <- function(n = 5, ...) {
-    fxn <- function(x) {
-      breaks <- floor(pretty(x, n, ...))
-      names(breaks) <- attr(breaks, "labels")
-      breaks
-    }
-    return(fxn)
-  }
-
+difplot <- function(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col) {
   x <- ggplot(data = data_exp, aes(x = Tot.val, y= exp.val, color = "Expected")) +
-  geom_line() + #linetype = "dashed") +
-  #geom_point() +
-  geom_point(data = data_obs, aes(x = Tot.val_grp, y = obs.val_grp, color = "Observed"), size = 1) +
-  scale_colour_manual(values = col) +
-  ggtitle(paste0("Item: ", itmtit)) +
-  xlab("Total Score") +
-  ylab("Item-Score") +
-  geom_errorbar(data = data_obs, aes(x = Tot.val_grp, y = obs.val_grp,
-                                     ymin = obs.val_grp - CI.bound, ymax = obs.val_grp + CI.bound,
-                                     color = "Observed"),
-                width = 0) + #, size = .5) +
-  scale_x_continuous(breaks = integer_breaks(), minor_breaks = Tot.val) + #breaks = Tot.val) +
-  theme_minimal() +
-  theme(legend.title = element_blank(),
-        plot.title = element_text(size = 8, hjust = 0.5),
-        text = element_text(size = 8))
+    geom_line() + #linetype = "dashed") +
+    #geom_point() +
+    geom_point(data = data_obs, aes(x = Tot.val_grp, y = obs.val_grp, color = "Observed"), size = 1) +
+    scale_colour_manual(values = col) +
+    ggtitle(paste0("Item: ", itmtit)) +
+    xlab("Total Score") +
+    ylab("Item-Score") +
+    geom_errorbar(data = data_obs, aes(x = Tot.val_grp, y = obs.val_grp,
+                                       ymin = obs.val_grp - CI.bound, ymax = obs.val_grp + CI.bound,
+                                       color = "Observed"),
+                  width = 0) + #, size = .5) +
+    scale_x_continuous(breaks = Tot.val) +
+    theme_minimal() +
+    theme(legend.title = element_blank(),
+          plot.title = element_text(size = 8, hjust = 0.5),
+          text = element_text(size = 8))
   print(x)
 }
