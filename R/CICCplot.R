@@ -6,7 +6,7 @@
 #' @param all.items Logical flag for constructing CICC plots for all items in the data. Default value is `FALSE`.
 #' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.
 #' @param grid.items  Logical flag for arranging the items selected by which.item or all.items in grids using the `ggarrange` function from the `ggpubr` package. Default value is `FALSE`.
-#' @param ... Arguments to be passed to `ggarrange`. The argument will only be used if 'grid.items = TRUE'.
+#' @param ... Arguments to be passed to `ggarrange`. The arguments will only be used if 'grid.items = TRUE'.
 #'
 #' @import ggplot2
 #' @import memoise
