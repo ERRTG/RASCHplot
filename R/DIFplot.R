@@ -18,22 +18,25 @@
 #' @examples
 #' library(iarm)
 #' str(amts)
-#' it.AMTS <- amts[, 4:13]
-#' it.AMTS.complete <- it.AMTS[complete.cases(it.AMTS), ]
+#' AMTS.complete <- amts[complete.cases(amts), ]
+#' it.AMTS <- AMTS.complete[, 4:13]
 #' model.AMTS <- RM(it.AMTS.complete, sum0 = FALSE)
-#' strat.vars = list(amts[, "sex"], amts[, "agegrp"])
+#' strat.vars = list(AMTS.complete[, "sex"], AMTS.complete[, "agegrp"])
+#' DIFplot(model = model.AMTS)
 #'
 #' @export DIFplot
 #'
-DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "all", all.items = FALSE, grid.items = FALSE, error.bar = TRUE){
+DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "all", all.items = FALSE, grid.items = FALSE, error.bar = TRUE, ...){
+
+  if(is.null(strat.vars)) {
+    pp <- CICCplot(model, which.item, lower.groups, all.items, grid.items, error.bar, ...)
+    warning("no variables for stratification; running CICCplot")
+    return(pp)
+  }
 
   itmidx <- suppressWarnings(as.numeric(which.item))
   if(anyNA(itmidx)){
     stop("all values of which.item can not be converted to numeric")
-  }
-
-  if(is.null(strat.vars)) {
-    stop("no variables for stratification")
   }
 
   data <- model$X
@@ -68,58 +71,95 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
       l <- par.itemgrp[par.itemgrp!=itmidx]
       par.itemgrp_noitem <- ifelse( l > itmidx, l-1, l)
       g1 <- gamma_r_rec_pcm(betas, R, par.itemgrp)
-      return( sum( sapply( 1:sum(par.itemgrp==itmidx), FUN = function(X){
+      return(sum( sapply( 1:sum(par.itemgrp==itmidx), FUN = function(X){
         g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itmidx], R-X, par.itemgrp_noitem)
-        return( X*exp(betas[par.itemgrp==itmidx][X])*g2/g1)})))
+        return(X*exp(betas[par.itemgrp==itmidx][X])*g2/g1)})))
     })
 
     data_exp <- data.frame(Tot.val, exp.val)
 
-    if (!is.double(lower.groups) & !is.integer(lower.groups)){
-      if (lower.groups == "all"){
 
-        #Tot.val_grp <- 0:length(phi)
-        Tot.val_grp <- 0:length(betas)
-        obs.val_grp <- sapply(Tot.val_grp, FUN = function(x){ mean( data[which(rowSums(data) == x), itmidx] )})
-        var.val_grp <- sapply(Tot.val_grp, FUN = function(x){ var( data[which(rowSums(data) == x), itmidx] )})
-        n.val_grp <- sapply(Tot.val_grp, FUN = function(x){ length( data[which(rowSums(data) == x), itmidx] )})
-      }}
+    Tot.val_grp <- vector(mode = "list", length(strat.vars))
+    Tot.val_grp <- lapply(seq_along(Tot.val_grp), function(l) vector(mode = "list", nlevels(as.factor(strat.vars[[l]]))))
+    obs.val_grp <- vector(mode = "list", length(strat.vars))
+    obs.val_grp <- lapply(seq_along(obs.val_grp), function(l) vector(mode = "list", nlevels(as.factor(strat.vars[[l]]))))
+    var.val_grp <- vector(mode = "list", length(strat.vars))
+    var.val_grp <- lapply(seq_along(var.val_grp), function(l) vector(mode = "list", nlevels(as.factor(strat.vars[[l]]))))
+    n.val_grp <- vector(mode = "list", length(strat.vars))
+    n.val_grp <- lapply(seq_along(n.val_grp), function(l) vector(mode = "list", nlevels(as.factor(strat.vars[[l]]))))
+    data_obs <- vector(mode = "list", length(strat.vars))
 
-    if (is.double(lower.groups)|is.integer(lower.groups)){
+    for(l in seq_along(strat.vars)) {
 
-      breaks <- sort(x = unique(c(floor(lower.groups), min(Tot.val))))
-      n.groups <- length(breaks)
+      if (!is.double(lower.groups) & !is.integer(lower.groups)){
+        if (lower.groups == "all"){
 
-      Tot.val_grp <- rep(NA, times = n.groups)
-      obs.val_grp <- rep(NA, times = n.groups)
-      var.val_grp <- rep(NA, times = n.groups)
-      n.val_grp <- rep(NA, times = n.groups)
+          Tot.val_grp <- 0:length(betas)
+          obs.val_grp[[l]] <- lapply(1:nlevels(as.factor(strat.vars[[l]])), function(j) {
+            sapply(Tot.val_grp, FUN = function(x) {
+              strat.data <- data[strat.vars[[l]] == levels(strat.vars[[l]])[j], ]
+              mean(strat.data[which(rowSums(strat.data) == x), itmidx])
+              })
+            })
+          var.val_grp[[l]] <- lapply(1:nlevels(as.factor(strat.vars[[l]])), function(j) {
+            sapply(Tot.val_grp, FUN = function(x) {
+              strat.data <- data[strat.vars[[l]] == levels(strat.vars[[l]])[j], ]
+              var(strat.data[which(rowSums(strat.data) == x), itmidx])
+            })
+          })
+          n.val_grp[[l]] <- lapply(1:nlevels(as.factor(strat.vars[[l]])), function(j) {
+            sapply(Tot.val_grp, FUN = function(x) {
+              strat.data <- data[strat.vars[[l]] == levels(strat.vars[[l]])[j], ]
+              length(strat.data[which(rowSums(strat.data) == x), itmidx])
+            })
+          })
+        }}
 
-      for (i in seq_along(breaks)){
+      if (is.double(lower.groups)|is.integer(lower.groups)){
 
-        if(i != n.groups){
+        breaks <- sort(x = unique(c(floor(lower.groups), min(Tot.val))))
+        n.groups <- length(breaks)
 
-          obs.val_grp[i] <- mean( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
-          var.val_grp[i] <- var( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
-          n.val_grp[i] <- length( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
-          Tot.val_grp[i] <- mean( rowSums(data)[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1))])
+        Tot.val_grp <- rep(NA, times = n.groups)
+        obs.val_grp <- rep(NA, times = n.groups)
+        var.val_grp <- rep(NA, times = n.groups)
+        n.val_grp <- rep(NA, times = n.groups)
 
-        } else{
+        for (i in seq_along(breaks)){
 
-          obs.val_grp[i] <- mean( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
-          var.val_grp[i] <- var( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
-          n.val_grp[i] <- length( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
-          Tot.val_grp[i] <- mean( rowSums(data)[which(rowSums(data) %in% breaks[i]:max(Tot.val))])
-        }
-      }}
+          if(i != n.groups){
 
-    data_obs <- data.frame(Tot.val_grp, obs.val_grp, var.val_grp, n.val_grp, CI.bound = NA)
-    data_obs <- data_obs[data_obs$n.val_grp != 0, ]
+            obs.val_grp[i] <- mean( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
+            var.val_grp[i] <- var( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
+            n.val_grp[i] <- length( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
+            Tot.val_grp[i] <- mean( rowSums(data)[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1))])
 
-    if(error.bar){data_obs$CI.bound <- 1.96*sqrt(data_obs[,3]/data_obs[,4])}
+          } else{
 
-    col <- c("Expected" = "darkgrey", "Observed" = "orange")
-    itmtit <- colnames(data)[itmidx]
+            obs.val_grp[i] <- mean( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
+            var.val_grp[i] <- var( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
+            n.val_grp[i] <- length( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
+            Tot.val_grp[i] <- mean( rowSums(data)[which(rowSums(data) %in% breaks[i]:max(Tot.val))])
+          }
+        }}
+
+      data_obs[[l]] <- lapply(1:nlevels(as.factor(strat.vars[[l]])), function(j) {
+        df <- data.frame(Tot.val_grp,
+                   obs.val_grp = obs.val_grp[[l]][[j]],
+                   var.val_grp = var.val_grp[[l]][[j]],
+                   n.val_grp = n.val_grp[[l]][[j]],
+                   CI.bound = NA)
+        df <- df[df$n.val_grp != 0, ]
+        if(error.bar){df$CI.bound <- 1.96*sqrt(df[,"var.val_grp"]/df[,"n.val_grp"])}
+        df
+      })
+
+      col <- c("Expected" = "darkgrey", "Observed" = "orange")
+      itmtit <- colnames(data)[itmidx]
+
+    }
+
+
 
     P <- difplot(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col)
   }
@@ -217,32 +257,6 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
   }
   P
 }
-#' Gamma polynomials (recursive formula)
-#' @param pars A vector of item parameters
-#' @param r The total score
-#' @param par.grp The grouping of scores
-#' @noRd
-gamma_r_rec_pcm <- memoise::memoise(function(pars, r, par.grp){
-
-  if (r == 0)
-    return(1)
-
-  if (r > length(pars) | r<0)
-    return(0)
-
-  if (r != 0 | r <= length(pars)) {
-
-    A <- exp(pars[par.grp==1])
-    B <- sapply(1:length(pars[par.grp==1]), FUN = function(x){
-      gamma_r_rec_pcm(pars = pars[par.grp!=1],
-                      r = r-x,
-                      par.grp = par.grp[par.grp!=1]-1)})
-    C <- gamma_r_rec_pcm(pars = pars[par.grp!=1], r = r, par.grp = par.grp[par.grp!=1]-1)
-
-    return({sum(A * B) + C})
-
-  }
-})
 #' Internal DIF plot function
 #' @param data_exp data_exp
 #' @param Tot.val Tot.val
