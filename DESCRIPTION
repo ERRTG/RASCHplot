@@ -1,4 +1,4 @@
-Package: CICCplot
+Package: RASCHplot
 Type: Package
 Title: Conditional Item Characteristic Curves for Rasch models
 Version: 0.1.0
