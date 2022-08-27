@@ -11,7 +11,8 @@ DIFplot(
   lower.groups = "all",
   all.items = FALSE,
   grid.items = FALSE,
-  error.bar = TRUE
+  error.bar = TRUE,
+  ...
 )
 }
 \arguments{
@@ -21,13 +22,15 @@ DIFplot(
 
 \item{strat.vars}{List of categorical variables for stratification.}
 
-\item{lower.groups}{A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score.}
+\item{lower.groups}{A list of length `length(strat.vars)` of vectors or a single vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector(s) should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector(s), it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score.}
 
 \item{all.items}{Logical flag for constructing CICC plots for all items in the data. Default value is `FALSE`.}
 
-\item{grid.items}{Logical flag for arranging the items selected by which.item or all.items in grids with at most four plots per grid. Default value is `FALSE`.}
+\item{grid.items}{Logical flag for arranging the items selected by which.item or all.items in grids using the `ggarrange` function from the `ggpubr` package. Default value is `FALSE`.}
 
 \item{error.bar}{Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.}
+
+\item{...}{Arguments to be passed to `ggarrange`. The arguments will only be used if 'grid.items = TRUE'.}
 }
 \value{
 CICC plot
@@ -38,9 +41,15 @@ This function constructs Conditional Item Characteristic Curves for selected ite
 \examples{
 library(iarm)
 str(amts)
-it.AMTS <- amts[, 4:13]
-it.AMTS.complete <- it.AMTS[complete.cases(it.AMTS), ]
-model.AMTS <- RM(it.AMTS.complete, sum0 = FALSE)
-strat.vars = list(amts[, "sex"], amts[, "agegrp"])
+AMTS.complete <- amts[complete.cases(amts), ]
+it.AMTS <- AMTS.complete[, 4:13]
+model.AMTS <- RM(it.AMTS, sum0 = FALSE)
+strat.vars <- list(sex = AMTS.complete[, "sex"], agegrp = AMTS.complete[, "agegrp"])
+DIFplot(model = model.AMTS, strat.vars = strat.vars)
+DIFplot(model = model.AMTS, which.item = c(1,2), strat.vars = strat.vars)
+lower.groups <- list(sex = c(0, 1, 2, 5, 8, 10), agegrp = c(0, 3, 6, 9))
+DIFplot(model = model.AMTS, strat.vars = strat.vars, lower.groups = lower.groups)
+DIFplot(model = model.AMTS, which.item = c(1,2),
+        strat.vars = strat.vars, lower.groups = lower.groups)
 
 }

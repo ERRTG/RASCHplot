@@ -4,8 +4,8 @@
 #' @param which.item An integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. The argument will not be used if `all.items = TRUE`.
 #' @param lower.groups A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score.
 #' @param all.items Logical flag for constructing CICC plots for all items in the data. Default value is `FALSE`.
-#' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.
 #' @param grid.items  Logical flag for arranging the items selected by which.item or all.items in grids using the `ggarrange` function from the `ggpubr` package. Default value is `FALSE`.
+#' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.
 #' @param ... Arguments to be passed to `ggarrange`. The arguments will only be used if 'grid.items = TRUE'.
 #'
 #' @import ggplot2
@@ -25,7 +25,7 @@
 #' CICCplot(model = model.AMTS)
 #' p <- CICCplot(model = model.AMTS)
 #' p + scale_colour_manual(values = c("burlywood","cornflowerblue"))
-#' CICCplot(model = model.AMTS, lower.groups = c(0, 1, 2,5,8,10))
+#' CICCplot(model = model.AMTS, lower.groups = c(0, 1, 2, 5, 8, 10))
 #' CICCplot(model = model.AMTS, all.items = TRUE, grid.items = TRUE,
 #'          common.legend = TRUE, ncol = 2, nrow = 2)
 #'
@@ -130,11 +130,13 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FA
     if(all.items){
       n.items <- dim(data)[2]
       pp <- list(rep(NA, n.items))
-      ii <- 1:n.items}
+      ii <- 1:n.items
+    }
 
     if((!all.items) & (length(itmidx)>1) ){
       pp <- list(rep(NA, length(itmidx)))
-      ii <- itmidx}
+      ii <- itmidx
+    }
 
     j <- 1
 

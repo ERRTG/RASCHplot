@@ -45,7 +45,7 @@ model.AMTS <- RM(it.AMTS.complete, sum0 = FALSE)
 CICCplot(model = model.AMTS)
 p <- CICCplot(model = model.AMTS)
 p + scale_colour_manual(values = c("burlywood","cornflowerblue"))
-CICCplot(model = model.AMTS, lower.groups = c(0, 1, 2,5,8,10))
+CICCplot(model = model.AMTS, lower.groups = c(0, 1, 2, 5, 8, 10))
 CICCplot(model = model.AMTS, all.items = TRUE, grid.items = TRUE,
          common.legend = TRUE, ncol = 2, nrow = 2)
 
