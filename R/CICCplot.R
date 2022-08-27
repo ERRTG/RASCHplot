@@ -255,6 +255,7 @@ ciccplot <- function(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_
   theme_minimal() +
   theme(legend.title = element_blank(),
         plot.title = element_text(size = 8, hjust = 0.5),
-        text = element_text(size = 8))
+        text = element_text(size = 8))+
+    guides(colour = guide_legend(override.aes = list(shape = c(NA, 1))))
   print(x)
 }

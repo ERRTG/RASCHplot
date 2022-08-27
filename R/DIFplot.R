@@ -22,7 +22,7 @@
 #' it.AMTS <- AMTS.complete[, 4:13]
 #' model.AMTS <- RM(it.AMTS.complete, sum0 = FALSE)
 #' strat.vars = list(AMTS.complete[, "sex"], AMTS.complete[, "agegrp"])
-#' DIFplot(model = model.AMTS)
+#' DIFplot(model = model.AMTS, strat.vars = strat.vars)
 #'
 #' @export DIFplot
 #'
@@ -79,37 +79,32 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
     data_exp <- data.frame(Tot.val, exp.val)
 
 
-    Tot.val_grp <- vector(mode = "list", length(strat.vars))
-    Tot.val_grp <- lapply(seq_along(Tot.val_grp), function(l) vector(mode = "list", nlevels(as.factor(strat.vars[[l]]))))
-    obs.val_grp <- vector(mode = "list", length(strat.vars))
-    obs.val_grp <- lapply(seq_along(obs.val_grp), function(l) vector(mode = "list", nlevels(as.factor(strat.vars[[l]]))))
-    var.val_grp <- vector(mode = "list", length(strat.vars))
-    var.val_grp <- lapply(seq_along(var.val_grp), function(l) vector(mode = "list", nlevels(as.factor(strat.vars[[l]]))))
-    n.val_grp <- vector(mode = "list", length(strat.vars))
-    n.val_grp <- lapply(seq_along(n.val_grp), function(l) vector(mode = "list", nlevels(as.factor(strat.vars[[l]]))))
-    data_obs <- vector(mode = "list", length(strat.vars))
+    P <- vector(mode = "list", length(strat.vars))
 
     for(l in seq_along(strat.vars)) {
+
+      levstrat <- levels(as.factor(strat.vars[[l]]))
+      nlevstrat <- length(levstrat)
 
       if (!is.double(lower.groups) & !is.integer(lower.groups)){
         if (lower.groups == "all"){
 
           Tot.val_grp <- 0:length(betas)
-          obs.val_grp[[l]] <- lapply(1:nlevels(as.factor(strat.vars[[l]])), function(j) {
+          obs.val_grp <- lapply(1:nlevstrat, function(j) {
             sapply(Tot.val_grp, FUN = function(x) {
-              strat.data <- data[strat.vars[[l]] == levels(strat.vars[[l]])[j], ]
+              strat.data <- data[strat.vars[[l]] == levstrat[j], ]
               mean(strat.data[which(rowSums(strat.data) == x), itmidx])
               })
             })
-          var.val_grp[[l]] <- lapply(1:nlevels(as.factor(strat.vars[[l]])), function(j) {
+          var.val_grp <- lapply(1:nlevstrat, function(j) {
             sapply(Tot.val_grp, FUN = function(x) {
-              strat.data <- data[strat.vars[[l]] == levels(strat.vars[[l]])[j], ]
+              strat.data <- data[strat.vars[[l]] == levstrat[j], ]
               var(strat.data[which(rowSums(strat.data) == x), itmidx])
             })
           })
-          n.val_grp[[l]] <- lapply(1:nlevels(as.factor(strat.vars[[l]])), function(j) {
+          n.val_grp <- lapply(1:nlevstrat, function(j) {
             sapply(Tot.val_grp, FUN = function(x) {
-              strat.data <- data[strat.vars[[l]] == levels(strat.vars[[l]])[j], ]
+              strat.data <- data[strat.vars[[l]] == levstrat[j], ]
               length(strat.data[which(rowSums(strat.data) == x), itmidx])
             })
           })
@@ -141,27 +136,31 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
             n.val_grp[i] <- length( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
             Tot.val_grp[i] <- mean( rowSums(data)[which(rowSums(data) %in% breaks[i]:max(Tot.val))])
           }
-        }}
+        }
+      }
 
-      data_obs[[l]] <- lapply(1:nlevels(as.factor(strat.vars[[l]])), function(j) {
+      data_obs <- lapply(1:nlevstrat, function(j) {
         df <- data.frame(Tot.val_grp,
-                   obs.val_grp = obs.val_grp[[l]][[j]],
-                   var.val_grp = var.val_grp[[l]][[j]],
-                   n.val_grp = n.val_grp[[l]][[j]],
-                   CI.bound = NA)
+                   obs.val_grp = obs.val_grp[[j]],
+                   var.val_grp = var.val_grp[[j]],
+                   n.val_grp = n.val_grp[[j]],
+                   CI.bound = NA,
+                   strat.var = levstrat[j])
         df <- df[df$n.val_grp != 0, ]
         if(error.bar){df$CI.bound <- 1.96*sqrt(df[,"var.val_grp"]/df[,"n.val_grp"])}
         df
       })
 
-      col <- c("Expected" = "darkgrey", "Observed" = "orange")
       itmtit <- colnames(data)[itmidx]
+
+      data_obs_long <- do.call(rbind, data_obs)
+
+
+      P[[l]] <- difplot(data_exp, Tot.val, exp.val, data_obs_long, Tot.val_grp, itmtit)
 
     }
 
 
-
-    P <- difplot(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col)
   }
 
   if (all.items | length(itmidx)>1 ){
@@ -261,30 +260,32 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
 #' @param data_exp data_exp
 #' @param Tot.val Tot.val
 #' @param exp.val exp.val
-#' @param data_obs data_obs
+#' @param data_obs_long data_obs_long
 #' @param Tot.val_grp Tot.val_grp
-#' @param obs.val_grp obs.val_grp
 #' @param itmtit itmtit
-#' @param CI.bound CI.bound
-#' @param col col
 #' @noRd
-difplot <- function(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col) {
-  x <- ggplot(data = data_exp, aes(x = Tot.val, y= exp.val, color = "Expected")) +
-    geom_line() + #linetype = "dashed") +
-    #geom_point() +
-    geom_point(data = data_obs, aes(x = Tot.val_grp, y = obs.val_grp, color = "Observed"), size = 1) +
-    scale_colour_manual(values = col) +
+difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, Tot.val_grp, itmtit) {
+
+  col <- c("darkgrey", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")[1:(nlevels(as.factor(data_obs_long$strat.var)) + 1)]
+  names(col) <- c("Expected", levels(as.factor(data_obs_long$strat.var)))
+
+  x <- ggplot(data = data_exp, aes(x = Tot.val, y= exp.val)) +
     ggtitle(paste0("Item: ", itmtit)) +
     xlab("Total Score") +
     ylab("Item-Score") +
-    geom_errorbar(data = data_obs, aes(x = Tot.val_grp, y = obs.val_grp,
-                                       ymin = obs.val_grp - CI.bound, ymax = obs.val_grp + CI.bound,
-                                       color = "Observed"),
-                  width = 0) + #, size = .5) +
     scale_x_continuous(breaks = Tot.val) +
+    geom_line(aes(color = "Expected")) +
+    geom_point(data = data_obs_long, aes(x = Tot.val_grp, y = obs.val_grp, color = strat.var), size = 1) +
+    geom_errorbar(data = data_obs_long, aes(x = Tot.val_grp, y = obs.val_grp,
+                                            ymin = obs.val_grp - CI.bound, ymax = obs.val_grp + CI.bound,
+                                            color = strat.var),
+                  width = 0.1) +
+    scale_colour_manual(values = col) +
     theme_minimal() +
     theme(legend.title = element_blank(),
           plot.title = element_text(size = 8, hjust = 0.5),
-          text = element_text(size = 8))
+          text = element_text(size = 8)) +
+    guides(colour = guide_legend(override.aes = list(shape = c(NA, rep(1, nlevels(as.factor(data_obs_long$strat.var)))))))
+
   print(x)
 }
