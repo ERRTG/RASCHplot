@@ -29,6 +29,10 @@
 #' DIFplot(model = model.AMTS, strat.vars = strat.vars, lower.groups = lower.groups)
 #' DIFplot(model = model.AMTS, which.item = c(1,2),
 #'         strat.vars = strat.vars, lower.groups = lower.groups)
+#' lower.groups <- list(sex = list(c(0, 1, 2, 5, 8, 10), c(0,  5, 10)), agegrp = list(c(0, 3, 6, 9), c(0, 1, 3, 6, 8, 10)))
+#' DIFplot(model = model.AMTS, strat.vars = strat.vars, lower.groups = lower.groups)
+#' DIFplot(model = model.AMTS, which.item = c(1,2),
+#'         strat.vars = strat.vars, lower.groups = lower.groups)
 #'
 #' @export DIFplot
 #'
@@ -78,15 +82,8 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
   if(all.items){
     P <- list(rep(NA, k))
     ii <- 1:k
-  }
-
-  if(length(itmidx) > 1){
+  } else {
     P <- list(rep(NA, length(itmidx)))
-    ii <- itmidx
-  }
-
-  if(all(length(itmidx)==1 & is.double(itmidx) & !all.items)) {
-    P <- list(NA)
     ii <- itmidx
   }
 
@@ -144,43 +141,52 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
       if (is.double(unlist(lower.groups))|is.integer(unlist(lower.groups))){
 
         if (is.list(lower.groups)) {
-          lgrps <- lower.groups[[l]]
+          lgrpsgrps <- lower.groups[[l]]
         } else {
-          lgrps <- lower.groups
+          lgrpsgrps <- lower.groups
         }
 
-        breaks <- sort(x = unique(c(floor(lgrps), min(Tot.val))))
-        n.groups <- length(breaks)
+        for(lgrpsidx in seq_along(lgrpsgrps)) {
 
-        Tot.val_grp <- lapply(1:nlevstrat, function(x) rep(NA, times = n.groups))
-        obs.val_grp <- lapply(1:nlevstrat, function(x) rep(NA, times = n.groups))
-        var.val_grp <- lapply(1:nlevstrat, function(x) rep(NA, times = n.groups))
-        n.val_grp <- lapply(1:nlevstrat, function(x) rep(NA, times = n.groups))
+          if(is.list(lgrpsgrps)) {
+            lgrps <- lgrpsgrps[[lgrpsidx]]
+          } else {
+            lgrps <- lgrpsgrps
+          }
 
-        for (j in 1:nlevstrat) {
+          breaks <- sort(x = unique(c(floor(lgrps), min(Tot.val))))
+          n.groups <- length(breaks)
 
-          strat.data <- data[strat.vars[[l]] == levstrat[j], ]
+          Tot.val_grp <- lapply(1:nlevstrat, function(x) rep(NA, times = n.groups))
+          obs.val_grp <- lapply(1:nlevstrat, function(x) rep(NA, times = n.groups))
+          var.val_grp <- lapply(1:nlevstrat, function(x) rep(NA, times = n.groups))
+          n.val_grp <- lapply(1:nlevstrat, function(x) rep(NA, times = n.groups))
 
-          for (i in seq_along(breaks)){
+          for (j in 1:nlevstrat) {
 
-            if(i != n.groups){
+            strat.data <- data[strat.vars[[l]] == levstrat[j], ]
 
-              obs.val_grp[[j]][i] <- mean( strat.data[which(rowSums(strat.data) %in% breaks[i]:(breaks[i+1]-1)), itm])
-              var.val_grp[[j]][i] <- var( strat.data[which(rowSums(strat.data) %in% breaks[i]:(breaks[i+1]-1)), itm])
-              n.val_grp[[j]][i] <- length( strat.data[which(rowSums(strat.data) %in% breaks[i]:(breaks[i+1]-1)), itm])
-              Tot.val_grp[[j]][i] <- mean( rowSums(strat.data)[which(rowSums(strat.data) %in% breaks[i]:(breaks[i+1]-1))])
+            for (i in seq_along(breaks)){
 
-            } else{
+              if(i != n.groups){
 
-              obs.val_grp[[j]][i] <- mean( strat.data[which(rowSums(strat.data) %in% breaks[i]:max(Tot.val)), itm])
-              var.val_grp[[j]][i] <- var( strat.data[which(rowSums(strat.data) %in% breaks[i]:max(Tot.val)), itm])
-              n.val_grp[[j]][i] <- length( strat.data[which(rowSums(strat.data) %in% breaks[i]:max(Tot.val)), itm])
-              Tot.val_grp[[j]][i] <- mean( rowSums(strat.data)[which(rowSums(strat.data) %in% breaks[i]:max(Tot.val))])
+                obs.val_grp[[j]][i] <- mean( strat.data[which(rowSums(strat.data) %in% breaks[i]:(breaks[i+1]-1)), itm])
+                var.val_grp[[j]][i] <- var( strat.data[which(rowSums(strat.data) %in% breaks[i]:(breaks[i+1]-1)), itm])
+                n.val_grp[[j]][i] <- length( strat.data[which(rowSums(strat.data) %in% breaks[i]:(breaks[i+1]-1)), itm])
+                Tot.val_grp[[j]][i] <- mean( rowSums(strat.data)[which(rowSums(strat.data) %in% breaks[i]:(breaks[i+1]-1))])
+
+              } else{
+
+                obs.val_grp[[j]][i] <- mean( strat.data[which(rowSums(strat.data) %in% breaks[i]:max(Tot.val)), itm])
+                var.val_grp[[j]][i] <- var( strat.data[which(rowSums(strat.data) %in% breaks[i]:max(Tot.val)), itm])
+                n.val_grp[[j]][i] <- length( strat.data[which(rowSums(strat.data) %in% breaks[i]:max(Tot.val)), itm])
+                Tot.val_grp[[j]][i] <- mean( rowSums(strat.data)[which(rowSums(strat.data) %in% breaks[i]:max(Tot.val))])
+              }
             }
+
           }
 
         }
-
 
       }
 
