@@ -24,17 +24,20 @@
 #' model.AMTS <- RM(it.AMTS.complete, sum0 = FALSE)
 #' CICCplot(model = model.AMTS)
 #' p <- CICCplot(model = model.AMTS)
-#' p + scale_colour_manual(values = c("burlywood","cornflowerblue"))
+#' p[[1]] + scale_colour_manual(values = c("burlywood","cornflowerblue"))
 #' CICCplot(model = model.AMTS, lower.groups = c(0, 1, 2, 5, 8, 10))
 #' CICCplot(model = model.AMTS, all.items = TRUE, grid.items = TRUE,
 #'          common.legend = TRUE, ncol = 2, nrow = 2)
+#' p <- CICCplot(model = model.AMTS, which.item = c(1,2))
+#' p[[1]] + scale_colour_manual(values = c("burlywood","cornflowerblue"))
+#' p[[2]] + scale_colour_manual(values = c("burlywood","cornflowerblue"))
 #'
 #' @export CICCplot
 #'
-CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FALSE, grid.items = FALSE, error.bar = TRUE, ...){
+CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FALSE, grid.items = FALSE, error.bar = TRUE, ...) {
 
   itmidx <- suppressWarnings(as.numeric(which.item))
-  if(anyNA(itmidx)){
+  if (anyNA(itmidx)) {
     stop("all values of which.item can not be converted to numeric")
   }
 
@@ -44,47 +47,61 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FA
   m_i <- sapply(1:k, FUN = function(i) length(unique(data[,i]))-1)
   parsidx <- rep(1:k, m_i)
 
-  n.itemcat <- apply(data, 2, FUN = function(x){max(x, na.rm = T) - min(x, na.rm = T)})
+  n.itemcat <- apply(data, 2, FUN = function(x) {max(x, na.rm = T) - min(x, na.rm = T)})
   par.itemgrp <- rep(1:ncol(data), times = n.itemcat)
 
   if (is.double(lower.groups) | is.integer(lower.groups)) {
-    if (any(lower.groups>length(betas)))
+    if (any(lower.groups>length(betas))) {
       stop("lower.group index greater than maximum possible score")
+    }
   }
-  if (any(itmidx > k))
+  if (any(itmidx > k)) {
     stop("some values of which.item are greater than number of items in the model")
+  }
 
   if (any(itmidx < 1)) {
     stop("some values of which.item < 1")
   }
 
-  if (all(length(itmidx)==1 & is.double(itmidx) & !all.items)) {
+  if (all.items) {
+    pp <- list(rep(NA, k))
+    ii <- 1:k
+  } else {
+    pp <- list(rep(NA, length(itmidx)))
+    ii <- itmidx
+  }
 
-    #Tot.val <- 0:length(phi)
+  plotidx <- 1
+
+  Tot.val <- 0:length(betas)
+
+  for (itm in ii) {
+
     Tot.val <- 0:length(betas)
 
-    exp.val <- sapply(Tot.val, FUN = function(R){
-      l <- par.itemgrp[par.itemgrp!=itmidx]
-      par.itemgrp_noitem <- ifelse( l > itmidx, l-1, l)
+    exp.val <- sapply(Tot.val, FUN = function(R) {
+      l <- par.itemgrp[par.itemgrp!=itm]
+      par.itemgrp_noitem <- ifelse(l > itm, l-1, l)
       g1 <- gamma_r_rec_pcm(betas, R, par.itemgrp)
-      return( sum( sapply( 1:sum(par.itemgrp==itmidx), FUN = function(X){
-        g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itmidx], R-X, par.itemgrp_noitem)
-        return( X*exp(betas[par.itemgrp==itmidx][X])*g2/g1)})))
+      return(sum(sapply(1:sum(par.itemgrp==itm), FUN = function(X) {
+        g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itm], R-X, par.itemgrp_noitem)
+        return(X*exp(betas[par.itemgrp==itm][X])*g2/g1)})))
     })
 
     data_exp <- data.frame(Tot.val, exp.val)
 
-    if (!is.double(lower.groups) & !is.integer(lower.groups)){
-      if (lower.groups == "all"){
+    if (!is.double(lower.groups) & !is.integer(lower.groups)) {
+      if (lower.groups == "all") {
 
         #Tot.val_grp <- 0:length(phi)
         Tot.val_grp <- 0:length(betas)
-        obs.val_grp <- sapply(Tot.val_grp, FUN = function(x){ mean( data[which(rowSums(data) == x), itmidx] )})
-        var.val_grp <- sapply(Tot.val_grp, FUN = function(x){ var( data[which(rowSums(data) == x), itmidx] )})
-        n.val_grp <- sapply(Tot.val_grp, FUN = function(x){ length( data[which(rowSums(data) == x), itmidx] )})
-      }}
+        obs.val_grp <- sapply(Tot.val_grp, FUN = function(x) {mean(data[which(rowSums(data) == x), itm])})
+        var.val_grp <- sapply(Tot.val_grp, FUN = function(x) {var(data[which(rowSums(data) == x), itm])})
+        n.val_grp <- sapply(Tot.val_grp, FUN = function(x) {length(data[which(rowSums(data) == x), itm])})
+      }
+    }
 
-    if (is.double(lower.groups)|is.integer(lower.groups)){
+    if (is.double(lower.groups)|is.integer(lower.groups)) {
 
       breaks <- sort(x = unique(c(floor(lower.groups), min(Tot.val))))
       n.groups <- length(breaks)
@@ -94,128 +111,45 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FA
       var.val_grp <- rep(NA, times = n.groups)
       n.val_grp <- rep(NA, times = n.groups)
 
-      for (i in seq_along(breaks)){
+      for (i in seq_along(breaks)) {
 
-        if(i != n.groups){
+        if (i != n.groups) {
 
-          obs.val_grp[i] <- mean( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
-          var.val_grp[i] <- var( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
-          n.val_grp[i] <- length( data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
-          Tot.val_grp[i] <- mean( rowSums(data)[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1))])
+          obs.val_grp[i] <- mean(data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itm])
+          var.val_grp[i] <- var(data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itm])
+          n.val_grp[i] <- length(data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itm])
+          Tot.val_grp[i] <- mean(rowSums(data)[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1))])
 
         } else{
 
-          obs.val_grp[i] <- mean( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
-          var.val_grp[i] <- var( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
-          n.val_grp[i] <- length( data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
-          Tot.val_grp[i] <- mean( rowSums(data)[which(rowSums(data) %in% breaks[i]:max(Tot.val))])
+          obs.val_grp[i] <- mean(data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itm])
+          var.val_grp[i] <- var(data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itm])
+          n.val_grp[i] <- length(data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itm])
+          Tot.val_grp[i] <- mean(rowSums(data)[which(rowSums(data) %in% breaks[i]:max(Tot.val))])
         }
-      }}
+      }
+    }
 
     data_obs <- data.frame(Tot.val_grp, obs.val_grp, var.val_grp, n.val_grp, CI.bound = NA)
     data_obs <- data_obs[data_obs$n.val_grp != 0, ]
 
-    if(error.bar){data_obs$CI.bound <- 1.96*sqrt(data_obs[,3]/data_obs[,4])}
+    if (error.bar) {
+      data_obs$CI.bound <- 1.96*sqrt(data_obs[,3]/data_obs[,4])
+    }
 
     col <- c("Expected" = "darkgrey", "Observed" = "orange")
-    itmtit <- colnames(data)[itmidx]
+    itmtit <- colnames(data)[itm]
 
-    P <- ciccplot(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col)
-  }
-
-  if (all.items | length(itmidx)>1 ){
-
-    which.item.arg <- itmidx
-
-    if(all.items){
-      n.items <- dim(data)[2]
-      pp <- list(rep(NA, n.items))
-      ii <- 1:n.items
-    }
-
-    if((!all.items) & (length(itmidx)>1) ){
-      pp <- list(rep(NA, length(itmidx)))
-      ii <- itmidx
-    }
-
-    j <- 1
-
-    Tot.val <- 0:length(betas)
-
-    for (k in ii) {
-
-      itmidx <- k
-      l <- par.itemgrp[par.itemgrp!=itmidx]
-      par.itemgrp_noitem <- ifelse( l > itmidx, l-1, l)
-
-      exp.val <- sapply(Tot.val, FUN = function(R){
-        g1 <- gamma_r_rec_pcm(betas, R, par.itemgrp)
-        return( sum( sapply( 1:sum(par.itemgrp==itmidx), FUN = function(X){
-          g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itmidx], R-X, par.itemgrp_noitem)
-          return( X*exp(betas[par.itemgrp==itmidx][X])*g2/g1)})))
-      })
-      data_exp <- data.frame(Tot.val, exp.val)
-
-      if (!is.double(lower.groups) & !is.integer(lower.groups)){
-
-        if (lower.groups == "all"){
-
-          # Tot.val_grp <- 0:length(phi)
-          Tot.val_grp <- 0:length(betas)
-          obs.val_grp <- sapply(Tot.val_grp, FUN = function(x){ mean( data[which(rowSums(data) == x), itmidx] )})
-          var.val_grp <- sapply(Tot.val_grp, FUN = function(x){ var( data[which(rowSums(data) == x), itmidx] )})
-          n.val_grp <- sapply(Tot.val_grp, FUN = function(x){ length( data[which(rowSums(data) == x), itmidx] )})
-        }}
-
-      if (is.double(lower.groups)|is.integer(lower.groups)){
-
-        breaks <- sort(x=unique(c(floor(lower.groups),min(Tot.val))))
-        n.groups <- length(breaks)
-
-        Tot.val_grp <- rep(NA, times = n.groups)
-        obs.val_grp <- rep(NA, times = n.groups)
-        var.val_grp <- rep(NA, times = n.groups)
-        n.val_grp <- rep(NA, times = n.groups)
-
-        for (i in seq_along(breaks)){
-
-          if(i != n.groups){
-
-            obs.val_grp[i] <- mean(data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
-            var.val_grp[i] <- var(data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
-            n.val_grp[i] <- length(data[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1)), itmidx])
-            Tot.val_grp[i] <- mean(rowSums(data)[which(rowSums(data) %in% breaks[i]:(breaks[i+1]-1))])
-
-          } else{
-
-            obs.val_grp[i] <- mean(data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
-            var.val_grp[i] <- var(data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
-            n.val_grp[i] <- length(data[which(rowSums(data) %in% breaks[i]:max(Tot.val)), itmidx])
-            Tot.val_grp[i] <- mean(rowSums(data)[which(rowSums(data) %in% breaks[i]:max(Tot.val))])
-          }
-        }}
-
-
-      data_obs <- data.frame(Tot.val_grp, obs.val_grp, var.val_grp, n.val_grp, CI.bound = NA)
-
-      if (error.bar){ data_obs$CI.bound <- 1.96*sqrt(data_obs[,3]/data_obs[,4]) }
-
-      col <- c("Expected" = "darkgrey", "Observed" = "orange")
-      itmtit <- colnames(model$X)[itmidx]
-
-      pp[[j]] <- ciccplot(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col)
-      j <- j+1
-
-    }
-
-    if (grid.items){
-
-      if (all.items){ P <- ggpubr::ggarrange(plotlist= pp, ...)}
-      if (!all.items){P <- ggpubr::ggarrange(plotlist= pp, ...)}
-    }
-    if (!grid.items){ P <- pp}
+    pp[[plotidx]] <- ciccplot(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col)
+    plotidx <- plotidx+1
 
   }
+
+    if (grid.items) {
+      P <- ggpubr::ggarrange(plotlist= pp, ...)
+    }
+    if (!grid.items) P <- pp
+
   P
 }
 #' Internal CICC plot function
