@@ -1,4 +1,8 @@
+#' Stratified Conditional Item Characteristic Curves
+#'
 #' This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model and allows for stratification on categorical variables. These plots can be used to investigate item misfit.
+#'
+#' ...
 #'
 #' @param model A model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.
 #' @param which.item An integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. The argument will not be used if `all.items = TRUE`.

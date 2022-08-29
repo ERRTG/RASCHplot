@@ -3,7 +3,7 @@
 \docType{package}
 \name{CICCplot}
 \alias{CICCplot}
-\title{This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model. These plots can be used to investigate item misfit.}
+\title{Conditional Item Characteristic Curves}
 \usage{
 CICCplot(
   model,
@@ -34,7 +34,12 @@ CICCplot(
 CICC plot
 }
 \description{
+This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model. These plots can be used to investigate item misfit.
+
 Description...
+}
+\details{
+...
 }
 \examples{
 library(iarm)
@@ -44,10 +49,13 @@ it.AMTS.complete <- it.AMTS[complete.cases(it.AMTS), ]
 model.AMTS <- RM(it.AMTS.complete, sum0 = FALSE)
 CICCplot(model = model.AMTS)
 p <- CICCplot(model = model.AMTS)
-p + scale_colour_manual(values = c("burlywood","cornflowerblue"))
+p[[1]] + scale_colour_manual(values = c("burlywood","cornflowerblue"))
 CICCplot(model = model.AMTS, lower.groups = c(0, 1, 2, 5, 8, 10))
 CICCplot(model = model.AMTS, all.items = TRUE, grid.items = TRUE,
          common.legend = TRUE, ncol = 2, nrow = 2)
+p <- CICCplot(model = model.AMTS, which.item = c(1,2))
+p[[1]] + scale_colour_manual(values = c("burlywood","cornflowerblue"))
+p[[2]] + scale_colour_manual(values = c("burlywood","cornflowerblue"))
 
 }
 \author{

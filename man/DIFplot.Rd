@@ -2,7 +2,7 @@
 % Please edit documentation in R/DIFplot.R
 \name{DIFplot}
 \alias{DIFplot}
-\title{This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model and allows for stratification on categorical variables. These plots can be used to investigate item misfit.}
+\title{Stratified Conditional Item Characteristic Curves}
 \usage{
 DIFplot(
   model,
@@ -20,9 +20,9 @@ DIFplot(
 
 \item{which.item}{An integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. The argument will not be used if `all.items = TRUE`.}
 
-\item{strat.vars}{List of categorical variables for stratification.}
+\item{strat.vars}{A named list of categorical variables for stratification.}
 
-\item{lower.groups}{A list of length `length(strat.vars)` of vectors or a single vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector(s) should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector(s), it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score.}
+\item{lower.groups}{A named list of length `length(strat.vars)` of vectors or a single vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector(s) should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector(s), it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score.}
 
 \item{all.items}{Logical flag for constructing CICC plots for all items in the data. Default value is `FALSE`.}
 
@@ -38,16 +38,25 @@ CICC plot
 \description{
 This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model and allows for stratification on categorical variables. These plots can be used to investigate item misfit.
 }
+\details{
+...
+}
 \examples{
 library(iarm)
 str(amts)
 AMTS.complete <- amts[complete.cases(amts), ]
 it.AMTS <- AMTS.complete[, 4:13]
 model.AMTS <- RM(it.AMTS, sum0 = FALSE)
-strat.vars <- list(sex = AMTS.complete[, "sex"], agegrp = AMTS.complete[, "agegrp"])
+strat.vars <- list(sex = AMTS.complete[, "sex"], agegrp = droplevels(AMTS.complete[, "agegrp"]))
 DIFplot(model = model.AMTS, strat.vars = strat.vars)
 DIFplot(model = model.AMTS, which.item = c(1,2), strat.vars = strat.vars)
 lower.groups <- list(sex = c(0, 1, 2, 5, 8, 10), agegrp = c(0, 3, 6, 9))
+DIFplot(model = model.AMTS, strat.vars = strat.vars, lower.groups = lower.groups)
+DIFplot(model = model.AMTS, which.item = c(1,2),
+        strat.vars = strat.vars, lower.groups = lower.groups)
+lower.groups <- list(sex = list(c(0, 1, 2, 5, 8, 10), c(0,  5, 10)),
+                     agegrp = list(c(0, 1, 2, 3, 5),
+                                   c(0, 1, 2, 4, 5, 8, 9, 10), c(0, 1, 2, 5, 7, 8, 9, 10)))
 DIFplot(model = model.AMTS, strat.vars = strat.vars, lower.groups = lower.groups)
 DIFplot(model = model.AMTS, which.item = c(1,2),
         strat.vars = strat.vars, lower.groups = lower.groups)
