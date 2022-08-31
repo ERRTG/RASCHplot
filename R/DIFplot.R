@@ -7,7 +7,7 @@
 #' @param model A model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.
 #' @param which.item An integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. The argument will not be used if `all.items = TRUE`.
 #' @param strat.vars A named list of categorical variables for stratification.
-#' @param lower.groups A named list of length `length(strat.vars)` of vectors or a single vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector(s) should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector(s), it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score.
+#' @param lower.groups A named list of length `length(strat.vars)` of lists, vectors or a single vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector(s) should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector(s), it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score. If a list is provided, the arguments should be named corresponding to the `strat.vars`. If the arguments are lists, they should be named corresponding to the levels of the `strat.vars`.
 #' @param all.items Logical flag for constructing CICC plots for all items in the data. Default value is `FALSE`.
 #' @param grid.items  Logical flag for arranging the items selected by which.item or all.items in grids using the `ggarrange` function from the `ggpubr` package. Default value is `FALSE`.
 #' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.
@@ -27,18 +27,18 @@
 #' it.AMTS <- AMTS.complete[, 4:13]
 #' model.AMTS <- RM(it.AMTS, sum0 = FALSE)
 #' strat.vars <- list(sex = AMTS.complete[, "sex"], agegrp = droplevels(AMTS.complete[, "agegrp"]))
+#' theme_set(theme_minimal())
 #' DIFplot(model = model.AMTS, strat.vars = strat.vars)
 #' DIFplot(model = model.AMTS, which.item = c(1,2), strat.vars = strat.vars)
 #' lower.groups <- list(sex = c(0, 1, 2, 5, 8, 10), agegrp = c(0, 3, 6, 9))
 #' DIFplot(model = model.AMTS, strat.vars = strat.vars, lower.groups = lower.groups)
 #' DIFplot(model = model.AMTS, which.item = c(1,2),
 #'         strat.vars = strat.vars, lower.groups = lower.groups)
-#' lower.groups <- list(sex = list(c(0, 1, 2, 5, 8, 10), c(0,  5, 10)),
-#'                      agegrp = list(c(0, 1, 2, 3, 5),
-#'                                    c(0, 1, 2, 4, 5, 8, 9, 10), c(0, 1, 2, 5, 7, 8, 9, 10)))
+#' lower.groups <- list(sex = list(male = c(0, 1, 2, 5, 8, 10), female = c(0,  5, 10)),
+#'                      agegrp = list("66-75" = c(0, 1, 2, 3, 5),
+#'                                    "76-85" = c(0, 4, 4, 5, 8, 9, 10),
+#'                                    "86+" = c(0, 1, 2, 5, 7, 8, 9, 10)))
 #' DIFplot(model = model.AMTS, strat.vars = strat.vars, lower.groups = lower.groups)
-#' DIFplot(model = model.AMTS, which.item = c(1,2),
-#'         strat.vars = strat.vars, lower.groups = lower.groups)
 #'
 #' @export DIFplot
 #'
@@ -170,11 +170,12 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
           lgrpsgrps <- lower.groups
         }
         if(!is.list(lgrpsgrps)) {
-          lgrpsgrps <- list(lgrpsgrps)
+          lgrpsgrps <- lapply(1:nlevstrat, function(x) lgrpsgrps) #list(lgrpsgrps)
+          names(lgrpsgrps) <- levstrat
         }
-        if(!all(sapply(lgrpsgrps, is.list))) {
-          lgrpsgrps <- lapply(1:nlevstrat, function(x) lgrpsgrps)
-        }
+        #if(!all(sapply(lgrpsgrps, is.list))) {
+        #  lgrpsgrps <- lapply(1:nlevstrat, function(x) lgrpsgrps)
+        #}
 
         Tot.val_grp <- vector(mode = "list", length(lgrpsgrps))
         obs.val_grp <- vector(mode = "list", length(lgrpsgrps))
@@ -187,7 +188,7 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
 
           #for(lgrpsidx in seq_along(lgrpsgrps)) {
 
-            lgrps <- unlist(lgrpsgrps[[j]])
+            lgrps <- lgrpsgrps[[levstrat[j]]] # unlist(lgrpsgrps[[j]])
 
             breaks <- sort(x = unique(c(floor(lgrps), min(Tot.val))))
             n.groups <- length(breaks)
@@ -275,9 +276,5 @@ difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit) {
                                             color = strat.var),
                   width = 0.1) +
     scale_colour_manual(values = col) +
-    theme_minimal() +
-    theme(legend.title = element_blank(),
-          plot.title = element_text(size = 8, hjust = 0.5),
-          text = element_text(size = 8)) +
     guides(colour = guide_legend(override.aes = list(shape = c(NA, rep(1, nlevels(as.factor(data_obs_long$strat.var)))))))
 }

@@ -1,8 +1,16 @@
-# CICCplot
+# Plots for investigating item misfit
+
+The R package can be installed via
+
+```{r}
+devtools::install_github("ERRTG/RASCHplot")
+```
+
+## CICCplot
 
 CICCplot is an R function that can be used to plot Conditional Item Characteristic Curves. These are useful when fitting a Rasch model to data in order to graphically detect misfit of an item in the model. A CICC describes the expected outcome of an item when conditioning on the total score of all items in the model. When plotting CICC's the total score will be on the x-axis and the conditional expected item score will be on the y-axis. For dichotomous items the expected item score corresponds to the probability of getting item score '1' and is always zero when the total score is zero and one when the total score is the maximal possible score. Between these to points the curve will be monotone increasing. 
 
-## Before using CICCplot
+### Before using CICCplot
 
 Before the `CICCplot`-function can be used, the following packages need to be installed (if not already done) and included by using `library()`.
 
@@ -19,7 +27,7 @@ o use the function `CICCplot` directly from a R-script containig the function. T
 source("CICCplot_source.R")
 ```
 
-## Plotting CICC's in R
+### Plotting CICC's in R
 
 The Abbreviated Mental Test Score (AMTS) is a score used to detect dementia. It consists of 10 questions (taking values 0 and 1), which can either be correctly answered (1 point) or incorrectly answered (0 points).  In the `iarm` package a dataset called `amts` containing responses to AMTS from 197 patients is available. Beside the scores of the 10 questions, the data also contain an identification number, agegroup and sex of each patient. In the following analysis we are only interested in the answers to the 10 AMTS-questions, and the remainig variables will be left out of the analysis.
 

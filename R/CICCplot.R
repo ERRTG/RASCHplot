@@ -23,18 +23,35 @@
 #' @examples
 #' library(iarm)
 #' str(amts)
-#' it.AMTS <- amts[, 4:13]
-#' it.AMTS.complete <- it.AMTS[complete.cases(it.AMTS), ]
-#' model.AMTS <- RM(it.AMTS.complete, sum0 = FALSE)
+#' AMTS.complete <- amts[complete.cases(amts), ]
+#' it.AMTS <- AMTS.complete[, 4:13]
+#' model.AMTS <- RM(it.AMTS, sum0 = FALSE)
+#' # Plot theme
+#' theme_set(theme_minimal())
+#' # Plot item 1
 #' CICCplot(model = model.AMTS)
+#' # Change colours
 #' p <- CICCplot(model = model.AMTS)
-#' p[[1]] + scale_colour_manual(values = c("burlywood","cornflowerblue"))
+#' p[[1]] +
+#'   scale_colour_manual(values = c("burlywood","cornflowerblue"))
+#' # Change colours and x axis limits
+#' p[[1]] +
+#'   scale_colour_manual(values = c("burlywood","cornflowerblue")) +
+#'   xlim(c(2,8))
+#' # Specify lower points of grouping intervals
 #' CICCplot(model = model.AMTS, lower.groups = c(0, 1, 2, 5, 8, 10))
+#' # Construc CICC plot for all items and grid the items 2 by 2
 #' CICCplot(model = model.AMTS, all.items = TRUE, grid.items = TRUE,
 #'          common.legend = TRUE, ncol = 2, nrow = 2)
+#' # Construct CICC plot for items 1 and 2
 #' p <- CICCplot(model = model.AMTS, which.item = c(1,2))
-#' p[[1]] + scale_colour_manual(values = c("burlywood","cornflowerblue"))
-#' p[[2]] + scale_colour_manual(values = c("burlywood","cornflowerblue"))
+#' p
+#' # Change colours for item 1
+#' p[[1]] +
+#'   scale_colour_manual(values = c("burlywood","cornflowerblue"))
+#' # Change colours for item 2
+#' p[[2]] +
+#'   scale_colour_manual(values = c("burlywood","cornflowerblue"))
 #'
 #' @export CICCplot
 #'
@@ -193,9 +210,5 @@ ciccplot <- function(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_
                                      color = "Observed"),
                 width = 0) + #, size = .5) +
   scale_x_continuous(breaks = integer_breaks(), minor_breaks = Tot.val) + #breaks = Tot.val) +
-  theme_minimal() +
-  theme(legend.title = element_blank(),
-        plot.title = element_text(size = 8, hjust = 0.5),
-        text = element_text(size = 8))+
     guides(colour = guide_legend(override.aes = list(shape = c(NA, 1))))
 }

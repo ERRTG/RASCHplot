@@ -13,7 +13,10 @@ Imports:
   memoise,
   ggpubr,
   scales,
-  stats
+  stats,
+  tidyr,
+  dplyr,
+  magrittr
 Suggests:
   eRm,
   iarm
