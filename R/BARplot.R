@@ -23,6 +23,7 @@
 #' items <- SPADI[,9:16]
 #' theme_set(theme_minimal())
 #' BARplot(data = items)
+#' BARplot(data = items, which.item = c(3,4))
 #' BARplot(data = items, addsums = TRUE)
 #' BARplot(data = items, freq = FALSE)
 #' BARplot(data = items, freq = FALSE, na.action = "na.rm")
@@ -113,7 +114,7 @@ longdffct <- function(df, which.item, freq, strat.var = NULL) {
     if(is.null(strat.var)) {
       longdf <- df %>%
         dplyr::select(all_of(which.item)) %>%
-        tidyr::pivot_longer(any_of(which.item), names_to = "item", values_to = "Score") %>%
+        tidyr::pivot_longer(any_of(colnames(df)[which.item]), names_to = "item", values_to = "Score") %>%
         dplyr::mutate(Score = as.factor(Score)) %>%
         dplyr::mutate(Score = forcats::fct_rev(Score)) %>%
         dplyr::count(item, Score) %>%
