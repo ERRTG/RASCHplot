@@ -37,12 +37,12 @@ This function constructs bar plots...
 }
 \examples{
 items <- SPADI[,9:16]
-model <- RM(items)
 theme_set(theme_minimal())
 BARplot(data = items)
 BARplot(data = items, addsums = TRUE)
+BARplot(data = items, freq = FALSE)
 BARplot(data = items, freq = FALSE, na.action = "na.rm")
-strat.var <- amts$sex
+strat.var <- as.factor(SPADI$over60)
 BARplot(data = items, which.item = 1, strat.var = strat.var)
 
 }
