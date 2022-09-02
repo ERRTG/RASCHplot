@@ -1,0 +1,64 @@
+---
+title: "Introduction to the RASCHplot package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{vignette_01}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+
+# Installation
+
+```{r, eval=FALSE}
+devtools::install_github("ERRTG/RASCHplot")
+install.packages(c("eRm","iarm"))
+```
+
+
+# Quick Start
+
+First, we load the `RASCHplot` package
+
+```{r setup}
+library(RASCHplot)
+```
+
+We load a data set from the `iarm` package.
+
+```{r}
+library(iarm)
+data(amts)
+```
+
+```{r}
+AMTS.complete <- amts[complete.cases(amts), ]
+it.AMTS <- AMTS.complete[, 4:13]
+```
+
+We fit the model using the most basic call to glmnet.
+
+```{r}
+model.AMTS <- RM(it.AMTS, sum0 = FALSE)
+item_restscore(model.AMTS)
+```
+
+
+# BAR
+
+
+
+# CICC
+
+
+
+# DIF

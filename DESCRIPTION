@@ -16,8 +16,14 @@ Imports:
   stats,
   tidyr,
   dplyr,
-  magrittr
+  magrittr,
+  forcats
 Suggests:
-  eRm,
-  iarm
+    eRm,
+    iarm,
+    knitr,
+    rmarkdown
 RoxygenNote: 7.2.1
+VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)

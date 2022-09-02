@@ -4,12 +4,27 @@
 \alias{BARplot}
 \title{Bar plot}
 \usage{
-BARplot(data, which.item = "all")
+BARplot(
+  data,
+  which.item = "all",
+  freq = TRUE,
+  addsums = FALSE,
+  na.action = c("na.plot", "na.rm", "na.report"),
+  strat.var = NULL
+)
 }
 \arguments{
-\item{data}{A model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.}
+\item{data}{Input data matrix or data frame; rows represent indiviiduals, columns represent items. Or a model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.}
 
 \item{which.item}{An integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. The argument will not be used if `all.items = TRUE`.}
+
+\item{freq}{Logical flag; if TRUE, the graphic is a representation of frequencies, the counts component of the result; if FALSE, percentages are plotted (so that each bar has a total area of 100). Defaults to TRUE.}
+
+\item{addsums}{Logical flag for adding score totals per item to the plots. Defaults to FALSE.}
+
+\item{na.action}{A character which indicates what should happen when the data contain missing scores. The default is `"na.plot"`, which shows NAs in the plot. Another possible value is `"na.rm"`, which removes NAs from the plot.}
+
+\item{strat.var}{A vector of observations used for stratification.}
 }
 \value{
 Bar plot
@@ -21,10 +36,13 @@ This function constructs bar plots...
 ...
 }
 \examples{
-library(iarm)
-str(amts)
-it.AMTS <- amts[, 4:13]
+items <- SPADI[,9:16]
+model <- RM(items)
 theme_set(theme_minimal())
-BARplot(it.AMTS)
-data <- read.table("http://publicifsv.sund.ku.dk/~kach/scaleval/CAT.txt", sep=' ', header = TRUE)
+BARplot(data = items)
+BARplot(data = items, addsums = TRUE)
+BARplot(data = items, freq = FALSE, na.action = "na.rm")
+strat.var <- amts$sex
+BARplot(data = items, which.item = 1, strat.var = strat.var)
+
 }
