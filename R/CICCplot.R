@@ -5,10 +5,9 @@
 #' ...
 #'
 #' @param model A model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.
-#' @param which.item An integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. The argument will not be used if `all.items = TRUE`.
+#' @param which.item Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. Or a character string `"all"`for constructing CICC plots for all items in the data.
 #' @param lower.groups A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score.
-#' @param all.items Logical flag for constructing CICC plots for all items in the data. Default value is `FALSE`.
-#' @param grid.items  Logical flag for arranging the items selected by which.item or all.items in grids using the `ggarrange` function from the `ggpubr` package. Default value is `FALSE`.
+#' @param grid.items  Logical flag for arranging the items selected by which.item in grids using the `ggarrange` function from the `ggpubr` package. Default value is `FALSE`.
 #' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.
 #' @param ... Arguments to be passed to `ggarrange`. The arguments will only be used if 'grid.items = TRUE'.
 #'
@@ -21,50 +20,48 @@
 #' @return CICC plot
 #'
 #' @examples
-#' library(iarm)
-#' str(amts)
-#' AMTS.complete <- amts[complete.cases(amts), ]
-#' it.AMTS <- AMTS.complete[, 4:13]
-#' model.AMTS <- RM(it.AMTS)
+#' library(eRm)
+#' data(SPADI)
+#' SPADI.complete <- SPADI[complete.cases(SPADI), ]
+#' it.SPADI <- SPADI.complete[, 9:16]
+#' model.SPADI <- eRm::PCM(it.SPADI)
 #' # Plot item 1
-#' CICCplot(model = model.AMTS)
-#' # Change colours
-#' p <- CICCplot(model = model.AMTS)
-#' p[[1]] +
-#'   scale_colour_manual(values = c("burlywood","cornflowerblue"))
-#' # Change colours and x axis limits
-#' p[[1]] +
-#'   scale_colour_manual(values = c("burlywood","cornflowerblue")) +
-#'   xlim(c(2,8))
+#' CICCplot(model = model.SPADI)
 #' # Specify lower points of grouping intervals
-#' CICCplot(model = model.AMTS, lower.groups = c(0, 1, 2, 5, 8, 10))
+#' CICCplot(model = model.SPADI, lower.groups = c(0, 1, 2, 5, 8, 10))
+#' # Plot item 3 and 4
+#' CICCplot(model = model.SPADI, which.item = c(3,4))
+#' # Plot all items
+#' CICCplot(model = model.SPADI, which.item = "all")
 #' # Construc CICC plot for all items and grid the items 2 by 2
-#' CICCplot(model = model.AMTS, all.items = TRUE, grid.items = TRUE,
+#'#  with a common legend
+#' CICCplot(model = model.SPADI, which.item = "all", grid.items = TRUE,
 #'          common.legend = TRUE, ncol = 2, nrow = 2)
-#' # Construct CICC plot for items 1 and 2
-#' p <- CICCplot(model = model.AMTS, which.item = c(1,2))
-#' p
-#' # Change colours for item 1
-#' p[[1]] +
-#'   scale_colour_manual(values = c("burlywood","cornflowerblue"))
-#' # Change colours for item 2
-#' p[[2]] +
-#'   scale_colour_manual(values = c("burlywood","cornflowerblue"))
+#' # Change colours and x axis limits for item 3
+#' ciccobj <- CICCplot(model = model.SPADI, which.item = c(3,4))
+#' ciccobj$`3` +
+#'   ggplot2::scale_colour_manual(values = c("burlywood","cornflowerblue")) +
+#'   ggplot2::xlim(c(2,8))
 #'
 #' @export CICCplot
 #'
-CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FALSE, grid.items = FALSE, error.bar = TRUE, ...) {
-
-  itmidx <- suppressWarnings(as.numeric(which.item))
-  if (anyNA(itmidx)) {
-    stop("all values of which.item can not be converted to numeric")
-  }
+CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, ...) {
 
   data <- model$X
   betas <- model$betapar
   k <- ncol(data)
   m_i <- sapply(1:k, FUN = function(i) length(unique(data[,i]))-1)
   parsidx <- rep(1:k, m_i)
+
+  if (any(which.item == "all")) {
+    itmidx <- 1:k
+  } else {
+    itmidx <- suppressWarnings(as.numeric(which.item))
+    if (anyNA(itmidx)) {
+      stop("all values of which.item can not be converted to numeric")
+    }
+  }
+
 
   n.itemcat <- apply(data, 2, FUN = function(x) {max(x, na.rm = T) - min(x, na.rm = T)})
   par.itemgrp <- rep(1:ncol(data), times = n.itemcat)
@@ -82,17 +79,12 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FA
     stop("some values of which.item < 1")
   }
 
-  if (all.items) {
-    pp <- list(rep(NA, k))
-    ii <- 1:k
-  } else {
-    pp <- list(rep(NA, length(itmidx)))
-    ii <- itmidx
-  }
+
+  pp <- list(rep(NA, length(itmidx)))
+  ii <- itmidx
+  Tot.val <- 0:length(betas)
 
   plotidx <- 1
-
-  Tot.val <- 0:length(betas)
 
   for (itm in ii) {
 
@@ -168,6 +160,7 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FA
       P <- ggpubr::ggarrange(plotlist= pp, ...)
     } else {
       P <- pp
+      names(P) <- itmidx
     }
 
   P

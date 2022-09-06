@@ -8,6 +8,7 @@
 #' \describe{
 #'   \item{gender}{Gender (1,2)}
 #'   \item{over60}{Age over/under 60 (0,1)}
+#'   \item{id}{Unique observation identifyer}
 #'   \item{P1}{At its worst (pain item)}
 #'   \item{P2}{Lying on affected side (pain item)}
 #'   \item{P3}{Reaching for object on a high shelf (pain item)}

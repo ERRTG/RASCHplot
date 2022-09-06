@@ -20,6 +20,8 @@
 #' @return Bar plot
 #'
 #' @examples
+#' library(eRm)
+#' data(SPADI)
 #' items <- SPADI[,9:16]
 #' BARplot(data = items)
 #' BARplot(data = items, which.item = c(3,4))

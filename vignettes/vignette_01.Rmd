@@ -217,13 +217,13 @@ CICCplot(fit, which.item = c(3,4))
 ```
 
 ```{r, results = 'hide'}
-CICCplot(fit, all.items = TRUE)
+CICCplot(fit, which.item = "all")
 ```
 
 Construc CICC plot for all items and grid the items in two columns
 
 ```{r, results = 'hide', fig.height=16}
-CICCplot(model = fit, all.items = TRUE, grid.items = TRUE,
+CICCplot(model = fit, which.item = "all", grid.items = TRUE,
           common.legend = TRUE, ncol = 2, nrow = 4)
 ```
 
