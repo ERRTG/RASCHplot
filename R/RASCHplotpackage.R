@@ -5,7 +5,8 @@
 #'
 #' @docType package
 #'
-#' @author Ann-Sophie Buchardt \email{asbu@sund.ku.dk}
+#' @author Karl Bang Christensen, Ann-Sophie Buchardt and Sidsel Normann Jensen\cr Maintainer:
+#' Ann-Sophie Buchardt <asbu@sund.ku.dk>
 #'
 #' @name RASCHplot
 NULL

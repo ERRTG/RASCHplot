@@ -10,7 +10,8 @@
 #' @param lower.groups A named list of length `length(strat.vars)` of lists, vectors or a single vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector(s) should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector(s), it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score. If a list is provided, the arguments should be named corresponding to the `strat.vars`. If the arguments are lists, they should be named corresponding to the levels of the `strat.vars`.
 #' @param grid.items  Logical flag for arranging the items selected by which.item in grids using the `ggarrange` function from the `ggpubr` package. Default value is `FALSE`.
 #' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.
-#' @param ... Arguments to be passed to `ggarrange`. The arguments will only be used if 'grid.items = TRUE'.
+#' @param dodge.width Dodging width of error bars. To prevent overlapping error bars, dodging (jittering) preserves the vertical position of error bars while adjusting the horizontal position. Default is `dodge.width = 0.5`.
+#' @param ... Arguments to be passed to `ggarrange`. The arguments will only be used if `grid.items = TRUE`.
 #'
 #' @import ggplot2
 #' @import memoise
@@ -41,7 +42,7 @@
 #' DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
 #' @export DIFplot
 #'
-DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, ...) {
+DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5, ...) {
 
   if (is.null(strat.vars)) {
     pp <- CICCplot(model, which.item, lower.groups, grid.items, error.bar, ...)
@@ -233,7 +234,7 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
       data_obs_long <- do.call(rbind, data_obs)
 
 
-      pp[[plotidx]][[l]] <- difplot(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname)
+      pp[[plotidx]][[l]] <- difplot(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname, dodge.width)
 
     }
 
@@ -256,8 +257,9 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
 #' @param data_obs_long data_obs_long
 #' @param itmtit itmtit
 #' @param stratname stratname
+#' @param dodge.width dodge.width
 #' @noRd
-difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname) {
+difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname, dodge.width) {
 
   col <- c("darkgrey", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")[1:(nlevels(as.factor(data_obs_long$strat.var)) + 1)]
   names(col) <- c("Expected", levels(as.factor(data_obs_long$strat.var)))
@@ -272,7 +274,8 @@ difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname
     geom_errorbar(data = data_obs_long, aes(x = Tot.val_grp, y = obs.val_grp,
                                             ymin = obs.val_grp - CI.bound, ymax = obs.val_grp + CI.bound,
                                             color = strat.var),
-                  width = 0.1) +
+                  width = 0.1,
+                  position = position_dodge(width = dodge.width)) +
     scale_colour_manual(values = col) +
     guides(colour = guide_legend(override.aes = list(shape = c(NA, rep(1, nlevels(as.factor(data_obs_long$strat.var))))))) + guides(colour = guide_legend(stratname)) # #+ labs(fill = stratname)#+ theme(legend.title=element_blank()) #scale_color_discrete(name = "")
 }

@@ -8,5 +8,6 @@
 Visualisation of Rasch item fit
 }
 \author{
-Ann-Sophie Buchardt \email{asbu@sund.ku.dk}
+Karl Bang Christensen, Ann-Sophie Buchardt and Sidsel Normann Jensen\cr Maintainer:
+Ann-Sophie Buchardt <asbu@sund.ku.dk>
 }

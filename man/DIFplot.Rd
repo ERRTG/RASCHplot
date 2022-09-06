@@ -11,6 +11,7 @@ DIFplot(
   lower.groups = "all",
   grid.items = FALSE,
   error.bar = TRUE,
+  dodge.width = 0.5,
   ...
 )
 }
@@ -27,7 +28,9 @@ DIFplot(
 
 \item{error.bar}{Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.}
 
-\item{...}{Arguments to be passed to `ggarrange`. The arguments will only be used if 'grid.items = TRUE'.}
+\item{dodge.width}{Dodging width of error bars. To prevent overlapping error bars, dodging (jittering) preserves the vertical position of error bars while adjusting the horizontal position. Default is `dodge.width = 0.5`.}
+
+\item{...}{Arguments to be passed to `ggarrange`. The arguments will only be used if `grid.items = TRUE`.}
 }
 \value{
 CICC plot
