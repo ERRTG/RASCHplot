@@ -27,7 +27,6 @@
 #' it.AMTS <- AMTS.complete[, 4:13]
 #' model.AMTS <- RM(it.AMTS)
 #' strat.vars <- list(sex = AMTS.complete[, "sex"], agegrp = droplevels(AMTS.complete[, "agegrp"]))
-#' theme_set(theme_minimal())
 #' DIFplot(model = model.AMTS, strat.vars = strat.vars)
 #' DIFplot(model = model.AMTS, which.item = c(1,2), strat.vars = strat.vars)
 #' lower.groups <- list(sex = c(0, 1, 2, 5, 8, 10), agegrp = c(0, 3, 6, 9))
@@ -39,6 +38,13 @@
 #'                                    "76-85" = c(0, 4, 4, 5, 8, 9, 10),
 #'                                    "86+" = c(0, 1, 2, 5, 7, 8, 9, 10)))
 #' DIFplot(model = model.AMTS, strat.vars = strat.vars, lower.groups = lower.groups)
+#'
+#'
+#' SPADI.complete <- SPADI[complete.cases(SPADI), ]
+#' it.SPADI <- SPADI.complete[, 9:16]
+#' model.SPADI <- PCM(it.SPADI)
+#' strat.vars <- list(sex = SPADI.complete[, "gender"])
+#' DIFplot(model = model.SPADI, strat.vars = strat.vars)
 #'
 #' @export DIFplot
 #'
@@ -236,7 +242,7 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
       data_obs_long <- do.call(rbind, data_obs)
 
 
-      pp[[plotidx]][[l]] <- difplot(data_exp, Tot.val, exp.val, data_obs_long, itmtit)
+      pp[[plotidx]][[l]] <- difplot(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname)
 
     }
 
@@ -258,8 +264,9 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
 #' @param exp.val exp.val
 #' @param data_obs_long data_obs_long
 #' @param itmtit itmtit
+#' @param stratname stratname
 #' @noRd
-difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit) {
+difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname) {
 
   col <- c("darkgrey", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")[1:(nlevels(as.factor(data_obs_long$strat.var)) + 1)]
   names(col) <- c("Expected", levels(as.factor(data_obs_long$strat.var)))
@@ -268,7 +275,7 @@ difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit) {
     ggtitle(paste0("Item: ", itmtit)) +
     xlab("Total Score") +
     ylab("Item-Score") +
-    scale_x_continuous(breaks = Tot.val) +
+    scale_x_continuous(breaks = integer_breaks(), minor_breaks = Tot.val) +
     geom_line(aes(color = "Expected")) +
     geom_point(data = data_obs_long, aes(x = Tot.val_grp, y = obs.val_grp, color = strat.var), size = 1) +
     geom_errorbar(data = data_obs_long, aes(x = Tot.val_grp, y = obs.val_grp,
@@ -276,5 +283,5 @@ difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit) {
                                             color = strat.var),
                   width = 0.1) +
     scale_colour_manual(values = col) +
-    guides(colour = guide_legend(override.aes = list(shape = c(NA, rep(1, nlevels(as.factor(data_obs_long$strat.var)))))))
+    guides(colour = guide_legend(override.aes = list(shape = c(NA, rep(1, nlevels(as.factor(data_obs_long$strat.var))))))) + guides(colour = guide_legend(stratname)) # #+ labs(fill = stratname)#+ theme(legend.title=element_blank()) #scale_color_discrete(name = "")
 }

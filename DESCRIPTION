@@ -17,7 +17,8 @@ Imports:
   tidyr,
   dplyr,
   magrittr,
-  forcats
+  forcats,
+  tidyverse
 Suggests:
     eRm,
     iarm,

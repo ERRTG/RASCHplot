@@ -1,12 +1,12 @@
 #' Shoulder pain and disability index (SPADI) data
 #'
 #' Data from a Danish validation study containing responses to the shoulder
-#'  pain and disability index (SPADI) from 229 patients with rotator-cuff
+#'  pain and disability index (SPADI) from 228 patients with rotator-cuff
 #'  related disorders. The variables are as follows:
 #'
 #' @format A data frame with 228 rows and 16 variables:
 #' \describe{
-#'   \item{gender}{Gender (0, 1)}
+#'   \item{gender}{Gender (1,2)}
 #'   \item{over60}{Age over/under 60 (0,1)}
 #'   \item{P1}{At its worst (pain item)}
 #'   \item{P2}{Lying on affected side (pain item)}

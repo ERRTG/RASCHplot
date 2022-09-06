@@ -5,7 +5,7 @@
 #' ...
 #'
 #' @param data Input data matrix or data frame; rows represent indiviiduals, columns represent items. Or a model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.
-#' @param which.item An integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. The argument will not be used if `all.items = TRUE`.
+#' @param which.item Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. Or a character string `"all"`for constructing CICC plots for all items in the data.
 #' @param freq 	Logical flag; if TRUE, the graphic is a representation of frequencies, the counts component of the result; if FALSE, percentages are plotted (so that each bar has a total area of 100). Defaults to TRUE.
 #' @param addsums Logical flag for adding score totals per item to the plots. Defaults to FALSE.
 #' @param na.action A character which indicates what should happen when the data contain missing scores. The default is `"na.plot"`, which shows NAs in the plot. Another possible value is `"na.rm"`, which removes NAs from the plot.
@@ -21,14 +21,13 @@
 #'
 #' @examples
 #' items <- SPADI[,9:16]
-#' theme_set(theme_minimal())
 #' BARplot(data = items)
 #' BARplot(data = items, which.item = c(3,4))
 #' BARplot(data = items, addsums = TRUE)
 #' BARplot(data = items, freq = FALSE)
 #' BARplot(data = items, freq = FALSE, na.action = "na.rm")
 #' strat.var <- as.factor(SPADI$over60)
-#' BARplot(data = items, which.item = 1, strat.var = strat.var)
+#' BARplot(data = items, which.item = 2, strat.var = strat.var)
 #'
 #' @export BARplot
 #'
@@ -93,14 +92,14 @@ longdffct <- function(df, which.item, freq, strat.var = NULL) {
     } else {
 
       dfs <- data.frame(df, strat.var = strat.var)
+      colnames(dfs)[which.item] <- "Score"
 
       longdf <- dfs %>%
-        dplyr::select(c(all_of(which.item), strat.var)) %>%
-        dplyr::mutate_at(c(which.item), factor) %>%
-        dplyr::count(across(c(all_of(which.item), strat.var))) %>%
+        dplyr::select(Score, strat.var) %>%
+        dplyr::mutate(across(c(Score, strat.var), factor)) %>%
+        dplyr::count(across(c(Score, strat.var))) %>%
         dplyr::mutate(q = n/sum(n) * 100)  %>%
         dplyr::mutate(item = colnames(df)[which.item]) %>%
-        dplyr::rename_with(.cols = 1, ~"Score") %>%
         dplyr::mutate(Score = forcats::fct_rev(Score))
 
     }
@@ -179,8 +178,15 @@ barplt <- function(longdf, addsums, na.action, freq, strat.var = NULL) {
 
   }
 
+  if (freq) {
+    pp <- pp +
+      geom_col()
+  } else {
+    pp <- pp +
+      geom_col(position = "fill")
+  }
+
    pp <- pp +
-    geom_bar(stat = "identity") +
     xlab(ifelse(nlevels(longdf$item) > 1, "Item", "")) +
     ylab(ifelse(freq, "Count", "Percentage")) +
     coord_flip() +

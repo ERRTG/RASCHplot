@@ -16,7 +16,7 @@ BARplot(
 \arguments{
 \item{data}{Input data matrix or data frame; rows represent indiviiduals, columns represent items. Or a model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.}
 
-\item{which.item}{An integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. The argument will not be used if `all.items = TRUE`.}
+\item{which.item}{Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. Or a character string `"all"`for constructing CICC plots for all items in the data.}
 
 \item{freq}{Logical flag; if TRUE, the graphic is a representation of frequencies, the counts component of the result; if FALSE, percentages are plotted (so that each bar has a total area of 100). Defaults to TRUE.}
 
@@ -37,12 +37,12 @@ This function constructs bar plots...
 }
 \examples{
 items <- SPADI[,9:16]
-theme_set(theme_minimal())
 BARplot(data = items)
+BARplot(data = items, which.item = c(3,4))
 BARplot(data = items, addsums = TRUE)
 BARplot(data = items, freq = FALSE)
 BARplot(data = items, freq = FALSE, na.action = "na.rm")
 strat.var <- as.factor(SPADI$over60)
-BARplot(data = items, which.item = 1, strat.var = strat.var)
+BARplot(data = items, which.item = 2, strat.var = strat.var)
 
 }

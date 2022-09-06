@@ -47,8 +47,6 @@ str(amts)
 AMTS.complete <- amts[complete.cases(amts), ]
 it.AMTS <- AMTS.complete[, 4:13]
 model.AMTS <- RM(it.AMTS)
-# Plot theme
-theme_set(theme_minimal())
 # Plot item 1
 CICCplot(model = model.AMTS)
 # Change colours

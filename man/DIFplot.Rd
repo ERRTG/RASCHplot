@@ -48,7 +48,6 @@ AMTS.complete <- amts[complete.cases(amts), ]
 it.AMTS <- AMTS.complete[, 4:13]
 model.AMTS <- RM(it.AMTS)
 strat.vars <- list(sex = AMTS.complete[, "sex"], agegrp = droplevels(AMTS.complete[, "agegrp"]))
-theme_set(theme_minimal())
 DIFplot(model = model.AMTS, strat.vars = strat.vars)
 DIFplot(model = model.AMTS, which.item = c(1,2), strat.vars = strat.vars)
 lower.groups <- list(sex = c(0, 1, 2, 5, 8, 10), agegrp = c(0, 3, 6, 9))
@@ -60,5 +59,12 @@ lower.groups <- list(sex = list(male = c(0, 1, 2, 5, 8, 10), female = c(0,  5, 1
                                    "76-85" = c(0, 4, 4, 5, 8, 9, 10),
                                    "86+" = c(0, 1, 2, 5, 7, 8, 9, 10)))
 DIFplot(model = model.AMTS, strat.vars = strat.vars, lower.groups = lower.groups)
+
+
+SPADI.complete <- SPADI[complete.cases(SPADI), ]
+it.SPADI <- SPADI.complete[, 9:16]
+model.SPADI <- PCM(it.SPADI)
+strat.vars <- list(sex = SPADI.complete[, "gender"])
+DIFplot(model = model.SPADI, strat.vars = strat.vars)
 
 }

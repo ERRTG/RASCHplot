@@ -26,8 +26,6 @@
 #' AMTS.complete <- amts[complete.cases(amts), ]
 #' it.AMTS <- AMTS.complete[, 4:13]
 #' model.AMTS <- RM(it.AMTS)
-#' # Plot theme
-#' theme_set(theme_minimal())
 #' # Plot item 1
 #' CICCplot(model = model.AMTS)
 #' # Change colours
@@ -186,16 +184,6 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", all.items = FA
 #' @param col col
 #' @noRd
 ciccplot <- function(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col) {
-
-  # A function factory for getting integer y-axis values.
-  integer_breaks <- function(n = 5, ...) {
-    fxn <- function(x) {
-      breaks <- floor(pretty(x, n, ...))
-      names(breaks) <- attr(breaks, "labels")
-      breaks
-    }
-    return(fxn)
-  }
 
   x <- ggplot(data = data_exp, aes(x = Tot.val, y= exp.val, color = "Expected")) +
   geom_line() + #linetype = "dashed") +
