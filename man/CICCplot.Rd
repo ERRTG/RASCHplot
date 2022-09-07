@@ -47,7 +47,6 @@ model.SPADI <- eRm::PCM(it.SPADI)
 CICCplot(model = model.SPADI)
 # Specify lower points of grouping intervals
 CICCplot(model = model.SPADI, lower.groups = c(0, 1, 2, 5, 8, 10))
-\dontrun{
 # Plot item 3 and 4
 CICCplot(model = model.SPADI, which.item = c(3,4))
 # Plot all items
@@ -61,6 +60,5 @@ ciccobj <- CICCplot(model = model.SPADI, which.item = c(3,4))
 ciccobj$`3` +
   ggplot2::scale_colour_manual(values = c("burlywood","cornflowerblue")) +
   ggplot2::xlim(c(2,8))
-}
 
 }

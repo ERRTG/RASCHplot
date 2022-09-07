@@ -35,11 +35,7 @@ options(ggplot2.discrete.fill = OkabeIto)
 
 # Introduction
 
-Visualisation of Rasch item fit using a Conditional Item Characteristic Curve (CICC), which is a curve describing the expected item
-mean as a function of the total score. It is possible to make an empirical CICC based on
-the observed data as both the empirical expected item score and the total scores can be
-calculated from the data. This emperical curve can then be compared to the model-based
-CICC to visualize item fit.
+Visualisation of Rasch item fit using a Conditional Item Characteristic Curve (CICC), which is a curve describing the expected item mean as a function of the total score. It is possible to make an empirical CICC based on the observed data as both the empirical expected item score and the total scores can be calculated from the data. This emperical curve can then be compared to the model-based CICC to visualize item fit.
 
 Here, you will learn how to use the `RASCHplot` package to visualise responses to tests or questionnaires as well as Rasch model fit.
 

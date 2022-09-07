@@ -49,7 +49,6 @@ it.SPADI <- SPADI.complete[, 9:16]
 model.SPADI <- eRm::PCM(it.SPADI)
 strat.vars <- list(gender = SPADI.complete[, "gender"])
 DIFplot(model = model.SPADI, strat.vars = strat.vars)
-\dontrun{
 strat.vars <- list(gender = SPADI.complete[, "gender"], over60 = SPADI.complete[, "over60"])
 DIFplot(model = model.SPADI, strat.vars = strat.vars)
 DIFplot(model = model.SPADI, which.item = c(1,2), strat.vars = strat.vars)
@@ -62,6 +61,5 @@ lower.groups <- list(gender = list("1" = c(0, 5, 15, 20, 30, 40),
                      over60 = list("0" = c(0, 10, 15, 20),
                                    "1" = c(0, 8, 15, 17, 18, 22, 29, 38)))
 DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
-}
 
 }

@@ -40,13 +40,11 @@ library(eRm)
 data(SPADI)
 items <- SPADI[,9:16]
 BARplot(data = items)
-\dontrun{
 BARplot(data = items, which.item = c(3,4))
 BARplot(data = items, addsums = TRUE)
 BARplot(data = items, freq = FALSE)
 BARplot(data = items, freq = FALSE, na.action = "na.rm")
 strat.var <- as.factor(SPADI$over60)
 BARplot(data = items, which.item = 2, strat.var = strat.var)
-}
 
 }
