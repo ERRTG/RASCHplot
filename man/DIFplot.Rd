@@ -16,21 +16,21 @@ DIFplot(
 )
 }
 \arguments{
-\item{model}{A model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.}
+\item{model}{A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()} or \code{PCM()} from the \code{eRm} package.}
 
-\item{which.item}{Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. Or a character string `"all"`for constructing CICC plots for all items in the data.}
+\item{which.item}{Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is \code{which.item = 1}. Or a character string \code{"all"} for constructing CICC plots for all items in the data.}
 
 \item{strat.vars}{A named list of categorical variables for stratification.}
 
-\item{lower.groups}{A named list of length `length(strat.vars)` of lists, vectors or a single vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector(s) should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector(s), it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score. If a list is provided, the arguments should be named corresponding to the `strat.vars`. If the arguments are lists, they should be named corresponding to the levels of the `strat.vars`.}
+\item{lower.groups}{A named list of length \code{length(strat.vars)} of lists, vectors or a single vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector(s) should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector(s), it will be added automatically. If \code{lower.groups = "all"} (default), the empirical expected item-score will be plotted for every possible total score. If a list is provided, the arguments should be named corresponding to the \code{strat.vars}. If the arguments are lists, they should be named corresponding to the levels of the \code{strat.vars}.}
 
-\item{grid.items}{Logical flag for arranging the items selected by which.item in grids using the `ggarrange` function from the `ggpubr` package. Default value is `FALSE`.}
+\item{grid.items}{Logical flag for arranging the items selected by which.item in grids using the \code{ggarrange} function from the \code{ggpubr} package. Default value is \code{FALSE}.}
 
-\item{error.bar}{Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.}
+\item{error.bar}{Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.}
 
-\item{dodge.width}{Dodging width of error bars. To prevent overlapping error bars, dodging (jittering) preserves the vertical position of error bars while adjusting the horizontal position. Default is `dodge.width = 0.5`.}
+\item{dodge.width}{Dodging width of error bars. To prevent overlapping error bars, dodging (jittering) preserves the vertical position of error bars while adjusting the horizontal position. Default is \code{dodge.width = 0.5}.}
 
-\item{...}{Arguments to be passed to `ggarrange`. The arguments will only be used if `grid.items = TRUE`.}
+\item{...}{Arguments to be passed to \code{ggarrange}. The arguments will only be used if \code{grid.items = TRUE}.}
 }
 \value{
 CICC plot
@@ -49,6 +49,7 @@ it.SPADI <- SPADI.complete[, 9:16]
 model.SPADI <- eRm::PCM(it.SPADI)
 strat.vars <- list(gender = SPADI.complete[, "gender"])
 DIFplot(model = model.SPADI, strat.vars = strat.vars)
+\dontrun{
 strat.vars <- list(gender = SPADI.complete[, "gender"], over60 = SPADI.complete[, "over60"])
 DIFplot(model = model.SPADI, strat.vars = strat.vars)
 DIFplot(model = model.SPADI, which.item = c(1,2), strat.vars = strat.vars)
@@ -61,4 +62,6 @@ lower.groups <- list(gender = list("1" = c(0, 5, 15, 20, 30, 40),
                      over60 = list("0" = c(0, 10, 15, 20),
                                    "1" = c(0, 8, 15, 17, 18, 22, 29, 38)))
 DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
+}
+
 }

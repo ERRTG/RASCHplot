@@ -14,15 +14,15 @@ BARplot(
 )
 }
 \arguments{
-\item{data}{Input data matrix or data frame; rows represent indiviiduals, columns represent items. Or a model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.}
+\item{data}{Input data matrix or data frame; rows represent indiviiduals, columns represent items. Or a model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()} or \code{PCM()} from the \code{eRm} package.}
 
-\item{which.item}{Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. Or a character string `"all"`for constructing CICC plots for all items in the data.}
+\item{which.item}{Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is \code{which.item = 1}. Or a character string \code{"all"}for constructing CICC plots for all items in the data.}
 
 \item{freq}{Logical flag; if TRUE, the graphic is a representation of frequencies, the counts component of the result; if FALSE, percentages are plotted (so that each bar has a total area of 100). Defaults to TRUE.}
 
 \item{addsums}{Logical flag for adding score totals per item to the plots. Defaults to FALSE.}
 
-\item{na.action}{A character which indicates what should happen when the data contain missing scores. The default is `"na.plot"`, which shows NAs in the plot. Another possible value is `"na.rm"`, which removes NAs from the plot.}
+\item{na.action}{A character which indicates what should happen when the data contain missing scores. The default is \code{"na.plot"}, which shows NAs in the plot. Another possible value is \code{"na.rm"}, which removes NAs from the plot.}
 
 \item{strat.var}{A vector of observations used for stratification.}
 }
@@ -40,11 +40,13 @@ library(eRm)
 data(SPADI)
 items <- SPADI[,9:16]
 BARplot(data = items)
+\dontrun{
 BARplot(data = items, which.item = c(3,4))
 BARplot(data = items, addsums = TRUE)
 BARplot(data = items, freq = FALSE)
 BARplot(data = items, freq = FALSE, na.action = "na.rm")
 strat.var <- as.factor(SPADI$over60)
 BARplot(data = items, which.item = 2, strat.var = strat.var)
+}
 
 }

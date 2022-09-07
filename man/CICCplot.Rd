@@ -2,7 +2,7 @@
 % Please edit documentation in R/CICCplot.R
 \name{CICCplot}
 \alias{CICCplot}
-\title{Conditional Item Characteristic Curves}
+\title{Conditional Item Characteristic Curves (CICCs)}
 \usage{
 CICCplot(
   model,
@@ -14,26 +14,28 @@ CICCplot(
 )
 }
 \arguments{
-\item{model}{A model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.}
+\item{model}{A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()} or \code{PCM()} from the \code{eRm} package.}
 
-\item{which.item}{Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. Or a character string `"all"`for constructing CICC plots for all items in the data.}
+\item{which.item}{Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is \code{which.item = 1}. Or a character string \code{"all"}for constructing CICC plots for all items in the data.}
 
-\item{lower.groups}{A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score.}
+\item{lower.groups}{A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If \code{lower.groups = "all"} (default), the empirical expected item-score will be plotted for every possible total score.}
 
-\item{grid.items}{Logical flag for arranging the items selected by which.item in grids using the `ggarrange` function from the `ggpubr` package. Default value is `FALSE`.}
+\item{grid.items}{Logical flag for arranging the items selected by which.item in grids using the \code{ggarrange} function from the \code{ggpubr} package. Default value is \code{FALSE}.}
 
-\item{error.bar}{Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.}
+\item{error.bar}{Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.}
 
-\item{...}{Arguments to be passed to `ggarrange`. The arguments will only be used if 'grid.items = TRUE'.}
+\item{...}{Arguments to be passed to \code{ggarrange}. The arguments will only be used if 'grid.items = TRUE'.}
 }
 \value{
 CICC plot
 }
 \description{
-This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model. These plots can be used to investigate item misfit.
+This function constructs CICCs for selected items in a Rasch-model. These can be used to investigate item misfit.
 }
 \details{
-...
+A CICC describes the expected outcome of an item when conditioning on the total score of all items in the model. When plotting CICCs the total score will be on the x axis and the conditional expected item score will be on the y axis. For dichotomous items the expected item score corresponds to the probability of getting item score '1' and is always zero when the total score is zero and one when the total score is the maximal possible score. Between these to points the curve will be monotone increasing.
+
+\code{CICCplot()} is used to construct a \code{ggplot} object, and can be followed by + to add component to the plot.
 }
 \examples{
 library(eRm)
@@ -45,6 +47,7 @@ model.SPADI <- eRm::PCM(it.SPADI)
 CICCplot(model = model.SPADI)
 # Specify lower points of grouping intervals
 CICCplot(model = model.SPADI, lower.groups = c(0, 1, 2, 5, 8, 10))
+\dontrun{
 # Plot item 3 and 4
 CICCplot(model = model.SPADI, which.item = c(3,4))
 # Plot all items
@@ -58,5 +61,6 @@ ciccobj <- CICCplot(model = model.SPADI, which.item = c(3,4))
 ciccobj$`3` +
   ggplot2::scale_colour_manual(values = c("burlywood","cornflowerblue")) +
   ggplot2::xlim(c(2,8))
+}
 
 }

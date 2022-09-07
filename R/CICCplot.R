@@ -1,19 +1,22 @@
-#' Conditional Item Characteristic Curves
+#' Conditional Item Characteristic Curves (CICCs)
 #'
-#' This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model. These plots can be used to investigate item misfit.
+#' This function constructs CICCs for selected items in a Rasch-model. These can be used to investigate item misfit.
 #'
-#' ...
+#' A CICC describes the expected outcome of an item when conditioning on the total score of all items in the model. When plotting CICCs the total score will be on the x axis and the conditional expected item score will be on the y axis. For dichotomous items the expected item score corresponds to the probability of getting item score '1' and is always zero when the total score is zero and one when the total score is the maximal possible score. Between these to points the curve will be monotone increasing.
 #'
-#' @param model A model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.
-#' @param which.item Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. Or a character string `"all"`for constructing CICC plots for all items in the data.
-#' @param lower.groups A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If `lower.groups = "all"` (default), the empirical expected item-score will be plotted for every possible total score.
-#' @param grid.items  Logical flag for arranging the items selected by which.item in grids using the `ggarrange` function from the `ggpubr` package. Default value is `FALSE`.
-#' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is `TRUE`.
-#' @param ... Arguments to be passed to `ggarrange`. The arguments will only be used if 'grid.items = TRUE'.
+#' \code{CICCplot()} is used to construct a \code{ggplot} object, and can be followed by + to add component to the plot.
 #'
-#' @import ggplot2
+#' @param model A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()} or \code{PCM()} from the \code{eRm} package.
+#' @param which.item Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is \code{which.item = 1}. Or a character string \code{"all"}for constructing CICC plots for all items in the data.
+#' @param lower.groups A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If \code{lower.groups = "all"} (default), the empirical expected item-score will be plotted for every possible total score.
+#' @param grid.items  Logical flag for arranging the items selected by which.item in grids using the \code{ggarrange} function from the \code{ggpubr} package. Default value is \code{FALSE}.
+#' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.
+#' @param ... Arguments to be passed to \code{ggarrange}. The arguments will only be used if 'grid.items = TRUE'.
+#'
+#' @importFrom ggplot2 ggplot aes scale_x_continuous guide_legend geom_errorbar ggtitle scale_colour_manual geom_point geom_line xlab ylab
+#' @importFrom rlang .data
 #' @import memoise
-#' @import ggpubr
+#' @importFrom ggpubr ggarrange
 #' @import scales
 #' @import stats
 #'
@@ -151,13 +154,13 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
     col <- c("Expected" = "darkgrey", "Observed" = "orange")
     itmtit <- colnames(data)[itm]
 
-    pp[[plotidx]] <- ciccplot(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col)
+    pp[[plotidx]] <- ciccplot(data_exp, Tot.val, exp.val, data_obs, itmtit, col)
     plotidx <- plotidx+1
 
   }
 
     if (grid.items) {
-      P <- ggpubr::ggarrange(plotlist= pp, ...)
+      P <- ggarrange(plotlist= pp, ...)
     } else {
       P <- pp
       names(P) <- itmidx
@@ -170,24 +173,21 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
 #' @param Tot.val Tot.val
 #' @param exp.val exp.val
 #' @param data_obs data_obs
-#' @param Tot.val_grp Tot.val_grp
-#' @param obs.val_grp obs.val_grp
 #' @param itmtit itmtit
-#' @param CI.bound CI.bound
 #' @param col col
 #' @noRd
-ciccplot <- function(data_exp, Tot.val, exp.val, data_obs, Tot.val_grp, obs.val_grp, itmtit, CI.bound, col) {
+ciccplot <- function(data_exp, Tot.val, exp.val, data_obs, itmtit, col) {
 
   x <- ggplot(data = data_exp, aes(x = Tot.val, y= exp.val, color = "Expected")) +
   geom_line() + #linetype = "dashed") +
   #geom_point() +
-  geom_point(data = data_obs, aes(x = Tot.val_grp, y = obs.val_grp, color = "Observed"), size = 1) +
+  geom_point(data = data_obs, aes(x = .data$Tot.val_grp, y = .data$obs.val_grp, color = "Observed"), size = 1) +
   scale_colour_manual(values = col) +
   ggtitle(paste0("Item: ", itmtit)) +
   xlab("Total Score") +
   ylab("Item-Score") +
-  geom_errorbar(data = data_obs, aes(x = Tot.val_grp, y = obs.val_grp,
-                                     ymin = obs.val_grp - CI.bound, ymax = obs.val_grp + CI.bound,
+  geom_errorbar(data = data_obs, aes(x = .data$Tot.val_grp, y = .data$obs.val_grp,
+                                     ymin = .data$obs.val_grp - .data$CI.bound, ymax = .data$obs.val_grp + .data$CI.bound,
                                      color = "Observed"),
                 width = 0) + #, size = .5) +
   scale_x_continuous(breaks = integer_breaks(), minor_breaks = Tot.val) + #breaks = Tot.val) +

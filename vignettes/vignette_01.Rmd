@@ -308,19 +308,31 @@ ciccobj +
 DIFplot(fit)
 ```
 
+
 ```{r}
 strat.vars <- list(gender = SPADI.complete[, "gender"])
 DIFplot(model = fit, strat.vars = strat.vars)
 ```
 
 ```{r}
+DIFplot(model = fit, strat.vars = strat.vars, dodge.width = 0)
+```
+
+
+```{r}
 strat.vars <- list(gender = SPADI.complete[, "gender"], over60 = SPADI.complete[, "over60"])
 DIFplot(model = fit, strat.vars = strat.vars)
 ```
 
+
+
+
+
 ```{r}
 DIFplot(model = fit, which.item = c(1,2), strat.vars = strat.vars)
 ```
+
+
 
 ```{r}
 lower.groups <- list(gender = c(0, 1, 2, 5, 8, 10), over60 = c(0, 3, 6, 9))

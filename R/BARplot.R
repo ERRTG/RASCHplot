@@ -4,14 +4,15 @@
 #'
 #' ...
 #'
-#' @param data Input data matrix or data frame; rows represent indiviiduals, columns represent items. Or a model object of class `Rm` or `eRm` returned from the functions `RM()` or `PCM()` from the `eRm` package.
-#' @param which.item Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is `which.item = 1`. Or a character string `"all"`for constructing CICC plots for all items in the data.
+#' @param data Input data matrix or data frame; rows represent indiviiduals, columns represent items. Or a model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()} or \code{PCM()} from the \code{eRm} package.
+#' @param which.item Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is \code{which.item = 1}. Or a character string \code{"all"}for constructing CICC plots for all items in the data.
 #' @param freq 	Logical flag; if TRUE, the graphic is a representation of frequencies, the counts component of the result; if FALSE, percentages are plotted (so that each bar has a total area of 100). Defaults to TRUE.
 #' @param addsums Logical flag for adding score totals per item to the plots. Defaults to FALSE.
-#' @param na.action A character which indicates what should happen when the data contain missing scores. The default is `"na.plot"`, which shows NAs in the plot. Another possible value is `"na.rm"`, which removes NAs from the plot.
+#' @param na.action A character which indicates what should happen when the data contain missing scores. The default is \code{"na.plot"}, which shows NAs in the plot. Another possible value is \code{"na.rm"}, which removes NAs from the plot.
 #' @param strat.var A vector of observations used for stratification.
 #'
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes remove_missing facet_grid theme xlab ylab coord_flip guides guide_legend geom_text position_stack geom_col vars
+#' @importFrom rlang .data
 #' @importFrom tidyr pivot_longer everything
 #' @importFrom dplyr mutate count select
 #' @import magrittr
@@ -83,13 +84,13 @@ longdffct <- function(df, which.item, freq, strat.var = NULL) {
     if(is.null(strat.var)) {
 
       longdf <- df %>%
-        dplyr::select(all_of(which.item)) %>%
+        dplyr::select(dplyr::all_of(which.item)) %>%
         dplyr::mutate_at(c(which.item), factor) %>%
-        dplyr::count(across(all_of(which.item))) %>%
-        dplyr::mutate(q = n/sum(n) * 100)  %>%
+        dplyr::count(dplyr::across(dplyr::all_of(which.item))) %>%
+        dplyr::mutate(q = .data$n/sum(.data$n) * 100)  %>%
         dplyr::mutate(item = colnames(df)[which.item]) %>%
         dplyr::rename_with(.cols = 1, ~"Score") %>%
-        dplyr::mutate(Score = forcats::fct_rev(Score))
+        dplyr::mutate(Score = forcats::fct_rev(.data$Score))
 
     } else {
 
@@ -97,12 +98,12 @@ longdffct <- function(df, which.item, freq, strat.var = NULL) {
       colnames(dfs)[which.item] <- "Score"
 
       longdf <- dfs %>%
-        dplyr::select(Score, strat.var) %>%
-        dplyr::mutate(across(c(Score, strat.var), factor)) %>%
-        dplyr::count(across(c(Score, strat.var))) %>%
-        dplyr::mutate(q = n/sum(n) * 100)  %>%
+        dplyr::select(.data$Score, strat.var) %>%
+        dplyr::mutate(dplyr::across(c(.data$Score, strat.var), factor)) %>%
+        dplyr::count(dplyr::across(c(.data$Score, strat.var))) %>%
+        dplyr::mutate(q = .data$n/sum(.data$n) * 100)  %>%
         dplyr::mutate(item = colnames(df)[which.item]) %>%
-        dplyr::mutate(Score = forcats::fct_rev(Score))
+        dplyr::mutate(Score = forcats::fct_rev(.data$Score))
 
     }
 
@@ -114,33 +115,33 @@ longdffct <- function(df, which.item, freq, strat.var = NULL) {
 
     if(is.null(strat.var)) {
       longdf <- df %>%
-        dplyr::select(all_of(which.item)) %>%
-        tidyr::pivot_longer(any_of(colnames(df)[which.item]), names_to = "item", values_to = "Score") %>%
-        dplyr::mutate(Score = as.factor(Score)) %>%
-        dplyr::mutate(Score = forcats::fct_rev(Score)) %>%
-        dplyr::count(item, Score) %>%
-        dplyr::group_by(item) %>%
-        dplyr::mutate(q = n/sum(n) * 100)
+        dplyr::select(dplyr::all_of(which.item)) %>%
+        tidyr::pivot_longer(dplyr::any_of(colnames(df)[which.item]), names_to = "item", values_to = "Score") %>%
+        dplyr::mutate(Score = as.factor(.data$Score)) %>%
+        dplyr::mutate(Score = forcats::fct_rev(.data$Score)) %>%
+        dplyr::count(.data$item, .data$Score) %>%
+        dplyr::group_by(.data$item) %>%
+        dplyr::mutate(q = .data$n/sum(.data$n) * 100)
 
     } else {
 
       dfs <- data.frame(df, strat.var = strat.var)
 
       longdf <- dfs %>%
-        dplyr::select(c(all_of(which.item), strat.var)) %>%
-        tidyr::pivot_longer(any_of(which.item), names_to = "item", values_to = "Score") %>%
-        dplyr::mutate(Score = as.factor(Score)) %>%
-        dplyr::mutate(Score = forcats::fct_rev(Score)) %>%
-        dplyr::count(item, strat.var, Score) %>%
-        dplyr::group_by(item, strat.var) %>%
-        dplyr::mutate(q = n/sum(n) * 100)
+        dplyr::select(c(dplyr::all_of(which.item), strat.var)) %>%
+        tidyr::pivot_longer(dplyr::any_of(which.item), names_to = "item", values_to = "Score") %>%
+        dplyr::mutate(Score = as.factor(.data$Score)) %>%
+        dplyr::mutate(Score = forcats::fct_rev(.data$Score)) %>%
+        dplyr::count(.data$item, strat.var, .data$Score) %>%
+        dplyr::group_by(.data$item, strat.var) %>%
+        dplyr::mutate(q = .data$n/sum(.data$n) * 100)
 
     }
 
   }
 
   longdf <- if(freq){
-    dplyr::rename(longdf, y = n)
+    dplyr::rename(longdf, y = .data$n)
   } else {
     dplyr::rename(longdf, y = q)
   }
@@ -160,21 +161,21 @@ barplt <- function(longdf, addsums, na.action, freq, strat.var = NULL) {
 
     if (is.null(strat.var)) {
       pp <- ggplot(remove_missing(longdf, na.rm = TRUE),
-                   aes(x = item, y = y, fill = Score, na.rm = TRUE))
+                   aes(x = .data$item, y = .data$y, fill = .data$Score, na.rm = TRUE))
     } else {
       pp <- ggplot(remove_missing(longdf, na.rm = TRUE),
-                   aes(x = strat.var, y = y, fill = Score, na.rm = TRUE)) +
-        facet_grid(rows = vars(item), switch = "y") +
+                   aes(x = .data$strat.var, y = .data$y, fill = .data$Score, na.rm = TRUE)) +
+        facet_grid(rows = vars(.data$item), switch = "y") +
         theme(strip.placement = "outside")
     }
 
   } else {
 
     if (is.null(strat.var)) {
-      pp <- ggplot(longdf, aes(x = item, y = y, fill = Score))
+      pp <- ggplot(longdf, aes(x = .data$item, y = .data$y, fill = .data$Score))
     } else {
-      pp <- ggplot(longdf, aes(x = strat.var, y = y, fill = Score))+
-        facet_grid(rows = vars(item), switch = "y") +
+      pp <- ggplot(longdf, aes(x = .data$strat.var, y = .data$y, fill = .data$Score))+
+        facet_grid(rows = vars(.data$item), switch = "y") +
         theme(strip.placement = "outside")
     }
 
@@ -198,7 +199,7 @@ barplt <- function(longdf, addsums, na.action, freq, strat.var = NULL) {
    if (addsums) {
      pp <- pp +
        geom_text(stat = "identity",
-                 aes(label = round(y, ifelse(freq, 0, 1)), y = y),
+                 aes(label = round(.data$y, ifelse(freq, 0, 1)), y = .data$y),
                  position = position_stack(0.5))
    }
 
