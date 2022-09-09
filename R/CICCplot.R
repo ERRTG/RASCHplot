@@ -23,28 +23,25 @@
 #' @return CICC plot
 #'
 #' @examples
-#' library(eRm)
 #' data(SPADI)
 #' SPADI.complete <- SPADI[complete.cases(SPADI), ]
 #' it.SPADI <- SPADI.complete[, 9:16]
 #' model.SPADI <- eRm::PCM(it.SPADI)
-#' # Plot item 1
+#' # Plot first item
 #' CICCplot(model = model.SPADI)
-#' # Specify lower points of grouping intervals
-#' CICCplot(model = model.SPADI, lower.groups = c(0, 1, 2, 5, 8, 10))
+#' # Plot using score groups specifying lower end of grouping intervals
+#' lowerg <- c(0, 1, 2, 5, 8, 10)
+#' CICCplot(model = model.SPADI, lower.groups = lowerg)
 #' # Plot item 3 and 4
 #' CICCplot(model = model.SPADI, which.item = c(3,4))
-#' # Plot all items
-#' CICCplot(model = model.SPADI, which.item = "all")
-#' # Construc CICC plot for all items and grid the items 2 by 2
-#'#  with a common legend
-#' CICCplot(model = model.SPADI, which.item = "all", grid.items = TRUE,
-#'          common.legend = TRUE, ncol = 2, nrow = 2)
+#' # Combined CICC plot for four items and with a common legend
+#' CICCplot(model = model.SPADI, which.item = c(3:6), lower.groups = lowerg,
+#'          grid.items = TRUE, common.legend = TRUE, ncol = 2, nrow = 2)
 #' # Change colours and x axis limits for item 3
 #' ciccobj <- CICCplot(model = model.SPADI, which.item = c(3,4))
 #' ciccobj$`3` +
 #'   ggplot2::scale_colour_manual(values = c("burlywood","cornflowerblue")) +
-#'   ggplot2::xlim(c(2,8))
+#'     ggplot2::xlim(c(2,8))
 #'
 #' @export CICCplot
 #'

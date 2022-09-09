@@ -15,7 +15,6 @@ knitr::opts_chunk$set(
   tidy = TRUE, 
   tidy.opts = list(blank = TRUE, arrow = TRUE), 
   highlight = TRUE,
-  #collapse = FALSE,
   #cache.extra = R.version, autodep=TRUE,
   fig.width=6, fig.height=4, comment=NA,
   fig.align="center"
@@ -36,5 +35,5 @@ options(ggplot2.discrete.fill = OkabeIto)
 # Installation
 
 ```{r, eval=FALSE}
-devtools::install_github("ERRTG/RASCHplot")
+devtools::install_github("ERRTG/RASCHplot", build_vignettes = TRUE)
 ```

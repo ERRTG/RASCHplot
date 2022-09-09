@@ -36,7 +36,7 @@ DIFplot(
 CICC plot
 }
 \description{
-This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model and allows for stratification on categorical variables. These plots can be used to investigate item misfit.
+This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model and allows for stratification on categorical variables. These plots can be used to investigate item misfit and differential item functioning (DIF).
 }
 \details{
 ...
