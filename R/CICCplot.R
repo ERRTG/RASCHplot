@@ -160,7 +160,7 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
   }
 
     if (grid.items) {
-      P <- ggarrange(plotlist= pp, ...)
+      P <- ggpubr::ggarrange(plotlist = pp, ...)
     } else {
       P <- pp
       names(P) <- itmidx

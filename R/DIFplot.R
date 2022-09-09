@@ -1,6 +1,6 @@
 #' Stratified Conditional Item Characteristic Curves
 #'
-#' This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model and allows for stratification on categorical variables. These plots can be used to investigate item misfit.
+#' This function constructs Conditional Item Characteristic Curves for selected items in a Rasch-model and allows for stratification on categorical variables. These plots can be used to investigate item misfit and differential item functioning (DIF).
 #'
 #' ...
 #'
@@ -245,7 +245,7 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
 
     if (grid.items) {
 
-       P <- ggpubr::ggarrange(plotlist= pp, ...)
+       P <- ggpubr::ggarrange(plotlist = pp, ...)
 
     }
     if (!grid.items) P <- pp

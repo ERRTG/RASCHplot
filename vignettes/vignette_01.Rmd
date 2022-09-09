@@ -35,9 +35,9 @@ options(ggplot2.discrete.fill = OkabeIto)
 
 # Introduction
 
-Visualisation of Rasch item fit using a Conditional Item Characteristic Curve (CICC), which is a curve describing the expected item mean as a function of the total score. It is possible to make an empirical CICC based on the observed data as both the empirical expected item score and the total scores can be calculated from the data. This emperical curve can then be compared to the model-based CICC to visualize item fit.
+Visualisation of Rasch item fit using a Conditional Item Characteristic Curve (CICC), which is a curve describing the expected item mean as a function of the total score. It is possible to make an empirical CICC based on the observed data as both the empirical expected item score and the total scores can be calculated from the data. This empirical curve can then be compared to the model-based CICC to visualise item fit. When data is stratified on levels of a factor the CICC can be used to identify differential item functioning (DIF).
 
-Here, you will learn how to use the `RASCHplot` package to visualise responses to tests or questionnaires as well as Rasch model fit.
+Here, you will learn how to use the `RASCHplot` package to do visualisation in the field of IRT models. In particular, visualisation of responses to tests or questionnaires (`BARplot`), visualisation of Rasch model fit (`CICCplot`), and visualisation of differential item functioning (`DIFplot`).
 
 # Installation
 
@@ -325,25 +325,19 @@ DIFplot(model = fit, strat.vars = strat.vars)
 
 
 ```{r}
-DIFplot(model = fit, which.item = c(1,2), strat.vars = strat.vars)
+strat.vars <- list(over60 = SPADI.complete[, "over60"])
+DIFplot(model = fit, which.item = c(1,4), strat.vars = strat.vars)
 ```
 
 
 
 ```{r}
-lower.groups <- list(gender = c(0, 1, 2, 5, 8, 10), over60 = c(0, 3, 6, 9))
-DIFplot(model = fit, strat.vars = strat.vars, lower.groups = lower.groups)
+lower.groups <- list(over60 = list("0" = c(0, 8, 13, 16, 32), "1" = c(0, 11, 16, 18, 26, 30)))
+DIFplot(model = fit, which.item = c(1,4), strat.vars = strat.vars, lower.groups = lower.groups)
 ```
 
 ```{r}
 DIFplot(model = fit, which.item = c(1,2),
         strat.vars = strat.vars, lower.groups = lower.groups)
-```
-
-```{r}
-lower.groups <- list(gender = list("1" = c(0, 1, 2, 5, 8, 10), "2" = c(0,  5, 10)),
-                     over60 = list("0" = c(0, 1, 2, 3, 5),
-                                   "1" = c(0, 1, 2, 5, 7, 8, 9, 10)))
-DIFplot(model = fit, strat.vars = strat.vars, lower.groups = lower.groups)
 ```
 
