@@ -52,6 +52,13 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
     return(pp)
   }
 
+  data <- model$X
+  betas <- model$betapar
+  k <- ncol(data)
+  N <- nrow(data)
+  m_i <- sapply(1:k, FUN = function(i) length(unique(data[,i]))-1)
+  parsidx <- rep(1:k, m_i)
+
   if (any(which.item == "all")) {
     itmidx <- 1:k
   } else {
@@ -78,13 +85,6 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
       }
     }
   }
-
-  data <- model$X
-  betas <- model$betapar
-  k <- ncol(data)
-  N <- nrow(data)
-  m_i <- sapply(1:k, FUN = function(i) length(unique(data[,i]))-1)
-  parsidx <- rep(1:k, m_i)
 
   n.itemcat <- apply(data, 2, FUN = function(x) {
     max(x, na.rm = T) - min(x, na.rm = T)
@@ -281,5 +281,6 @@ difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname
                   width = 0.1,
                   position = position_dodge(width = dodge.width)) +
     scale_colour_manual(values = col) +
-    guides(colour = guide_legend(override.aes = list(shape = c(NA, rep(1, nlevels(as.factor(data_obs_long$strat.var))))))) + guides(colour = guide_legend(stratname)) # #+ labs(fill = stratname)#+ theme(legend.title=element_blank()) #scale_color_discrete(name = "")
+    guides(colour = guide_legend(title = stratname,
+                                 override.aes = list(shape = c(NA, rep(1, nlevels(as.factor(data_obs_long$strat.var))))))) #+ guides(colour = guide_legend(stratname)) # #+ labs(fill = stratname)#+ theme(legend.title=element_blank()) #scale_color_discrete(name = "")
 }
