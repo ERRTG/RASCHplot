@@ -52,9 +52,13 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
     return(pp)
   }
 
-  itmidx <- suppressWarnings(as.numeric(which.item))
-  if (anyNA(itmidx)) {
-    stop("all values of which.item can not be converted to numeric")
+  if (any(which.item == "all")) {
+    itmidx <- 1:k
+  } else {
+    itmidx <- suppressWarnings(as.numeric(which.item))
+    if (anyNA(itmidx)) {
+      stop("all values of which.item can not be converted to numeric")
+    }
   }
 
   if (is.null(names(strat.vars))) {
@@ -81,10 +85,6 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
   N <- nrow(data)
   m_i <- sapply(1:k, FUN = function(i) length(unique(data[,i]))-1)
   parsidx <- rep(1:k, m_i)
-
-  if (any(which.item == "all")) {
-    itmidx <- 1:k
-  }
 
   n.itemcat <- apply(data, 2, FUN = function(x) {
     max(x, na.rm = T) - min(x, na.rm = T)
@@ -272,7 +272,9 @@ difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname
     ylab("Item-Score") +
     scale_x_continuous(breaks = integer_breaks(), minor_breaks = Tot.val) +
     geom_line(aes(color = "Expected")) +
-    geom_point(data = data_obs_long, aes(x = .data$Tot.val_grp, y = .data$obs.val_grp, color = .data$strat.var), size = 1) +
+    geom_point(data = data_obs_long, aes(x = .data$Tot.val_grp, y = .data$obs.val_grp, color = .data$strat.var),
+               size = 1,
+               position = position_dodge(width = dodge.width)) +
     geom_errorbar(data = data_obs_long, aes(x = .data$Tot.val_grp, y = .data$obs.val_grp,
                                             ymin = .data$obs.val_grp - .data$CI.bound, ymax = .data$obs.val_grp + .data$CI.bound,
                                             color = .data$strat.var),

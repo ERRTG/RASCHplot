@@ -90,27 +90,37 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
 
     Tot.val <- 0:length(betas)
 
+    #-------------------- Expected item response -------------------------------
+
     exp.val <- sapply(Tot.val, FUN = function(R) {
       l <- par.itemgrp[par.itemgrp!=itm]
       par.itemgrp_noitem <- ifelse(l > itm, l-1, l)
+
+      #==================== call gamma polynomials (recursive formula) =========
       g1 <- gamma_r_rec_pcm(betas, R, par.itemgrp)
       return(sum(sapply(1:sum(par.itemgrp==itm), FUN = function(X) {
         g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itm], R-X, par.itemgrp_noitem)
         return(X*exp(betas[par.itemgrp==itm][X])*g2/g1)})))
+      #=================== end call gamma polynomials ==========================
     })
 
     data_exp <- data.frame(Tot.val, exp.val)
 
+    #==================== Observed values (no grouping) ========================
+
     if (!is.double(lower.groups) & !is.integer(lower.groups)) {
       if (lower.groups == "all") {
 
-        #Tot.val_grp <- 0:length(phi)
         Tot.val_grp <- 0:length(betas)
         obs.val_grp <- sapply(Tot.val_grp, FUN = function(x) {mean(data[which(rowSums(data) == x), itm])})
         var.val_grp <- sapply(Tot.val_grp, FUN = function(x) {var(data[which(rowSums(data) == x), itm])})
         n.val_grp <- sapply(Tot.val_grp, FUN = function(x) {length(data[which(rowSums(data) == x), itm])})
       }
     }
+
+    #========================= End no grouping =================================
+
+    #==================== Observed values (grouping) ===========================
 
     if (is.double(lower.groups)|is.integer(lower.groups)) {
 
@@ -141,8 +151,10 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
       }
     }
 
+    #========================= End grouping ====================================
+
     data_obs <- data.frame(Tot.val_grp, obs.val_grp, var.val_grp, n.val_grp, CI.bound = NA)
-    data_obs <- data_obs[data_obs$n.val_grp != 0, ]
+    data_obs <- data_obs[data_obs$n.val_grp != 0, ] #remove groups with no observations
 
     if (error.bar) {
       data_obs$CI.bound <- 1.96*sqrt(data_obs[,3]/data_obs[,4])
