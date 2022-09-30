@@ -200,5 +200,5 @@ ciccplot <- function(data_exp, Tot.val, exp.val, data_obs, itmtit, col) {
                                      color = "Observed"),
                 width = 0) + #, size = .5) +
   scale_x_continuous(breaks = integer_breaks(), minor_breaks = Tot.val) + #breaks = Tot.val) +
-    guides(colour = guide_legend(override.aes = list(shape = c(NA, 1))))
+    guides(colour = guide_legend(override.aes = list(shape = c(NA, 19))))
 }
