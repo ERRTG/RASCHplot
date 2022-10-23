@@ -11,6 +11,11 @@
 #' @param grid.items  Logical flag for arranging the items selected by which.item in grids using the \code{ggarrange} function from the \code{ggpubr} package. Default value is \code{FALSE}.
 #' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.
 #' @param dodge.width Dodging width of error bars. To prevent overlapping error bars, dodging (jittering) preserves the vertical position of error bars while adjusting the horizontal position. Default is \code{dodge.width = 0.5}.
+#' @param point.size Size aesthetics for \code{geom_point()}.
+#' @param line.size Size aesthetics for \code{geom_line()}.
+#' @param line.type Linetype aesthetics for \code{geom_line()}.
+#' @param errorbar.width Width aesthetics for \code{geom_line()}.
+#' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
 #' @param ... Arguments to be passed to \code{ggarrange}. The arguments will only be used if \code{grid.items = TRUE}.
 #'
 #' @importFrom ggplot2 ggplot aes scale_x_continuous guide_legend geom_errorbar ggtitle scale_colour_manual geom_point geom_line xlab ylab position_dodge
@@ -44,10 +49,10 @@
 #'
 #' @export DIFplot
 #'
-DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5, ...) {
+DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5, point.size= 1, line.size = 1, line.type = 1, errorbar.width = 0.1, errorbar.size = 1, ...) {
 
   if (is.null(strat.vars)) {
-    pp <- CICCplot(model, which.item, lower.groups, grid.items, error.bar, ...)
+    pp <- CICCplot(model, which.item, lower.groups, grid.items, error.bar, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)
     warning("no variables for stratification; running CICCplot")
     return(pp)
   }
@@ -234,9 +239,13 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
       itmtit <- colnames(data)[itm]
 
       data_obs_long <- do.call(rbind, data_obs)
+      cidx <- 1:(nlevels(as.factor(data_obs_long$strat.var)) + 1)
+      col <- c("darkgrey", "#E69F00", "#56B4E9", "#009E73", "#F0E442",
+               "#0072B2", "#D55E00", "#CC79A7")[cidx]
+      names(col) <- c("Expected", levels(as.factor(data_obs_long$strat.var)))
 
 
-      pp[[plotidx]][[l]] <- difplot(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname, dodge.width)
+      pp[[plotidx]][[l]] <- difplot(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname, col, dodge.width, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)
 
     }
 
@@ -259,26 +268,33 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
 #' @param data_obs_long data_obs_long
 #' @param itmtit itmtit
 #' @param stratname stratname
+#' @param col col
 #' @param dodge.width dodge.width
+#' @param point.size Size aesthetics for \code{geom_point()}.
+#' @param line.size Size aesthetics for \code{geom_line()}.
+#' @param line.type Linetype aesthetics for \code{geom_line()}.
+#' @param errorbar.width Width aesthetics for \code{geom_line()}.
+#' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
 #' @noRd
-difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname, dodge.width) {
-
-  col <- c("darkgrey", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")[1:(nlevels(as.factor(data_obs_long$strat.var)) + 1)]
-  names(col) <- c("Expected", levels(as.factor(data_obs_long$strat.var)))
+difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname, col, dodge.width, point.size, line.size, line.type, errorbar.width, errorbar.size, ...) {
 
   x <- ggplot(data = data_exp, aes(x = Tot.val, y= exp.val)) +
     ggtitle(paste0("Item: ", itmtit)) +
     xlab("Total Score") +
     ylab("Item-Score") +
     scale_x_continuous(breaks = integer_breaks(), minor_breaks = Tot.val) +
-    geom_line(aes(color = "Expected")) +
-    geom_point(data = data_obs_long, aes(x = .data$Tot.val_grp, y = .data$obs.val_grp, color = .data$strat.var),
-               size = 1,
-               position = position_dodge(width = dodge.width)) +
-    geom_errorbar(data = data_obs_long, aes(x = .data$Tot.val_grp, y = .data$obs.val_grp,
-                                            ymin = .data$obs.val_grp - .data$CI.bound, ymax = .data$obs.val_grp + .data$CI.bound,
+    geom_line(aes(color = "Expected"), size = line.size, linetype = line.type, ...) +
+    geom_point(data = data_obs_long, aes(x = .data$Tot.val_grp,
+                                         y = .data$obs.val_grp,
+                                         color = .data$strat.var),
+               position = position_dodge(width = dodge.width),
+               size = point.size, ...) +
+    geom_errorbar(data = data_obs_long, aes(x = .data$Tot.val_grp,
+                                            y = .data$obs.val_grp,
+                                            ymin = .data$obs.val_grp - .data$CI.bound,
+                                            ymax = .data$obs.val_grp + .data$CI.bound,
                                             color = .data$strat.var),
-                  width = 0.1,
+                  width = errorbar.width, size = errorbar.size,
                   position = position_dodge(width = dodge.width)) +
     scale_colour_manual(values = col) +
     guides(colour = guide_legend(title = stratname,

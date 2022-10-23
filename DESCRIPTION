@@ -19,12 +19,17 @@ Imports:
   magrittr,
   forcats,
   tidyverse,
-  rlang
+  rlang,
+  data.table,
+  zoo,
+  TAM,
+  shiny,
+  sirt,
+  eRm
 Suggests:
-    eRm,
-    iarm,
-    knitr,
-    rmarkdown
+  knitr,
+  rmarkdown,
+  iarm
 RoxygenNote: 7.2.1
 VignetteBuilder: knitr
 Depends: 
