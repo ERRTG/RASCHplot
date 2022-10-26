@@ -8,10 +8,7 @@
 #' object}
 #'
 #' @export pcMfits
-pcMfits <- function(method.item = c("PCML", "CML", "JML", "MML"), method.person = c("WML", "MLE"), dat) {
-
-  method.item <- match.arg(method.item)
-  method.person <- match.arg(method.person)
+pcMfits <- function(method.item, method.person, dat) {
 
   mi <- apply(dat, 2, max, na.rm = TRUE) # number of categories - 1 for each item
   K <- ncol(dat)                         # number of items

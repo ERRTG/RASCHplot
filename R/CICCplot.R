@@ -20,6 +20,7 @@
 #'
 #' @importFrom ggplot2 ggplot aes scale_x_continuous guide_legend geom_errorbar ggtitle scale_colour_manual geom_point geom_line xlab ylab
 #' @importFrom rlang .data
+#' @importFrom dplyr bind_rows
 #' @import memoise
 #' @importFrom ggpubr ggarrange
 #' @import scales
@@ -171,9 +172,7 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
     datalist <- list(data_exp, data_obs)
     df <- bind_rows(datalist, .id="data_frame")
 
-
-
-      pp[[plotidx]] <- ciccplot(df, itmtit, col, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)
+    pp[[plotidx]] <- ciccplot(df, itmtit, col, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)
 
 
     ##ciccplot(data_exp, Tot.val, exp.val, data_obs, itmtit, col, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)
@@ -211,10 +210,10 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
 #' @noRd
 ciccplot <- function(df, itmtit, col, point.size, line.size, line.type, errorbar.width, errorbar.size, ...) {
 
-  x <- ggplot(data = df, aes(x = Tot.val, y= exp.val, color = "Expected")) +
+  x <- ggplot(data = df, aes(x = .data$Tot.val, y= .data$exp.val, color = "Expected")) +
     geom_line(size = line.size, linetype = line.type, ...) +
-    geom_point(aes(x = Tot.val_grp,
-                   y = obs.val_grp,
+    geom_point(aes(x = .data$Tot.val_grp,
+                   y = .data$obs.val_grp,
                    color = "Observed"),
                shape = 19,
                size = point.size, ...) +
@@ -222,9 +221,9 @@ ciccplot <- function(df, itmtit, col, point.size, line.size, line.type, errorbar
     ggtitle(paste0("Item: ", itmtit)) +
     xlab("Total Score") +
     ylab("Item-Score") +
-    geom_errorbar(aes(x = Tot.val_grp, y = obs.val_grp,
-                      ymin = obs.val_grp - CI.bound,
-                      ymax = obs.val_grp + CI.bound,
+    geom_errorbar(aes(x = .data$Tot.val_grp, y = .data$obs.val_grp,
+                      ymin = .data$obs.val_grp - .data$CI.bound,
+                      ymax = .data$obs.val_grp + .data$CI.bound,
                       color = "Observed"),
                   width = errorbar.width, size = errorbar.size) +
     scale_x_continuous(breaks = integer_breaks(), minor_breaks = df$Tot.val) +

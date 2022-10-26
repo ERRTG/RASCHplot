@@ -20,6 +20,7 @@
 #'
 #' @importFrom ggplot2 ggplot aes scale_x_continuous guide_legend geom_errorbar ggtitle scale_colour_manual geom_point geom_line xlab ylab position_dodge
 #' @importFrom rlang .data
+#' @importFrom dplyr bind_rows
 #' @import memoise
 #' @import ggpubr
 #' @import stats
@@ -244,8 +245,10 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
                "#0072B2", "#D55E00", "#CC79A7")[cidx]
       names(col) <- c("Expected", levels(as.factor(data_obs_long$strat.var)))
 
+      datalist <- list(data_exp, data_obs_long)
+      df <- bind_rows(datalist, .id="data_frame")
 
-      pp[[plotidx]][[l]] <- difplot(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname, col, dodge.width, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)
+      pp[[plotidx]][[l]] <- difplot(df, itmtit, stratname, col, dodge.width, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)
 
     }
 
@@ -262,10 +265,7 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
   P
 }
 #' Internal DIF plot function
-#' @param data_exp data_exp
-#' @param Tot.val Tot.val
-#' @param exp.val exp.val
-#' @param data_obs_long data_obs_long
+#' @param df data to ggplot
 #' @param itmtit itmtit
 #' @param stratname stratname
 #' @param col col
@@ -276,29 +276,29 @@ DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "al
 #' @param errorbar.width Width aesthetics for \code{geom_line()}.
 #' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
 #' @noRd
-difplot <- function(data_exp, Tot.val, exp.val, data_obs_long, itmtit, stratname, col, dodge.width, point.size, line.size, line.type, errorbar.width, errorbar.size, ...) {
+difplot <- function(df, itmtit, stratname, col, dodge.width, point.size, line.size, line.type, errorbar.width, errorbar.size, ...) {
 
-  x <- ggplot(data = data_exp, aes(x = Tot.val, y= exp.val)) +
+  x <- ggplot(data = df, aes(x = .data$Tot.val, y= .data$exp.val)) +
     ggtitle(paste0("Item: ", itmtit)) +
     xlab("Total Score") +
     ylab("Item-Score") +
-    scale_x_continuous(breaks = integer_breaks(), minor_breaks = Tot.val) +
+    scale_x_continuous(breaks = integer_breaks(), minor_breaks = df$Tot.val) +
     geom_line(aes(color = "Expected"), size = line.size, linetype = line.type, ...) +
-    geom_point(data = data_obs_long, aes(x = .data$Tot.val_grp,
-                                         y = .data$obs.val_grp,
-                                         color = .data$strat.var),
+    geom_point(aes(x = .data$Tot.val_grp,
+                   y = .data$obs.val_grp,
+                   color = .data$strat.var),
                position = position_dodge(width = dodge.width),
                size = point.size, ...) +
-    geom_errorbar(data = data_obs_long, aes(x = .data$Tot.val_grp,
-                                            y = .data$obs.val_grp,
-                                            ymin = .data$obs.val_grp - .data$CI.bound,
-                                            ymax = .data$obs.val_grp + .data$CI.bound,
-                                            color = .data$strat.var),
+    geom_errorbar(aes(x = .data$Tot.val_grp,
+                      y = .data$obs.val_grp,
+                      ymin = .data$obs.val_grp - .data$CI.bound,
+                      ymax = .data$obs.val_grp + .data$CI.bound,
+                      color = .data$strat.var),
                   width = errorbar.width, size = errorbar.size,
                   position = position_dodge(width = dodge.width)) +
     scale_colour_manual(values = col) +
     guides(colour = guide_legend(title = stratname,
-                                 override.aes = list(shape = c(NA, rep(19, nlevels(as.factor(data_obs_long$strat.var)))))))
+                                 override.aes = list(shape = c(NA, rep(19, nlevels(as.factor(df$strat.var)))))))
   #+ guides(colour = guide_legend(stratname)) #
   #+ #+ labs(fill = stratname)
   #+ #+ theme(legend.title=element_blank()) #scale_color_discrete(name = "")

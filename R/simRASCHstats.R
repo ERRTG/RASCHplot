@@ -20,6 +20,7 @@ simRASCHstats <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MM
 
   method.item <- match.arg(method.item)
   method.person <- match.arg(method.person)
+  model <- match.arg(model)
 
   if (model == "RMP") {
 

@@ -179,23 +179,23 @@ function(input, output, session) {
     z <- selectedData()
 
     p1 <- plot(x = z,
-                          type = "Outfit", extreme = "min",
-                          probs = c(0.025, 0.05),
-                          breaks = c("2.5%", "5%"),
-                          labels = c("2.5%", "5%", "other"),
-                          colours = my_colors,
-                          xtitle = "Outfit",
-                          title = "Minimal outfit distribution") +
+               type = "Outfit", extreme = "min",
+               probs = c(0.025, 0.05),
+               breaks = c("2.5%", "5%"),
+               labels = c("2.5%", "5%", "other"),
+               colours = my_colors,
+               xtitle = "Outfit",
+               title = "Minimal outfit distribution") +
       ggplot2::theme_minimal()
 
     p2 <- plot(x = z,
-                          type = "Outfit", extreme = "max",
-                          probs = c(0.95, 0.975),
-                          breaks = c("5%", "2.5%"),
-                          labels = c("other", "5%", "2.5%"),
-                          colours = my_colors,
-                          xtitle = "Outfit",
-                          title = "Maximal outfit distribution") +
+               type = "Outfit", extreme = "max",
+               probs = c(0.95, 0.975),
+               breaks = c("5%", "2.5%"),
+               labels = c("other", "5%", "2.5%"),
+               colours = my_colors,
+               xtitle = "Outfit",
+               title = "Maximal outfit distribution") +
       ggplot2::theme_minimal()
 
     ggpubr::ggarrange(plotlist = list(p1, p2),
