@@ -4,11 +4,7 @@
 \alias{pcMfits}
 \title{Model fit for polytomous Rasch model}
 \usage{
-pcMfits(
-  method.item = c("PCML", "CML", "JML", "MML"),
-  method.person = c("WML", "MLE"),
-  dat
-)
+pcMfits(method.item, method.person, dat)
 }
 \arguments{
 \item{method.item}{Estimation method for item parameters.}

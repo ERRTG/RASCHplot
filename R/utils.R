@@ -2,6 +2,7 @@
 #' @param pars A vector of item parameters
 #' @param r The total score
 #' @param par.grp The grouping of scores
+#'
 #' @noRd
 gamma_r_rec_pcm <- memoise::memoise(function(pars, r, par.grp){
 
