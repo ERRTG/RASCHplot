@@ -1,4 +1,12 @@
-pageWithSidebar(
+#' UI for dichotomous App
+#'
+#' @rawNamespace import(shiny, except = dataTableOutput)
+#' @importFrom utils read.csv
+#' @importFrom DT dataTableOutput
+#'
+#' @export
+RMDui <- function() {
+  pageWithSidebar(
   headerPanel('Item Statistics for dichotomous items'),
   sidebarPanel(
     helpText("Parameter etimation method for:"),
@@ -67,3 +75,4 @@ pageWithSidebar(
                 tabPanel("FitResidual", plotOutput("plot4")))
   )
 )
+}

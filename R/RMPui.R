@@ -1,4 +1,12 @@
-pageWithSidebar(
+#' UI for polytomous App
+#'
+#' @rawNamespace import(shiny, except = dataTableOutput)
+#' @importFrom utils read.csv
+#' @importFrom DT dataTableOutput
+#'
+#' @export
+RMPui <- function() {
+  pageWithSidebar(
   headerPanel('Item Statistics for polytomous items'),
   sidebarPanel(
     helpText("Parameter etimation method for:"),
@@ -40,7 +48,7 @@ pageWithSidebar(
     numericInput('B', 'Number of simulations', 50, min = 0, max = 1000, step = 50),
     #conditionalPanel(
     #  condition = "input.method == 'JML'",
-    #  numericInput(inputId = "adj", label = "Adjustment for extremes in JML", 
+    #  numericInput(inputId = "adj", label = "Adjustment for extremes in JML",
     #               value = 0.3, min = 0, max = 1, step = "any")
     #),
     actionButton("go", "Go")
@@ -67,3 +75,4 @@ pageWithSidebar(
                 tabPanel("FitResidual", plotOutput("plot4")))
   )
 )
+}

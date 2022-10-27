@@ -2,6 +2,10 @@
 #' @param input input set by Shiny.
 #' @param output output set by Shiny.
 #' @param session session set by Shiny.
+#'
+#' @rawNamespace import(shiny, except = dataTableOutput)
+#' @importFrom utils read.csv
+#'
 #' @export
 RMDserver <- function(input, output, session) {
 

@@ -21,6 +21,7 @@ Imports:
   tidyverse,
   rlang,
   data.table,
+  DT,
   zoo,
   TAM,
   shiny,
