@@ -27,7 +27,7 @@
 #' @rdname plot.RASCHstats
 #' @export
 #'
-plot.RASCHstats <- function(x, type = c("Outfit", "Infit", "FitResid"), extreme = c("min", "max"), probs, breaks, labels, colours, xtitle, title, col.outline = 0, alpha.ribbon = 1, title.legend = "Quantiles", ...) {
+plot.RASCHstats <- function(x, type = c("Outfit", "Infit", "FitResid", "tOutfit", "tInfit"), extreme = c("min", "max"), probs, breaks, labels, colours, xtitle, title, col.outline = 0, alpha.ribbon = 1, title.legend = "Quantiles", ...) {
 
   if (!inherits(x, "RASCHstats")) {
     stop("use only with \"RASCHstats\" objects")

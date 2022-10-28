@@ -220,24 +220,24 @@ RMDserver <- function(input, output, session) {
     z <- selectedData()
 
     p1 <- plot(x = z,
-                          type = "Infit", extreme = "min",
-                          probs = c(0.025, 0.05),
-                          breaks = c("2.5%", "5%"),
-                          labels = c("2.5%", "5%", "other"),
-                          colours = my_colors,
-                          xtitle = "Infit",
-                          title = "Minimal infit distribution") +
+               type = "Infit", extreme = "min",
+               probs = c(0.025, 0.05),
+               breaks = c("2.5%", "5%"),
+               labels = c("2.5%", "5%", "other"),
+               colours = my_colors,
+               xtitle = "Infit",
+               title = "Minimal infit distribution") +
       ggplot2::theme_minimal()
 
 
     p2 <- plot(x = z,
-                          type = "Infit", extreme = "max",
-                          probs = c(0.95, 0.975),
-                          breaks = c("5%", "2.5%"),
-                          labels = c("other", "5%", "2.5%"),
-                          colours = my_colors,
-                          xtitle = "Infit",
-                          title = "Maximal infit distribution") +
+               type = "Infit", extreme = "max",
+               probs = c(0.95, 0.975),
+               breaks = c("5%", "2.5%"),
+               labels = c("other", "5%", "2.5%"),
+               colours = my_colors,
+               xtitle = "Infit",
+               title = "Maximal infit distribution") +
       ggplot2::theme_minimal()
 
     ggpubr::ggarrange(plotlist = list(p1, p2),
@@ -253,24 +253,90 @@ RMDserver <- function(input, output, session) {
     z <- selectedData()
 
     p1 <- plot(x = z,
-                          type = "FitResid", extreme = "min",
-                          probs = c(0.025, 0.05),
-                          breaks = c("2.5%", "5%"),
-                          labels = c("2.5%", "5%", "other"),
-                          colours = my_colors,
-                          xtitle = "FitResidual",
-                          title = "Minimal FitResidual distribution") +
+               type = "FitResid", extreme = "min",
+               probs = c(0.025, 0.05),
+               breaks = c("2.5%", "5%"),
+               labels = c("2.5%", "5%", "other"),
+               colours = my_colors,
+               xtitle = "FitResidual",
+               title = "Minimal FitResidual distribution") +
       ggplot2::theme_minimal()
 
     p2 <- plot(x = z,
-                          type = "FitResid",
-                          extreme = "max",
-                          probs = c(0.95, 0.975),
-                          breaks = c("5%", "2.5%"),
-                          labels = c("other", "5%", "2.5%"),
-                          colours = my_colors,
-                          xtitle = "FitResidual",
-                          title = "Maximal FitResidual distribution") +
+               type = "FitResid",
+               extreme = "max",
+               probs = c(0.95, 0.975),
+               breaks = c("5%", "2.5%"),
+               labels = c("other", "5%", "2.5%"),
+               colours = my_colors,
+               xtitle = "FitResidual",
+               title = "Maximal FitResidual distribution") +
+      ggplot2::theme_minimal()
+
+    ggpubr::ggarrange(plotlist = list(p1, p2),
+                      common.legend = TRUE, legend = "bottom")
+
+  })
+
+  output$plot5 <- renderPlot({
+
+    my_colors <- c("seashell3", "seashell2", "seashell")
+    names(my_colors) <- c("2.5%", "5%", "other")
+
+    z <- selectedData()
+
+    p1 <- plot(x = z,
+               type = "tOutfit", extreme = "min",
+               probs = c(0.025, 0.05),
+               breaks = c("2.5%", "5%"),
+               labels = c("2.5%", "5%", "other"),
+               colours = my_colors,
+               xtitle = "t-Outfit",
+               title = "Minimal Wilson-Hilferty cube-root transformed Outfit distribution") +
+      ggplot2::theme_minimal()
+
+    p2 <- plot(x = z,
+               type = "tOutfit",
+               extreme = "max",
+               probs = c(0.95, 0.975),
+               breaks = c("5%", "2.5%"),
+               labels = c("other", "5%", "2.5%"),
+               colours = my_colors,
+               xtitle = "t-Outfit",
+               title = "Maximal Wilson-Hilferty cube-root transformed Outfit distribution") +
+      ggplot2::theme_minimal()
+
+    ggpubr::ggarrange(plotlist = list(p1, p2),
+                      common.legend = TRUE, legend = "bottom")
+
+  })
+
+  output$plot6 <- renderPlot({
+
+    my_colors <- c("seashell3", "seashell2", "seashell")
+    names(my_colors) <- c("2.5%", "5%", "other")
+
+    z <- selectedData()
+
+    p1 <- plot(x = z,
+               type = "tInfit", extreme = "min",
+               probs = c(0.025, 0.05),
+               breaks = c("2.5%", "5%"),
+               labels = c("2.5%", "5%", "other"),
+               colours = my_colors,
+               xtitle = "t-Infit",
+               title = "Minimal Wilson-Hilferty cube-root transformed Infit distribution") +
+      ggplot2::theme_minimal()
+
+    p2 <- plot(x = z,
+               type = "tInfit",
+               extreme = "max",
+               probs = c(0.95, 0.975),
+               breaks = c("5%", "2.5%"),
+               labels = c("other", "5%", "2.5%"),
+               colours = my_colors,
+               xtitle = "t-Infit",
+               title = "Maximal Wilson-Hilferty cube-root transformed Infit distribution") +
       ggplot2::theme_minimal()
 
     ggpubr::ggarrange(plotlist = list(p1, p2),

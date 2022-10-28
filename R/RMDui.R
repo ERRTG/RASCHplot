@@ -72,7 +72,9 @@ RMDui <- function() {
                   )),
                 tabPanel("Outfit", plotOutput("plot2")),
                 tabPanel("Infit", plotOutput("plot3")),
-                tabPanel("FitResidual", plotOutput("plot4")))
+                tabPanel("FitResidual", plotOutput("plot4")),
+                tabPanel("t-Outfit", plotOutput("plot5")),
+                tabPanel("t-Infit", plotOutput("plot6")))
   )
 )
 }

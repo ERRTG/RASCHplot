@@ -26,7 +26,7 @@ print.simRMstats <- function(x, ...) {
 #' @param theta Vector of person parameters.
 #' @param ii item index
 #'
-#' @export irffct
+#' @noRd
 irffct <- function(theta, b, ii){
   eta <- exp(theta - b[ii])
   pbs <- eta / (1 + eta)
@@ -39,7 +39,7 @@ irffct <- function(theta, b, ii){
 #' @param theta Vector of person parameters.
 #' @param ii item index
 #'
-#' @export pcmfct
+#' @noRd
 pcmfct <- function(theta, b, ii){
   N <- length(theta)  # number of persons
   M <- nrow(b)        # max number of categories - 1 for items

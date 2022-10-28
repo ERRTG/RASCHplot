@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{RASCHstats}(
   x,
-  type = c("Outfit", "Infit", "FitResid"),
+  type = c("Outfit", "Infit", "FitResid", "tOutfit", "tInfit"),
   extreme = c("min", "max"),
   probs,
   breaks,
