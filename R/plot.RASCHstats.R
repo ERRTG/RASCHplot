@@ -64,7 +64,7 @@ plot.RASCHstats <- function(x, type = c("Outfit", "Infit", "FitResid", "tOutfit"
   }
 
   if (missing(colours)) {
-    colours <- c("seashell4", "seashell3", "seashell2", "seashell")[(4-length(probs)):4]
+    colours <- c("#A43340", "#F44F4F", "#CFCFC2")
     names(colours) <- c(breaks, "other")
   }
 
@@ -95,10 +95,10 @@ plot.RASCHstats <- function(x, type = c("Outfit", "Infit", "FitResid", "tOutfit"
   df_plot[] <- lapply(df_plot, na.locf, fromLast = TRUE)
 
   ggplot(data = df_plot, aes(.data$x, .data$y)) +
-    geom_line() +
+    #geom_line() +
     geom_ribbon(aes(ymin = 0, ymax = .data$y,
                     fill = .data$quant, group = .data$group),
-                color = col.outline, alpha = alpha.ribbon) +
+                colour = col.outline, alpha = alpha.ribbon) +
     xlab(xtitle) + ylab("") +
     ggtitle(title) +
     scale_fill_manual(values = colours, breaks = breaks, labels = breaks,
