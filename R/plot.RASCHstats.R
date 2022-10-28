@@ -27,7 +27,7 @@
 #' @rdname plot.RASCHstats
 #' @export
 #'
-plot.RASCHstats <- function(x, type = c("Outfit", "Infit", "FitResid"), extreme = c("min", "max"), probs = NULL, breaks = NULL, labels = NULL, colours = NULL, xtitle = NULL, title = NULL, col.outline = 0, alpha.ribbon = 1, title.legend = "Quantiles", ...) {
+plot.RASCHstats <- function(x, type = c("Outfit", "Infit", "FitResid"), extreme = c("min", "max"), probs, breaks, labels, colours, xtitle, title, col.outline = 0, alpha.ribbon = 1, title.legend = "Quantiles", ...) {
 
   if (!inherits(x, "RASCHstats")) {
     stop("use only with \"RASCHstats\" objects")
@@ -36,7 +36,7 @@ plot.RASCHstats <- function(x, type = c("Outfit", "Infit", "FitResid"), extreme 
   type <- match.arg(type)
   extreme <- match.arg(extreme)
 
-  if (is.null(probs)) {
+  if (missing(probs)) {
     if (extreme == "min") {
       probs <- c(0.025, 0.05)
     }
@@ -45,7 +45,7 @@ plot.RASCHstats <- function(x, type = c("Outfit", "Infit", "FitResid"), extreme 
     }
   }
 
-  if (is.null(breaks)) {
+  if (missing(breaks)) {
     if (extreme == "min") {
       breaks <- paste0(probs * 100, "%")
     }
@@ -54,7 +54,7 @@ plot.RASCHstats <- function(x, type = c("Outfit", "Infit", "FitResid"), extreme 
     }
   }
 
-  if (is.null(labels)) {
+  if (missing(labels)) {
     if (extreme == "min") {
       labels <- c(breaks, "other")
     }
@@ -63,16 +63,16 @@ plot.RASCHstats <- function(x, type = c("Outfit", "Infit", "FitResid"), extreme 
     }
   }
 
-  if (is.null(colours)) {
+  if (missing(colours)) {
     colours <- c("seashell4", "seashell3", "seashell2", "seashell")[(4-length(probs)):4]
     names(colours) <- c(breaks, "other")
   }
 
-  if (is.null(xtitle)) {
+  if (missing(xtitle)) {
     xtitle <- paste0(ifelse(extreme == "max", "Maximal ", "Minimal "), type)
   }
 
-  if (is.null(title)) {
+  if (missing(title)) {
     title <- paste0(ifelse(extreme == "max", "Maximal ", "Minimal "), type, " Distribution")
   }
 

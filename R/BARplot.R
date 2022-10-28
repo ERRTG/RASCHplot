@@ -34,7 +34,7 @@
 #'
 #' @export BARplot
 #'
-BARplot <- function(data, which.item = "all", freq = TRUE, addsums = FALSE, na.action = c("na.plot", "na.rm", "na.report"), strat.var = NULL) {
+BARplot <- function(data, which.item = "all", freq = TRUE, addsums = FALSE, na.action = c("na.plot", "na.rm", "na.report"), strat.var) {
 
   na.action <- match.arg(na.action)
 
@@ -52,11 +52,13 @@ BARplot <- function(data, which.item = "all", freq = TRUE, addsums = FALSE, na.a
     df <- data
   }
 
-  if (!is.null(strat.var) & length(strat.var) != nrow(df)) {
-    stop("lengths of stratification variable must equal number of rows in data input")
+  if (!missing(strat.var)) {
+    if (length(strat.var) != nrow(df)) {
+      stop("lengths of stratification variable must equal number of rows in data input")
+    }
   }
 
-  if (is.null(strat.var)) {
+  if (missing(strat.var)) {
 
     longdf <- longdffct(df, which.item, freq)
 
@@ -77,11 +79,11 @@ BARplot <- function(data, which.item = "all", freq = TRUE, addsums = FALSE, na.a
 #' @param freq freq
 #' @param strat.var strat.var
 #' @noRd
-longdffct <- function(df, which.item, freq, strat.var = NULL) {
+longdffct <- function(df, which.item, freq, strat.var) {
 
   if(any(is.numeric(which.item)) & length(which.item) == 1) {
 
-    if(is.null(strat.var)) {
+    if(missing(strat.var)) {
 
       longdf <- df %>%
         dplyr::select(dplyr::all_of(which.item)) %>%
@@ -113,7 +115,7 @@ longdffct <- function(df, which.item, freq, strat.var = NULL) {
       which.item <- 1:ncol(df)
     }
 
-    if(is.null(strat.var)) {
+    if(missing(strat.var)) {
       longdf <- df %>%
         dplyr::select(dplyr::all_of(which.item)) %>%
         tidyr::pivot_longer(dplyr::any_of(colnames(df)[which.item]), names_to = "item", values_to = "Score") %>%
@@ -155,11 +157,11 @@ longdffct <- function(df, which.item, freq, strat.var = NULL) {
 #' @param freq freq
 #' @param strat.var strat.var
 #' @noRd
-barplt <- function(longdf, addsums, na.action, freq, strat.var = NULL) {
+barplt <- function(longdf, addsums, na.action, freq, strat.var) {
 
   if (na.action %in% c("na.rm", "na.report")) {
 
-    if (is.null(strat.var)) {
+    if (missing(strat.var)) {
       pp <- ggplot(remove_missing(longdf, na.rm = TRUE),
                    aes(x = .data$item, y = .data$y, fill = .data$Score, na.rm = TRUE))
     } else {
@@ -171,7 +173,7 @@ barplt <- function(longdf, addsums, na.action, freq, strat.var = NULL) {
 
   } else {
 
-    if (is.null(strat.var)) {
+    if (missing(strat.var)) {
       pp <- ggplot(longdf, aes(x = .data$item, y = .data$y, fill = .data$Score))
     } else {
       pp <- ggplot(longdf, aes(x = .data$strat.var, y = .data$y, fill = .data$Score))+

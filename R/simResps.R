@@ -21,6 +21,7 @@ simResps <- function(model, probs, B, M = NULL, mi = NULL) {
 
     #------------- Simulate polytomous item responses --------------------------
     if (model == "RMP") {
+
       novar <- TRUE
       while (novar) {
         PP <- matrix(runif(n = N * K, 0, 1), nrow = N, ncol = K)

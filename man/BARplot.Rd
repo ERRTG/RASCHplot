@@ -10,7 +10,7 @@ BARplot(
   freq = TRUE,
   addsums = FALSE,
   na.action = c("na.plot", "na.rm", "na.report"),
-  strat.var = NULL
+  strat.var
 )
 }
 \arguments{

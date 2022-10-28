@@ -7,7 +7,7 @@
 DIFplot(
   model,
   which.item = 1,
-  strat.vars = NULL,
+  strat.vars,
   lower.groups = "all",
   grid.items = FALSE,
   error.bar = TRUE,

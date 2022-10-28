@@ -4,7 +4,7 @@
 #' @importFrom utils read.csv
 #' @importFrom DT dataTableOutput
 #'
-#' @export
+#' @noRd
 RMDui <- function() {
   pageWithSidebar(
   headerPanel('Item Statistics for dichotomous items'),

@@ -50,9 +50,9 @@
 #'
 #' @export DIFplot
 #'
-DIFplot <- function(model, which.item = 1, strat.vars = NULL, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5, point.size= 1, line.size = 1, line.type = 1, errorbar.width = 0.1, errorbar.size = 1, ...) {
+DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5, point.size= 1, line.size = 1, line.type = 1, errorbar.width = 0.1, errorbar.size = 1, ...) {
 
-  if (is.null(strat.vars)) {
+  if (missing(strat.vars)) {
     pp <- CICCplot(model, which.item, lower.groups, grid.items, error.bar, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)
     warning("no variables for stratification; running CICCplot")
     return(pp)

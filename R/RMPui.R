@@ -4,7 +4,7 @@
 #' @importFrom utils read.csv
 #' @importFrom DT dataTableOutput
 #'
-#' @export
+#' @noRd
 RMPui <- function() {
   pageWithSidebar(
   headerPanel('Item Statistics for polytomous items'),

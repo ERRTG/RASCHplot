@@ -6,7 +6,7 @@
 #' @rawNamespace import(shiny, except = dataTableOutput)
 #' @importFrom utils read.csv
 #'
-#' @export
+#' @noRd
 RMDserver <- function(input, output, session) {
 
   betaRea <- reactive({
