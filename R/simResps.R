@@ -10,7 +10,9 @@
 #'
 #' @export simResps
 #'
-simResps <- function(model, probs, B, M = NULL, mi = NULL) {
+simResps <- function(model = c("RMD", "RMP"), probs, B, M = NULL, mi = NULL) {
+
+  model <- match.arg(model)
 
   K <- ifelse(model == "RMD", ncol(probs), length(probs))
   N <- ifelse(model == "RMD", nrow(probs), nrow(probs[[1]]))

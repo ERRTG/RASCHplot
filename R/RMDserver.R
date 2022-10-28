@@ -9,6 +9,11 @@
 #' @noRd
 RMDserver <- function(input, output, session) {
 
+  #my_colors <- c("seashell3", "seashell2", "seashell")
+  colpal <- c("#CFCFC2", "#95DA4C", "#3F8058", "#2980B9", "#F67400", "#7F8C8D", "#FDBC4B", "#3DAEE9", "#27AEAE", "#7A7C7D", "#7F8C8D", "#A43340", "#2980B9", "#F67400", "#DA4453", "#0099FF", "#F67400", "#8E44AD", "#27AE60", "#C45B00", "#CFCFC2", "#CFCFC2", "#27AE60", "#27AE60", "#2980B9", "#3DAEE9", "#DA4453", "#F44F4F", "#27AEAE", "#DA4453", "#DA4453")
+  my_colors <- colpal[c(12, 28, 1)]
+  names(my_colors) <- c("2.5%", "5%", "other")
+
   betaRea <- reactive({
 
     validate(
@@ -182,9 +187,6 @@ RMDserver <- function(input, output, session) {
 
   output$plot2 <- renderPlot({
 
-    my_colors <- c("seashell3", "seashell2", "seashell")
-    names(my_colors) <- c("2.5%", "5%", "other")
-
     z <- selectedData()
 
     p1 <- plot(x = z,
@@ -193,8 +195,8 @@ RMDserver <- function(input, output, session) {
                breaks = c("2.5%", "5%"),
                labels = c("2.5%", "5%", "other"),
                colours = my_colors,
-               xtitle = "Outfit",
-               title = "Minimal outfit distribution") +
+               xtitle = "Minimal Outfit",
+               title = "") +
       ggplot2::theme_minimal()
 
     p2 <- plot(x = z,
@@ -203,19 +205,19 @@ RMDserver <- function(input, output, session) {
                breaks = c("5%", "2.5%"),
                labels = c("other", "5%", "2.5%"),
                colours = my_colors,
-               xtitle = "Outfit",
-               title = "Maximal outfit distribution") +
+               xtitle = "Maximal Outfit",
+               title = "") +
       ggplot2::theme_minimal()
 
-    ggpubr::ggarrange(plotlist = list(p1, p2),
-                      common.legend = TRUE, legend = "bottom")
+    pp <- ggpubr::ggarrange(plotlist = list(p1, p2),
+                            common.legend = TRUE, legend = "bottom")
+
+    toptit <- "Outfit distribution"
+    ggpubr::annotate_figure(pp, top = ggpubr::text_grob(toptit))
 
   })
 
   output$plot3 <- renderPlot({
-
-    my_colors <- c("seashell3", "seashell2", "seashell")
-    names(my_colors) <- c("2.5%", "5%", "other")
 
     z <- selectedData()
 
@@ -225,8 +227,8 @@ RMDserver <- function(input, output, session) {
                breaks = c("2.5%", "5%"),
                labels = c("2.5%", "5%", "other"),
                colours = my_colors,
-               xtitle = "Infit",
-               title = "Minimal infit distribution") +
+               xtitle = "Minimal Infit",
+               title = "") +
       ggplot2::theme_minimal()
 
 
@@ -236,19 +238,19 @@ RMDserver <- function(input, output, session) {
                breaks = c("5%", "2.5%"),
                labels = c("other", "5%", "2.5%"),
                colours = my_colors,
-               xtitle = "Infit",
-               title = "Maximal infit distribution") +
+               xtitle = "Maximal Infit",
+               title = "") +
       ggplot2::theme_minimal()
 
-    ggpubr::ggarrange(plotlist = list(p1, p2),
-                      common.legend = TRUE, legend = "bottom")
+    pp <- ggpubr::ggarrange(plotlist = list(p1, p2),
+                            common.legend = TRUE, legend = "bottom")
+
+    toptit <- "Infit distribution"
+    ggpubr::annotate_figure(pp, top = ggpubr::text_grob(toptit))
 
   })
 
   output$plot4 <- renderPlot({
-
-    my_colors <- c("seashell3", "seashell2", "seashell")
-    names(my_colors) <- c("2.5%", "5%", "other")
 
     z <- selectedData()
 
@@ -258,8 +260,8 @@ RMDserver <- function(input, output, session) {
                breaks = c("2.5%", "5%"),
                labels = c("2.5%", "5%", "other"),
                colours = my_colors,
-               xtitle = "FitResidual",
-               title = "Minimal FitResidual distribution") +
+               xtitle = "Minimal fit residual",
+               title = "") +
       ggplot2::theme_minimal()
 
     p2 <- plot(x = z,
@@ -269,19 +271,19 @@ RMDserver <- function(input, output, session) {
                breaks = c("5%", "2.5%"),
                labels = c("other", "5%", "2.5%"),
                colours = my_colors,
-               xtitle = "FitResidual",
-               title = "Maximal FitResidual distribution") +
+               xtitle = "Maximal fit residual",
+               title = "") +
       ggplot2::theme_minimal()
 
-    ggpubr::ggarrange(plotlist = list(p1, p2),
-                      common.legend = TRUE, legend = "bottom")
+    pp <- ggpubr::ggarrange(plotlist = list(p1, p2),
+                            common.legend = TRUE, legend = "bottom")
+
+    toptit <- "Fit residual distribution"
+    ggpubr::annotate_figure(pp, top = ggpubr::text_grob(toptit))
 
   })
 
   output$plot5 <- renderPlot({
-
-    my_colors <- c("seashell3", "seashell2", "seashell")
-    names(my_colors) <- c("2.5%", "5%", "other")
 
     z <- selectedData()
 
@@ -291,8 +293,8 @@ RMDserver <- function(input, output, session) {
                breaks = c("2.5%", "5%"),
                labels = c("2.5%", "5%", "other"),
                colours = my_colors,
-               xtitle = "t-Outfit",
-               title = "Minimal Wilson-Hilferty cube-root transformed Outfit distribution") +
+               xtitle = "Minimal t-Outfit",
+               title = "") +
       ggplot2::theme_minimal()
 
     p2 <- plot(x = z,
@@ -302,19 +304,19 @@ RMDserver <- function(input, output, session) {
                breaks = c("5%", "2.5%"),
                labels = c("other", "5%", "2.5%"),
                colours = my_colors,
-               xtitle = "t-Outfit",
-               title = "Maximal Wilson-Hilferty cube-root transformed Outfit distribution") +
+               xtitle = "Maximal t-Outfit",
+               title = "") +
       ggplot2::theme_minimal()
 
-    ggpubr::ggarrange(plotlist = list(p1, p2),
+    pp <- ggpubr::ggarrange(plotlist = list(p1, p2),
                       common.legend = TRUE, legend = "bottom")
+
+    toptit <- "Wilson-Hilferty cube-root transformed Outfit (t-Outfit) distribution"
+    ggpubr::annotate_figure(pp, top = ggpubr::text_grob(toptit))
 
   })
 
   output$plot6 <- renderPlot({
-
-    my_colors <- c("seashell3", "seashell2", "seashell")
-    names(my_colors) <- c("2.5%", "5%", "other")
 
     z <- selectedData()
 
@@ -324,8 +326,8 @@ RMDserver <- function(input, output, session) {
                breaks = c("2.5%", "5%"),
                labels = c("2.5%", "5%", "other"),
                colours = my_colors,
-               xtitle = "t-Infit",
-               title = "Minimal Wilson-Hilferty cube-root transformed Infit distribution") +
+               xtitle = "Minimal t-Infit",
+               title = "") +
       ggplot2::theme_minimal()
 
     p2 <- plot(x = z,
@@ -335,12 +337,15 @@ RMDserver <- function(input, output, session) {
                breaks = c("5%", "2.5%"),
                labels = c("other", "5%", "2.5%"),
                colours = my_colors,
-               xtitle = "t-Infit",
-               title = "Maximal Wilson-Hilferty cube-root transformed Infit distribution") +
+               xtitle = "Maximal t-Infit",
+               title = "") +
       ggplot2::theme_minimal()
 
-    ggpubr::ggarrange(plotlist = list(p1, p2),
-                      common.legend = TRUE, legend = "bottom")
+    pp <- ggpubr::ggarrange(plotlist = list(p1, p2),
+                            common.legend = TRUE, legend = "bottom")
+
+    toptit <- "Wilson-Hilferty cube-root transformed Infit (t-Infit) distribution"
+    ggpubr::annotate_figure(pp, top = ggpubr::text_grob(toptit))
 
   })
 

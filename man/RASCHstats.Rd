@@ -5,8 +5,6 @@
 \title{Compute fit statistics}
 \usage{
 RASCHstats(beta, theta, dat)
-
-RASCHstats(beta, theta, dat)
 }
 \arguments{
 \item{beta}{Vector or matrix of item parameters.}
@@ -16,7 +14,5 @@ RASCHstats(beta, theta, dat)
 \item{dat}{Matrix with item responses.}
 }
 \description{
-Compute fit statistics
-
 Compute fit statistics
 }
