@@ -4,7 +4,7 @@
 #'
 #' ...
 #'
-#' @param model A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()} or \code{PCM()} from the \code{eRm} package.
+#' @param model A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()}, \code{PCM()}, or \code{RSM()} from the \code{eRm} package.
 #' @param which.item Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is \code{which.item = 1}. Or a character string \code{"all"} for constructing CICC plots for all items in the data.
 #' @param strat.vars A named list of categorical variables for stratification.
 #' @param lower.groups A named list of length \code{length(strat.vars)} of lists, vectors or a single vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector(s) should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector(s), it will be added automatically. If \code{lower.groups = "all"} (default), the empirical expected item-score will be plotted for every possible total score. If a list is provided, the arguments should be named corresponding to the \code{strat.vars}. If the arguments are lists, they should be named corresponding to the levels of the \code{strat.vars}.
@@ -51,6 +51,10 @@
 #' @export DIFplot
 #'
 DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5, point.size= 1, line.size = 1, line.type = 1, errorbar.width = 0.1, errorbar.size = 1, ...) {
+
+  if (!inherits(model, c("RM", "PCM", "RSM"))) {
+    stop("Object must be of class RM, PCM, or RSM")
+  }
 
   if (missing(strat.vars)) {
     pp <- CICCplot(model, which.item, lower.groups, grid.items, error.bar, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)

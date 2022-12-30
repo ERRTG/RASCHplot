@@ -21,7 +21,7 @@ DIFplot(
 )
 }
 \arguments{
-\item{model}{A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()} or \code{PCM()} from the \code{eRm} package.}
+\item{model}{A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()}, \code{PCM()}, or \code{RSM()} from the \code{eRm} package.}
 
 \item{which.item}{Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is \code{which.item = 1}. Or a character string \code{"all"} for constructing CICC plots for all items in the data.}
 

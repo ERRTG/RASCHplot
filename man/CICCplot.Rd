@@ -19,9 +19,9 @@ CICCplot(
 )
 }
 \arguments{
-\item{model}{A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()} or \code{PCM()} from the \code{eRm} package.}
+\item{model}{A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()}, \code{PCM()}, or \code{RSM()} from the \code{eRm} package.}
 
-\item{which.item}{Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is \code{which.item = 1}. Or a character string \code{"all"}for constructing CICC plots for all items in the data.}
+\item{which.item}{An indexing vector specifying the item(s) for which a CICC-plot should be constructed. Either an integer or vector of integers to select items by position, or a character string or a vector of character strings to select items by their names. Or a character string \code{"all"} for constructing CICC plots for all items in the data. The default is \code{which.item = 1}.}
 
 \item{lower.groups}{A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If \code{lower.groups = "all"} (default), the empirical expected item-score will be plotted for every possible total score.}
 
@@ -60,7 +60,7 @@ model.SPADI <- eRm::PCM(it.SPADI)
 # Plot first item
 CICCplot(model = model.SPADI)
 # Plot using score groups specifying lower end of grouping intervals
-lowerg <- c(0, 1, 2, 5, 8, 10)
+lowerg <- c(0, 10, 20, 30)
 CICCplot(model = model.SPADI, lower.groups = lowerg)
 # Plot item 3 and 4
 CICCplot(model = model.SPADI, which.item = c(3,4))

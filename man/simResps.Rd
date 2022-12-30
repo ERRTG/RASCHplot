@@ -4,7 +4,7 @@
 \alias{simResps}
 \title{Response simulation}
 \usage{
-simResps(model, probs, B, M = NULL, mi = NULL)
+simResps(model = c("RMD", "RMP"), probs, B, M = NULL, mi = NULL)
 }
 \arguments{
 \item{model}{Character. "RMD" for dichotomous Rasch model. "RMP" for partial credit model.}
