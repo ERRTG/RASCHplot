@@ -212,6 +212,13 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
       names(P) <- which.item
     }
 
+  withCallingHandlers({
+    P
+  }, warning=function(w) {
+    if (any( grepl( "containing missing values", w)))
+      invokeRestart("muffleWarning")
+  })
+
 }
 #' Internal CICC plot function
 #' @param df data to ggplot
@@ -255,8 +262,6 @@ ciccplot <- function(df, itmtit, col, point.size, line.size, line.type, errorbar
       scale_fill_manual(values = c(rgb(.2,.2,.2), rgb(.4,.4,.4)))
 
   }
-
-  x
 
   withCallingHandlers({
     x
