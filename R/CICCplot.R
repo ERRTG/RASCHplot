@@ -178,7 +178,7 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
       rects <- data.frame(xstart = breaks,
                           xend = c(breaks[-1], max(Tot.val)),
                           bg = rep(c("1", "2"),
-                                    ceiling(length(breaks)/2)))
+                                    ceiling(length(breaks)/2))[seq_along(breaks)])
     }
 
     #========================= End grouping ====================================
@@ -211,13 +211,6 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
       P <- pp
       names(P) <- which.item
     }
-
-  withCallingHandlers({
-    print(P)
-  }, warning=function(w) {
-    if (any( grepl( "containing missing values", w)))
-      invokeRestart("muffleWarning")
-  })
 
 }
 #' Internal CICC plot function
@@ -264,5 +257,12 @@ ciccplot <- function(df, itmtit, col, point.size, line.size, line.type, errorbar
   }
 
   x
+
+  withCallingHandlers({
+    x
+  }, warning=function(w) {
+    if (any( grepl( "containing missing values", w)))
+      invokeRestart("muffleWarning")
+  })
 
 }
