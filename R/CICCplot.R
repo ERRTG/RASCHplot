@@ -57,6 +57,7 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
     stop("Object must be of class Rm or eRm")
   }
 
+
   data <- model$X
   itmnames <- colnames(data)
   betas <- model$betapar
@@ -84,7 +85,9 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
     }
   }
 
-
+  if (grid.items & length(itmidx) <= 1) {
+    warning("option 'grid.items' works only if CICC-plot should be constructed for more than one item, so the argument is ignored")
+  }
 
   n.itemcat <- apply(data, 2, FUN = function(x) {max(x, na.rm = T) - min(x, na.rm = T)})
   par.itemgrp <- rep(1:ncol(data), times = n.itemcat)
@@ -212,12 +215,7 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
       names(P) <- which.item
     }
 
-  withCallingHandlers({
-    P
-  }, warning=function(w) {
-    if (any( grepl( "containing missing values", w)))
-      invokeRestart("muffleWarning")
-  })
+  P
 
 }
 #' Internal CICC plot function
@@ -234,12 +232,12 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
 ciccplot <- function(df, itmtit, col, point.size, line.size, line.type, errorbar.width, errorbar.size, ...) {
 
   x <- ggplot(data = df, aes(x = .data$Tot.val, y= .data$exp.val, color = "Expected")) +
-    geom_line(size = line.size, linetype = line.type) + #, ...) +
+    geom_line(size = line.size, linetype = line.type, na.rm=TRUE, ...) +
     geom_point(aes(x = .data$Tot.val_grp,
                    y = .data$obs.val_grp,
                    color = "Observed"),
                shape = 19,
-               size = point.size) + #, ...) +
+               size = point.size, na.rm=TRUE, ...) +
     scale_colour_manual(values = col) +
     ggtitle(paste0("Item: ", itmtit)) +
     xlab("Total Score") +
@@ -256,18 +254,13 @@ ciccplot <- function(df, itmtit, col, point.size, line.size, line.type, errorbar
     x <- x +
       geom_rect(aes(ymin = 0, ymax = max(exp.val, na.rm = TRUE),
                     xmin = xstart, xmax = xend, fill = bg),
-                alpha = 0.2, inherit.aes = FALSE) +
+                alpha = 0.2, inherit.aes = FALSE, na.rm=TRUE) +
       theme_bw() + theme(panel.border = element_blank()) +
       guides(fill = "none") +
       scale_fill_manual(values = c(rgb(.2,.2,.2), rgb(.4,.4,.4)))
 
   }
 
-  withCallingHandlers({
-    x
-  }, warning=function(w) {
-    if (any( grepl( "containing missing values", w)))
-      invokeRestart("muffleWarning")
-  })
+  x
 
 }
