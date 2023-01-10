@@ -87,8 +87,7 @@ This produces a bar plot where the length of the bar  is proportional to
 Visualising Rasch model fit is main motivation for the package. 
 
 ```{r}
-SPADI.complete <- SPADI[complete.cases(SPADI), ]
-items <- SPADI.complete[, 9:16]
+items <- SPADI[, 9:16]
 ```
 
 
@@ -114,7 +113,7 @@ CICCplot(fit, lower.groups = c(0,7,13,14,19,22,27,30,35))
 
 
 ```{r}
-strat.vars <- list(gender = SPADI.complete[, "gender"])
+strat.vars <- list(gender = SPADI[, "gender"])
 DIFplot(model = fit, strat.vars = strat.vars)
 ```
 
@@ -228,12 +227,6 @@ Construct CICC plot for items 1 and 2
 ```{r, results = 'hide'}
  p <- CICCplot(model = fit, which.item = c(1,2))
  p
- # Change colours for item 1
- p[[1]] +
-   scale_colour_manual(values = c("burlywood","cornflowerblue"))
- # Change colours for item 2
- p[[2]] +
-   scale_colour_manual(values = c("burlywood","cornflowerblue"))
 ```
 
 
@@ -306,7 +299,7 @@ DIFplot(fit)
 
 
 ```{r}
-strat.vars <- list(gender = SPADI.complete[, "gender"])
+strat.vars <- list(gender = SPADI[, "gender"])
 DIFplot(model = fit, strat.vars = strat.vars)
 ```
 
@@ -316,7 +309,7 @@ DIFplot(model = fit, strat.vars = strat.vars, dodge.width = 0)
 
 
 ```{r}
-strat.vars <- list(gender = SPADI.complete[, "gender"], over60 = SPADI.complete[, "over60"])
+strat.vars <- list(gender = SPADI[, "gender"], over60 = SPADI[, "over60"])
 DIFplot(model = fit, strat.vars = strat.vars)
 ```
 
@@ -325,7 +318,7 @@ DIFplot(model = fit, strat.vars = strat.vars)
 
 
 ```{r}
-strat.vars <- list(over60 = SPADI.complete[, "over60"])
+strat.vars <- list(over60 = SPADI[, "over60"])
 DIFplot(model = fit, which.item = c(1,4), strat.vars = strat.vars)
 ```
 

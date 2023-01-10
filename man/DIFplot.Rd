@@ -23,7 +23,7 @@ DIFplot(
 \arguments{
 \item{model}{A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()}, \code{PCM()}, or \code{RSM()} from the \code{eRm} package.}
 
-\item{which.item}{Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is \code{which.item = 1}. Or a character string \code{"all"} for constructing CICC plots for all items in the data.}
+\item{which.item}{An indexing vector specifying the item(s) for which a CICC-plot should be constructed. Either an integer or vector of integers to select items by position, or a character string or a vector of character strings to select items by their names. Or a character string \code{"all"} for constructing CICC plots for all items in the data. The default is \code{which.item = 1}.}
 
 \item{strat.vars}{A named list of categorical variables for stratification.}
 
@@ -67,10 +67,6 @@ DIFplot(model = model.SPADI, strat.vars = strat.vars)
 strat.vars <- list(gender = SPADI.complete[, "gender"], over60 = SPADI.complete[, "over60"])
 DIFplot(model = model.SPADI, strat.vars = strat.vars)
 DIFplot(model = model.SPADI, which.item = c(1,2), strat.vars = strat.vars)
-lower.groups <- list(gender = c(0, 1, 2, 5, 8, 10), over60 = c(0, 3, 6, 9))
-DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
-DIFplot(model = model.SPADI, which.item = c(1,2),
-        strat.vars = strat.vars, lower.groups = lower.groups)
 lower.groups <- list(gender = list("1" = c(0, 5, 15, 20, 30, 40),
                                    "2" = c(0,  5, 10)),
                      over60 = list("0" = c(0, 10, 15, 20),

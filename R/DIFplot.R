@@ -5,7 +5,7 @@
 #' ...
 #'
 #' @param model A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()}, \code{PCM()}, or \code{RSM()} from the \code{eRm} package.
-#' @param which.item Either an integer or vector of integers giving the item(s), for which a CICC-plot should be constructed. The default is \code{which.item = 1}. Or a character string \code{"all"} for constructing CICC plots for all items in the data.
+#' @param which.item An indexing vector specifying the item(s) for which a CICC-plot should be constructed. Either an integer or vector of integers to select items by position, or a character string or a vector of character strings to select items by their names. Or a character string \code{"all"} for constructing CICC plots for all items in the data. The default is \code{which.item = 1}.
 #' @param strat.vars A named list of categorical variables for stratification.
 #' @param lower.groups A named list of length \code{length(strat.vars)} of lists, vectors or a single vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector(s) should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector(s), it will be added automatically. If \code{lower.groups = "all"} (default), the empirical expected item-score will be plotted for every possible total score. If a list is provided, the arguments should be named corresponding to the \code{strat.vars}. If the arguments are lists, they should be named corresponding to the levels of the \code{strat.vars}.
 #' @param grid.items  Logical flag for arranging the items selected by which.item in grids using the \code{ggarrange} function from the \code{ggpubr} package. Default value is \code{FALSE}.
@@ -38,10 +38,6 @@
 #' strat.vars <- list(gender = SPADI.complete[, "gender"], over60 = SPADI.complete[, "over60"])
 #' DIFplot(model = model.SPADI, strat.vars = strat.vars)
 #' DIFplot(model = model.SPADI, which.item = c(1,2), strat.vars = strat.vars)
-#' lower.groups <- list(gender = c(0, 1, 2, 5, 8, 10), over60 = c(0, 3, 6, 9))
-#' DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
-#' DIFplot(model = model.SPADI, which.item = c(1,2),
-#'         strat.vars = strat.vars, lower.groups = lower.groups)
 #' lower.groups <- list(gender = list("1" = c(0, 5, 15, 20, 30, 40),
 #'                                    "2" = c(0,  5, 10)),
 #'                      over60 = list("0" = c(0, 10, 15, 20),
@@ -52,8 +48,8 @@
 #'
 DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5, point.size= 1, line.size = 1, line.type = 1, errorbar.width = 0.1, errorbar.size = 1, ...) {
 
-  if (!inherits(model, c("RM", "PCM", "RSM"))) {
-    stop("Object must be of class RM, PCM, or RSM")
+  if (!inherits(model, c("Rm", "eRm"))) {
+    stop("Object must be of class Rm or eRm")
   }
 
   if (missing(strat.vars)) {
@@ -63,6 +59,7 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", gri
   }
 
   data <- model$X
+  itmnames <- colnames(data)
   betas <- model$betapar
   k <- ncol(data)
   N <- nrow(data)
@@ -71,11 +68,26 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", gri
 
   if (any(which.item == "all")) {
     itmidx <- 1:k
+  } else if (is.character(which.item)) {
+    if (any(which.item %in% itmnames)) {
+      itmidx <- which(itmnames %in% which.item)
+    } else {
+      itmidx <- suppressWarnings(as.numeric(which.item))
+      if (anyNA(itmidx)) {
+        stop(paste0("no items in data named ", paste(which.item, collapse = " or ")))
+      } else {
+        warning("all values of which.item are converted to numeric")
+      }
+    }
   } else {
     itmidx <- suppressWarnings(as.numeric(which.item))
     if (anyNA(itmidx)) {
       stop("all values of which.item can not be converted to numeric")
     }
+  }
+
+  if (grid.items & length(itmidx) <= 1) {
+    warning("option 'grid.items' works only if CICC-plot should be constructed for more than one item, so the argument is ignored")
   }
 
   if (is.null(names(strat.vars))) {
@@ -169,6 +181,8 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", gri
             })
           })
           Tot.val_grp <- lapply(1:nlevstrat, function(j) 0:length(betas))
+
+          rects <- data.frame(xstart = NA, xend = NA, bg = NA)
         }
       }
 
@@ -225,6 +239,11 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", gri
 
         }
 
+        rects <- data.frame(xstart = breaks,
+                            xend = c(breaks[-1], max(Tot.val)),
+                            bg = rep(c("1", "2"),
+                                     ceiling(length(breaks)/2))[seq_along(breaks)])
+
       }
 
       data_obs <- lapply(1:nlevstrat, function(j) {
@@ -249,7 +268,7 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", gri
                "#0072B2", "#D55E00", "#CC79A7")[cidx]
       names(col) <- c("Expected", levels(as.factor(data_obs_long$strat.var)))
 
-      datalist <- list(data_exp, data_obs_long)
+      datalist <- list(data_exp, data_obs_long, rects)
       df <- bind_rows(datalist, .id="data_frame")
 
       pp[[plotidx]][[l]] <- difplot(df, itmtit, stratname, col, dodge.width, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)
@@ -259,12 +278,12 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", gri
     plotidx <- plotidx + 1
 }
 
-    if (grid.items) {
-
-       P <- ggpubr::ggarrange(plotlist = pp, ...)
-
-    }
-    if (!grid.items) P <- pp
+  if (grid.items) {
+    P <- ggpubr::ggarrange(plotlist = pp, ...)
+  } else {
+    P <- pp
+    names(P) <- itmnames[itmidx]
+  }
 
   P
 }
@@ -287,23 +306,37 @@ difplot <- function(df, itmtit, stratname, col, dodge.width, point.size, line.si
     xlab("Total Score") +
     ylab("Item-Score") +
     scale_x_continuous(breaks = integer_breaks(), minor_breaks = df$Tot.val) +
-    geom_line(aes(color = "Expected"), size = line.size, linetype = line.type, ...) +
+    geom_line(aes(color = "Expected"), size = line.size, linetype = line.type, na.rm = TRUE, ...) +
     geom_point(aes(x = .data$Tot.val_grp,
                    y = .data$obs.val_grp,
                    color = .data$strat.var),
                position = position_dodge(width = dodge.width),
-               size = point.size, ...) +
+               size = point.size, na.rm = TRUE, ...) +
     geom_errorbar(aes(x = .data$Tot.val_grp,
                       y = .data$obs.val_grp,
                       ymin = .data$obs.val_grp - .data$CI.bound,
                       ymax = .data$obs.val_grp + .data$CI.bound,
                       color = .data$strat.var),
-                  width = errorbar.width, size = errorbar.size,
+                  width = errorbar.width,
+                  size = errorbar.size,
                   position = position_dodge(width = dodge.width)) +
     scale_colour_manual(values = col) +
     guides(colour = guide_legend(title = stratname,
-                                 override.aes = list(shape = c(NA, rep(19, nlevels(as.factor(df$strat.var)))))))
+                                 override.aes = list(shape = c(rep(19, nlevels(as.factor(df$strat.var))), NA))))
   #+ guides(colour = guide_legend(stratname)) #
   #+ #+ labs(fill = stratname)
   #+ #+ theme(legend.title=element_blank()) #scale_color_discrete(name = "")
+
+  if (FALSE) {#(!all(is.na(df$bg))) {
+    x <- x +
+      geom_rect(aes(ymin = 0, ymax = max(exp.val, na.rm = TRUE),
+                    xmin = xstart, xmax = xend, fill = bg),
+                alpha = 0.2, inherit.aes = FALSE, na.rm=TRUE) +
+      theme_bw() + theme(panel.border = element_blank()) +
+      guides(fill = "none") +
+      scale_fill_manual(values = c(rgb(.2,.2,.2), rgb(.4,.4,.4)))
+
+  }
+
+  x
 }

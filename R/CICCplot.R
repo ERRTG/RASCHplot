@@ -23,6 +23,7 @@
 #' @importFrom dplyr bind_rows
 #' @import memoise
 #' @importFrom ggpubr ggarrange
+#' @importFrom grDevices rgb
 #' @import scales
 #' @import stats
 #'
@@ -212,7 +213,7 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
       P <- ggpubr::ggarrange(plotlist = pp, ...)
     } else {
       P <- pp
-      names(P) <- which.item
+      names(P) <- itmnames[itmidx]
     }
 
   P
@@ -252,8 +253,8 @@ ciccplot <- function(df, itmtit, col, point.size, line.size, line.type, errorbar
 
   if (!all(is.na(df$bg))) {
     x <- x +
-      geom_rect(aes(ymin = 0, ymax = max(exp.val, na.rm = TRUE),
-                    xmin = xstart, xmax = xend, fill = bg),
+      geom_rect(aes(ymin = 0, ymax = max(.data$exp.val, na.rm = TRUE),
+                    xmin = .data$xstart, xmax = .data$xend, fill = .data$bg),
                 alpha = 0.2, inherit.aes = FALSE, na.rm=TRUE) +
       theme_bw() + theme(panel.border = element_blank()) +
       guides(fill = "none") +
