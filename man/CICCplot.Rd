@@ -15,6 +15,8 @@ CICCplot(
   line.type = 1,
   errorbar.width = 0,
   errorbar.size = 1,
+  lower.group.bg = NULL,
+  legend.title = NULL,
   ...
 )
 }
@@ -38,6 +40,10 @@ CICCplot(
 \item{errorbar.width}{Width aesthetics for \code{geom_line()}.}
 
 \item{errorbar.size}{Size aesthetics for \code{geom_errorbar()}.}
+
+\item{lower.group.bg}{Altering lower group background colour. Default is rgb(.6,.6,.6) and rgb(.8,.8,.8).}
+
+\item{legend.title}{Legend title. Defult is empty.}
 
 \item{...}{Arguments to be passed to \code{ggarrange}. The arguments will only be used if 'grid.items = TRUE'.}
 }

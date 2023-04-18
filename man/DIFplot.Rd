@@ -59,18 +59,22 @@ This function constructs Conditional Item Characteristic Curves for selected ite
 \examples{
 library(eRm)
 data(SPADI)
-SPADI.complete <- SPADI[complete.cases(SPADI), ]
-it.SPADI <- SPADI.complete[, 9:16]
+it.SPADI <- SPADI[, 9:16]
 model.SPADI <- eRm::PCM(it.SPADI)
-strat.vars <- list(gender = SPADI.complete[, "gender"])
+strat.vars <- list(gender = SPADI[, "gender"])
 DIFplot(model = model.SPADI, strat.vars = strat.vars)
-strat.vars <- list(gender = SPADI.complete[, "gender"], over60 = SPADI.complete[, "over60"])
+strat.vars <- list(gender = SPADI[, "gender"], over60 = SPADI[, "over60"])
 DIFplot(model = model.SPADI, strat.vars = strat.vars)
 DIFplot(model = model.SPADI, which.item = c(1,2), strat.vars = strat.vars)
 lower.groups <- list(gender = list("1" = c(0, 5, 15, 20, 30, 40),
                                    "2" = c(0,  5, 10)),
                      over60 = list("0" = c(0, 10, 15, 20),
                                    "1" = c(0, 8, 15, 17, 18, 22, 29, 38)))
+DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
+lower.groups <- list(gender = list("1" = c(0, 5, 15, 20, 30, 40),
+                                   "2" = c(0,  5, 10)),
+                     over60 = list("1" = c(0, 5, 15, 20, 30, 40),
+                                   "2" = c(0,  5, 10)))
 DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
 
 }

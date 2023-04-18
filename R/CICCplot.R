@@ -10,12 +10,15 @@
 #' @param which.item An indexing vector specifying the item(s) for which a CICC-plot should be constructed. Either an integer or vector of integers to select items by position, or a character string or a vector of character strings to select items by their names. Or a character string \code{"all"} for constructing CICC plots for all items in the data. The default is \code{which.item = 1}.
 #' @param lower.groups A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If \code{lower.groups = "all"} (default), the empirical expected item-score will be plotted for every possible total score.
 #' @param grid.items  Logical flag for arranging the items selected by which.item in grids using the \code{ggarrange} function from the \code{ggpubr} package. Default value is \code{FALSE}.
+#' @param observed Logical flag for adding observed average item scores. Default value is \code{TRUE}.
 #' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.
 #' @param point.size Size aesthetics for \code{geom_point()}.
 #' @param line.size Size aesthetics for \code{geom_line()}.
 #' @param line.type Linetype aesthetics for \code{geom_line()}.
 #' @param errorbar.width Width aesthetics for \code{geom_line()}.
 #' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
+#' @param lower.group.bg Altering lower group background colour. Default is rgb(.6,.6,.6) and rgb(.8,.8,.8).
+#' @param legend.title Legend title. Defult is empty.
 #' @param ... Arguments to be passed to \code{ggarrange}. The arguments will only be used if 'grid.items = TRUE'.
 #'
 #' @importFrom ggplot2 ggplot aes scale_x_continuous guide_legend geom_errorbar ggtitle scale_colour_manual geom_point geom_line geom_rect xlab ylab theme_bw scale_fill_manual
@@ -52,7 +55,7 @@
 #'
 #' @export CICCplot
 #'
-CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, point.size = 1, line.size = 1, line.type = 1, errorbar.width = 0, errorbar.size = 1, ...) {
+CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = FALSE, observed = TRUE, error.bar = TRUE, point.size = 1, line.size = 1, line.type = 1, errorbar.width = 0, errorbar.size = 1, lower.group.bg = NULL, legend.title = "", ...) {
 
   if (!inherits(model, c("Rm", "eRm"))) {
     stop("Object must be of class Rm or eRm")
@@ -200,10 +203,11 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
     datalist <- list(data_exp, data_obs, rects)
     df <- dplyr::bind_rows(datalist, .id="data_frame")
 
-    pp[[plotidx]] <- ciccplot(df, itmtit, col,
+    pp[[plotidx]] <- ciccplot(df, itmtit, col, observed,
                               point.size,
                               line.size, line.type,
-                              errorbar.width, errorbar.size) #, ...)
+                              errorbar.width, errorbar.size,
+                              lower.group.bg, legend.title)#, ...)
 
     plotidx <- plotidx+1
 
@@ -223,43 +227,57 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
 #' @param df data to ggplot
 #' @param itmtit itmtit
 #' @param col col
+#' @param observed Observed average item scores.
 #' @param point.size Size aesthetics for \code{geom_point()}.
 #' @param line.size Size aesthetics for \code{geom_line()}.
 #' @param line.type Linetype aesthetics for \code{geom_line()}.
 #' @param errorbar.width Width aesthetics for \code{geom_line()}.
 #' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
+#' @param lower.group.bg Background colours
+#' @param legend.title Legend title.
 #' @param ... optional parameters to be passed on to ggplot
 #' @noRd
-ciccplot <- function(df, itmtit, col, point.size, line.size, line.type, errorbar.width, errorbar.size, ...) {
+ciccplot <- function(df, itmtit, col, observed, point.size, line.size, line.type, errorbar.width, errorbar.size, lower.group.bg, legend.title, ...) {
 
   x <- ggplot(data = df, aes(x = .data$Tot.val, y= .data$exp.val, color = "Expected")) +
-    geom_line(size = line.size, linetype = line.type, na.rm=TRUE, ...) +
-    geom_point(aes(x = .data$Tot.val_grp,
-                   y = .data$obs.val_grp,
-                   color = "Observed"),
-               shape = 19,
-               size = point.size, na.rm=TRUE, ...) +
-    scale_colour_manual(values = col) +
-    ggtitle(paste0("Item: ", itmtit)) +
+    geom_line(linewidth = line.size, linetype = line.type, na.rm=TRUE, ...) +
     xlab("Total Score") +
-    ylab("Item-Score") +
-    geom_errorbar(aes(x = .data$Tot.val_grp, y = .data$obs.val_grp,
-                      ymin = .data$obs.val_grp - .data$CI.bound,
-                      ymax = .data$obs.val_grp + .data$CI.bound,
-                      color = "Observed"),
-                  width = errorbar.width, size = errorbar.size) +
-    scale_x_continuous(breaks = integer_breaks(), minor_breaks = df$Tot.val) +
-    guides(colour = guide_legend(override.aes = list(shape = c(NA, 19))))
+    ylab("Item-Score")  +
+    ggtitle(paste0("Item: ", itmtit))
+
 
   if (!all(is.na(df$bg))) {
+
+    if (is.null(lower.group.bg)) {
+      lower.group.bg <- c(rgb(.6,.6,.6), rgb(.8,.8,.8))
+    }
+
     x <- x +
       geom_rect(aes(ymin = 0, ymax = max(.data$exp.val, na.rm = TRUE),
                     xmin = .data$xstart, xmax = .data$xend, fill = .data$bg),
                 alpha = 0.2, inherit.aes = FALSE, na.rm=TRUE) +
       theme_bw() + theme(panel.border = element_blank()) +
       guides(fill = "none") +
-      scale_fill_manual(values = c(rgb(.2,.2,.2), rgb(.4,.4,.4)))
+      scale_fill_manual(values = lower.group.bg)
 
+  }
+
+  if (observed) {
+    x <- x +
+      geom_point(aes(x = .data$Tot.val_grp,
+                     y = .data$obs.val_grp,
+                     color = "Observed"),
+                 shape = 19,
+                 size = point.size, na.rm=TRUE, ...) +
+      scale_colour_manual(values = col) +
+      geom_errorbar(aes(x = .data$Tot.val_grp, y = .data$obs.val_grp,
+                        ymin = .data$obs.val_grp - .data$CI.bound,
+                        ymax = .data$obs.val_grp + .data$CI.bound,
+                        color = "Observed"),
+                    width = errorbar.width, linewidth = errorbar.size) +
+      scale_x_continuous(breaks = integer_breaks(), minor_breaks = df$Tot.val) +
+      guides(colour = guide_legend(override.aes = list(shape = c(NA, 19)))) +
+      guides(colour = guide_legend(title = legend.title))
   }
 
   x

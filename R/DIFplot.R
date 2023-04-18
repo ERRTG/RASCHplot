@@ -21,6 +21,7 @@
 #' @importFrom ggplot2 ggplot aes scale_x_continuous guide_legend geom_errorbar ggtitle scale_colour_manual geom_point geom_line xlab ylab position_dodge
 #' @importFrom rlang .data
 #' @importFrom dplyr bind_rows
+#' @importFrom methods is
 #' @import memoise
 #' @import ggpubr
 #' @import stats
@@ -30,12 +31,11 @@
 #' @examples
 #' library(eRm)
 #' data(SPADI)
-#' SPADI.complete <- SPADI[complete.cases(SPADI), ]
-#' it.SPADI <- SPADI.complete[, 9:16]
+#' it.SPADI <- SPADI[, 9:16]
 #' model.SPADI <- eRm::PCM(it.SPADI)
-#' strat.vars <- list(gender = SPADI.complete[, "gender"])
+#' strat.vars <- list(gender = SPADI[, "gender"])
 #' DIFplot(model = model.SPADI, strat.vars = strat.vars)
-#' strat.vars <- list(gender = SPADI.complete[, "gender"], over60 = SPADI.complete[, "over60"])
+#' strat.vars <- list(gender = SPADI[, "gender"], over60 = SPADI[, "over60"])
 #' DIFplot(model = model.SPADI, strat.vars = strat.vars)
 #' DIFplot(model = model.SPADI, which.item = c(1,2), strat.vars = strat.vars)
 #' lower.groups <- list(gender = list("1" = c(0, 5, 15, 20, 30, 40),
@@ -43,17 +43,22 @@
 #'                      over60 = list("0" = c(0, 10, 15, 20),
 #'                                    "1" = c(0, 8, 15, 17, 18, 22, 29, 38)))
 #' DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
+#' lower.groups <- list(gender = list("1" = c(0, 5, 15, 20, 30, 40),
+#'                                    "2" = c(0,  5, 10)),
+#'                      over60 = list("1" = c(0, 5, 15, 20, 30, 40),
+#'                                    "2" = c(0,  5, 10)))
+#' DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
 #'
 #' @export DIFplot
 #'
-DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5, point.size= 1, line.size = 1, line.type = 1, errorbar.width = 0.1, errorbar.size = 1, ...) {
+DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5, point.size= 1, line.size = 1, line.type = 1, errorbar.width = 0, errorbar.size = 1, ...) {
 
   if (!inherits(model, c("Rm", "eRm"))) {
     stop("Object must be of class Rm or eRm")
   }
 
   if (missing(strat.vars)) {
-    pp <- CICCplot(model, which.item, lower.groups, grid.items, error.bar, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)
+    pp <- CICCplot(model, which.item, lower.groups, grid.items, observed = TRUE, error.bar, point.size, line.size, line.type, errorbar.width, errorbar.size, lower.group.bg = NULL, legend.title = "", ...)
     warning("no variables for stratification; running CICCplot")
     return(pp)
   }
@@ -239,10 +244,20 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", gri
 
         }
 
-        rects <- data.frame(xstart = breaks,
-                            xend = c(breaks[-1], max(Tot.val)),
-                            bg = rep(c("1", "2"),
-                                     ceiling(length(breaks)/2))[seq_along(breaks)])
+        checkValues <- function(x,y) if (identical(x,y)) x else FALSE
+        endValues <- Reduce(checkValues,lower.groups)
+        identicalValue <- ifelse(is(endValues, "logical"), FALSE, TRUE)
+
+        if (identicalValue) {
+          rects <- data.frame(xstart = breaks,
+                              xend = c(breaks[-1], max(Tot.val)),
+                              bg = rep(c("1", "2"),
+                                       ceiling(length(breaks)/2))[seq_along(breaks)])
+        } else {
+          rects <- data.frame(xstart = NA, xend = NA, bg = NA)
+        }
+
+
 
       }
 
@@ -306,7 +321,7 @@ difplot <- function(df, itmtit, stratname, col, dodge.width, point.size, line.si
     xlab("Total Score") +
     ylab("Item-Score") +
     scale_x_continuous(breaks = integer_breaks(), minor_breaks = df$Tot.val) +
-    geom_line(aes(color = "Expected"), size = line.size, linetype = line.type, na.rm = TRUE, ...) +
+    geom_line(aes(color = "Expected"), linewidth = line.size, linetype = line.type, na.rm = TRUE, ...) +
     geom_point(aes(x = .data$Tot.val_grp,
                    y = .data$obs.val_grp,
                    color = .data$strat.var),
@@ -318,7 +333,7 @@ difplot <- function(df, itmtit, stratname, col, dodge.width, point.size, line.si
                       ymax = .data$obs.val_grp + .data$CI.bound,
                       color = .data$strat.var),
                   width = errorbar.width,
-                  size = errorbar.size,
+                  linewidth = errorbar.size,
                   position = position_dodge(width = dodge.width)) +
     scale_colour_manual(values = col) +
     guides(colour = guide_legend(title = stratname,
@@ -327,14 +342,19 @@ difplot <- function(df, itmtit, stratname, col, dodge.width, point.size, line.si
   #+ #+ labs(fill = stratname)
   #+ #+ theme(legend.title=element_blank()) #scale_color_discrete(name = "")
 
-  if (FALSE) {#(!all(is.na(df$bg))) {
-    x <- x +
-      geom_rect(aes(ymin = 0, ymax = max(exp.val, na.rm = TRUE),
-                    xmin = xstart, xmax = xend, fill = bg),
-                alpha = 0.2, inherit.aes = FALSE, na.rm=TRUE) +
-      theme_bw() + theme(panel.border = element_blank()) +
-      guides(fill = "none") +
-      scale_fill_manual(values = c(rgb(.2,.2,.2), rgb(.4,.4,.4)))
+  if (!all(is.na(df$bg))) {#(!all(is.na(df$bg))) {
+
+    if (FALSE) {#(identicalValue) {
+
+      x <- x +
+        geom_rect(aes(ymin = 0, ymax = max(.data$exp.val, na.rm = TRUE),
+                      xmin = .data$xstart, xmax = .data$xend, fill = .data$bg),
+                  alpha = 0.2, inherit.aes = FALSE, na.rm=TRUE) +
+        theme_bw() + theme(panel.border = element_blank()) +
+        guides(fill = "none") +
+        scale_fill_manual(values = c(rgb(.2,.2,.2), rgb(.4,.4,.4)))
+
+    }
 
   }
 
