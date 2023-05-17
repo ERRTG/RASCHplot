@@ -9,6 +9,7 @@ CICCplot(
   which.item = 1,
   lower.groups = "all",
   grid.items = FALSE,
+  observed = TRUE,
   error.bar = TRUE,
   point.size = 1,
   line.size = 1,
@@ -16,7 +17,7 @@ CICCplot(
   errorbar.width = 0,
   errorbar.size = 1,
   lower.group.bg = NULL,
-  legend.title = NULL,
+  legend.title = "",
   ...
 )
 }
@@ -28,6 +29,8 @@ CICCplot(
 \item{lower.groups}{A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If \code{lower.groups = "all"} (default), the empirical expected item-score will be plotted for every possible total score.}
 
 \item{grid.items}{Logical flag for arranging the items selected by which.item in grids using the \code{ggarrange} function from the \code{ggpubr} package. Default value is \code{FALSE}.}
+
+\item{observed}{Logical flag for adding observed average item scores. Default value is \code{TRUE}.}
 
 \item{error.bar}{Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.}
 

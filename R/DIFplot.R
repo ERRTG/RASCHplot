@@ -45,8 +45,8 @@
 #' DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
 #' lower.groups <- list(gender = list("1" = c(0, 5, 15, 20, 30, 40),
 #'                                    "2" = c(0,  5, 10)),
-#'                      over60 = list("1" = c(0, 5, 15, 20, 30, 40),
-#'                                    "2" = c(0,  5, 10)))
+#'                      over60 = list("0" = c(0, 5, 15, 20, 30, 40),
+#'                                    "1" = c(0,  5, 10)))
 #' DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
 #'
 #' @export DIFplot
