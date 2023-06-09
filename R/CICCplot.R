@@ -258,7 +258,10 @@ ciccplot <- function(df, itmtit, col, observed, point.size, line.size, line.type
                 alpha = 0.2, inherit.aes = FALSE, na.rm=TRUE) +
       theme_bw() + theme(panel.border = element_blank()) +
       guides(fill = "none") +
-      scale_fill_manual(values = lower.group.bg)
+      scale_fill_manual(values = lower.group.bg) +
+    scale_x_continuous(breaks = integer_breaks(), minor_breaks = df$Tot.val) +
+      guides(colour = guide_legend(override.aes = list(shape = c(NA, 19)))) +
+      guides(colour = guide_legend(title = legend.title))
 
   }
 
@@ -275,7 +278,6 @@ ciccplot <- function(df, itmtit, col, observed, point.size, line.size, line.type
                         ymax = .data$obs.val_grp + .data$CI.bound,
                         color = "Observed"),
                     width = errorbar.width, linewidth = errorbar.size) +
-      scale_x_continuous(breaks = integer_breaks(), minor_breaks = df$Tot.val) +
       guides(colour = guide_legend(override.aes = list(shape = c(NA, 19)))) +
       guides(colour = guide_legend(title = legend.title))
   }

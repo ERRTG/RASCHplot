@@ -4,21 +4,20 @@
 \alias{CUTscores}
 \title{Grouping of total scores function}
 \usage{
-CUTscores(x, probs = seq(0, 1, length.out = 6))
+CUTscores(x, probs = seq(0, 1, length.out = 6), min0 = TRUE)
 }
 \arguments{
 \item{x}{A numeric vector which is to be converted to a factor by cutting.}
 
 \item{probs}{A numeric vector of probabilities with values in [0,1].}
+
+\item{min0}{Logical flag for shifting responses such that lowest category is 0. Default is \code{TRUE}.}
 }
 \value{
 Vector
 }
 \description{
 This function groups total scores by quantiles.
-}
-\details{
-...
 }
 \examples{
 library(eRm)

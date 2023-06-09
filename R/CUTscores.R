@@ -2,10 +2,9 @@
 #'
 #' This function groups total scores by quantiles.
 #'
-#' ...
-#'
 #' @param x A numeric vector which is to be converted to a factor by cutting.
 #' @param probs A numeric vector of probabilities with values in [0,1].
+#' @param min0 Logical flag for shifting responses such that lowest category is 0. Default is \code{TRUE}.
 #'
 #' @return Vector
 #'
@@ -20,8 +19,28 @@
 #'
 #' @export CUTscores
 #'
-CUTscores <- function(x, probs = seq(0, 1, length.out = 6)) {
+CUTscores <- function(x, probs = seq(0, 1, length.out = 6), min0 = TRUE) {
 
+  if (min0) {
+    ri.min <- apply(x, 2, min, na.rm = TRUE)
+
+    #if no 0 responses
+    if(any(ri.min > 0)){
+      warning(paste0(
+        "\n",
+        paste("The following items have no 0-responses:"),
+        "\n",
+        paste(colnames(x)[ri.min > 0], collapse=" "),
+        "\n",
+        paste("Responses are shifted such that lowest category is 0.")
+      ), call. = FALSE, immediate.=TRUE)
+    }
+
+    #shift down to 0
+    x <- t(apply(x,1,function(y) {y-ri.min}))
+  }
+
+  x <- x[which(rowSums(x) != max(x)*ncol(x)),]
   qu <- quantile(rowSums(x, na.rm = TRUE), probs)
   cuts <- CUT(rowSums(x, na.rm = TRUE),
               breaks = qu, include.lowest = TRUE)
