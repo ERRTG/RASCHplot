@@ -1,11 +1,12 @@
-#' Compute Yen's Q3
+#' Compute residuals from item fit
 #'
 #' @param beta Vector or matrix of item parameters.
 #' @param theta Vector of person parameters.
 #' @param dat Matrix with item responses.
 #'
-#' @export RASCHq3
-RASCHq3 <- function(beta, theta, dat) {
+#' @export
+#'
+RASCHresiduals <- function(beta, theta, dat) {
 
   N <- nrow(dat)
   K <- ncol(dat)
@@ -46,8 +47,7 @@ RASCHq3 <- function(beta, theta, dat) {
 
   R <- dat - E # unconditional residuals
 
-  Q3 <- suppressMessages(cor(R, method = "pearson", use = "pairwise.complete.obs"))
-
-  Q3
+  class(R) <- c("data.frame","RASCHresiduals")
+  R
 
 }
