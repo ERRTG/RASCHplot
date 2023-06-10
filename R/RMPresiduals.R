@@ -1,4 +1,4 @@
-#' Compute residuals from item fit
+#' Compute residuals from item fit for polytomous items
 #'
 #' @param beta Vector or matrix of item parameters.
 #' @param theta Vector of person parameters.
@@ -6,15 +6,20 @@
 #'
 #' @export
 #'
-RASCHresiduals <- function(beta, theta, dat) {
+RMPresiduals <- function(beta, theta, dat) {
+
+  if (all(any(class(beta) %in% c("matrix", "data.frame")))) {
+    beta <- beta
+  } else if (class(beta) == "numeric") {
+    beta <- PARmat(x = dat, par = beta)
+  } else {
+    stop("beta is not numeric, matrix or data.frame")
+  }
 
   N <- nrow(dat)
   K <- ncol(dat)
   M <- max(dat, na.rm = TRUE)            # max number of categories - 1 for items
   mi <- apply(dat, 2, max, na.rm = TRUE) # number of categories - 1 for each item
-
-  #--------- Polytomous items --------------------------------------------------
-  if (all(any(class(beta) %in% c("matrix", "data.frame")))) {
 
     if (ncol(beta) > 1) {
 
@@ -35,19 +40,9 @@ RASCHresiduals <- function(beta, theta, dat) {
     }
 
 
-    #--------- Dichotomous items -------------------------------------------------
-  } else if (class(beta) == "numeric") {
-
-    probssim <- sapply(1:K, function(ii) irffct(theta = theta, b = beta, ii)[, 2])
-    E <- probssim
-    #W <- probssim * (1-probssim)
-    #Civ <- E^4 * (1 - probssim) + (1 - E)^4 * probssim
-
-  }
-
   R <- dat - E # unconditional residuals
 
-  class(R) <- c("data.frame","RASCHresiduals")
+  class(R) <- c("data.frame","RMPresiduals")
   R
 
 }

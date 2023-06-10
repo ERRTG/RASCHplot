@@ -7,7 +7,7 @@
 #'
 Q3 <- function(object, ...) {
 
-  if (!inherits(object, "RASCHresiduals")) {
+  if (!inherits(object, c("RMDresiduals", "RMPresiduals"))) {
     stop("use only with \"RASCHresiduals\" objects")
   }
 
