@@ -7,11 +7,11 @@
 RASCHresiduals(beta, theta, data)
 }
 \arguments{
+\item{beta}{A numeric vector or matrix of item parameters with compatible dimensions to data.}
+
+\item{theta}{A vector of person parameters with compatible dimensions to data.}
+
 \item{data}{Matrix with item responses.}
-
-\item{x}{A numeric vector or matrix of item parameters with compatible dimensions to data.}
-
-\item{y}{A vector of person parameters with compatible dimensions to data.}
 }
 \description{
 Compute residuals from item fit

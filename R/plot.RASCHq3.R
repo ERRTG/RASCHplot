@@ -71,7 +71,7 @@ plot.RASCHq3 <- function(x, extreme = c("max", "min"), probs, breaks, labels, co
   }
 
   if (missing(title)) {
-    title <- paste0(ifelse(extreme == "max", "Maximal ", "Minimal "), "Q3 Distribution")
+    title <- paste0(ifelse(extreme == "max", "Maximal ", "Minimal "), "Q3", " Distribution")
   }
 
   z <- switch(extreme,

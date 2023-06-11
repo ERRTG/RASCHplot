@@ -1,7 +1,7 @@
 #' Compute residuals from item fit
 #'
-#' @param x A numeric vector or matrix of item parameters with compatible dimensions to data.
-#' @param y A vector of person parameters with compatible dimensions to data.
+#' @param beta A numeric vector or matrix of item parameters with compatible dimensions to data.
+#' @param theta A vector of person parameters with compatible dimensions to data.
 #' @param data Matrix with item responses.
 #'
 #' @export
@@ -52,10 +52,10 @@ RASCHresiduals <- function(beta, theta, data) {
 
   if (type == "RMD") {
 
-    N <- nrow(dat)
-    K <- ncol(dat)
-    M <- max(dat, na.rm = TRUE)            # max number of categories - 1 for items
-    mi <- apply(dat, 2, max, na.rm = TRUE) # number of categories - 1 for each item
+    N <- nrow(data)
+    K <- ncol(data)
+    M <- max(data, na.rm = TRUE)            # max number of categories - 1 for items
+    mi <- apply(data, 2, max, na.rm = TRUE) # number of categories - 1 for each item
 
     if (class(beta) == "numeric") {
 
@@ -70,11 +70,9 @@ RASCHresiduals <- function(beta, theta, data) {
 
   }
 
-
-
   R <- data - E # unconditional residuals
 
-  class(R) <- c("data.frame","RASCHresiduals")
+  class(R) <- c(class(R),"RASCHresiduals")
   R
 
 }

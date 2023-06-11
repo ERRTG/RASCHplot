@@ -72,7 +72,9 @@ simRASCHq3 <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MML")
 
     #============= Compute Q3 statistics =======================================
 
-    statobj[[b]] <- RASCHq3(beta = beta.sim, theta = theta.sim, dat = X[[b]])
+    resids <- RASCHresiduals(beta = beta.sim, theta = theta.sim, data = X[[b]])
+    fitQ3 <- Q3(resids)
+    statobj[[b]] <- fitQ3 #max(fitQ3) - mean(fitQ3)
 
     if (trace.it) message(paste(b)) #cat(sprintf("Iteration: %d/%d\n", b, B))
   }
