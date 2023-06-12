@@ -26,7 +26,7 @@
 #' @rdname plot.RASCHq3
 #' @export
 #'
-plot.RASCHq3 <- function(x, extreme = c("max", "min"), probs, breaks, labels, colours, xtitle, title, col.outline = 0, alpha.ribbon = 1, title.legend = "Quantiles", ...) {
+plot.RASCHq3 <- function(x, extreme = c("max", "min", "star"), probs, breaks, labels, colours, xtitle, title, col.outline = 0, alpha.ribbon = 1, title.legend = "Quantiles", ...) {
 
   if (!inherits(x, "RASCHq3")) {
     stop("use only with \"RASCHq3\" objects")
@@ -38,7 +38,7 @@ plot.RASCHq3 <- function(x, extreme = c("max", "min"), probs, breaks, labels, co
     if (extreme == "min") {
       probs <- c(0.025, 0.05)
     }
-    if (extreme == "max") {
+    if (extreme %in% c("max", "star")) {
       probs <- c(0.95, 0.975)
     }
   }
@@ -47,7 +47,7 @@ plot.RASCHq3 <- function(x, extreme = c("max", "min"), probs, breaks, labels, co
     if (extreme == "min") {
       breaks <- paste0(probs * 100, "%")
     }
-    if (extreme == "max") {
+    if (extreme %in% c("max", "star")) {
       breaks <- paste0((1-probs) * 100, "%")
     }
   }
@@ -56,7 +56,7 @@ plot.RASCHq3 <- function(x, extreme = c("max", "min"), probs, breaks, labels, co
     if (extreme == "min") {
       labels <- c(breaks, "other")
     }
-    if (extreme == "max") {
+    if (extreme %in% c("max", "star")) {
       labels <- c("other", breaks)
     }
   }
@@ -67,16 +67,27 @@ plot.RASCHq3 <- function(x, extreme = c("max", "min"), probs, breaks, labels, co
   }
 
   if (missing(xtitle)) {
-    xtitle <- paste0(ifelse(extreme == "max", "Maximal ", "Minimal "), "Q3")
+    xtitle <- switch(extreme,
+                "min" = expression(Q[3,min]),
+                "max" = expression(Q[3,max]),
+                "star" = expression(Q["3,*"])
+                )
   }
 
   if (missing(title)) {
-    title <- paste0(ifelse(extreme == "max", "Maximal ", "Minimal "), "Q3", " Distribution")
+    title <- switch(extreme,
+                     "min" = expression(Distribution~of~Q[3,min]),
+                     "max" = expression(Distribution~of~Q[3,max]),
+                     "star" = expression(paste(Distribution~of~Q["3,*"]))
+    )
   }
+
+  starfct <- function(x) max(x) - mean(x)
 
   z <- switch(extreme,
               "min" = unlist(lapply(x$statobj, function(x) min(x[upper.tri(x)]))),
-              "max" = unlist(lapply(x$statobj, function(x) max(x[upper.tri(x)]))))
+              "max" = unlist(lapply(x$statobj, function(x) max(x[upper.tri(x)]))),
+              "star" = unlist(lapply(x$statobj, function(x) starfct(x[upper.tri(x)]))))
   z <- z[!is.na(z)]
 
   dens <- density(z)

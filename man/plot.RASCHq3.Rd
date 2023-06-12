@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{RASCHq3}(
   x,
-  extreme = c("max", "min"),
+  extreme = c("max", "min", "star"),
   probs,
   breaks,
   labels,
