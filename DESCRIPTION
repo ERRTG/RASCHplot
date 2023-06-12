@@ -2,9 +2,13 @@ Package: RASCHplot
 Type: Package
 Title: Visualisation tool for validity of Rasch models
 Version: 0.1.0
-Author: Karl Bang Christensen,  Sidsel Normann Jensen and Ann-Sophie Buchardt
+Author@R: c(person("Ann-Sophie", "Buchardt", email = "asbu@sund.ku.dk", role = c("aut", "cre")),
+            person("Sidsel Normann", "Jensen", role = c("ctb")),
+            person("Karl Bang", "Christensen", role = c("ctb")))
+Author: Ann-Sophie Buchardt [aut, cre], Sidsel Normann Jensen [ctb], Karl Bang Christensen [ctb]
 Maintainer: Ann-Sophie Buchardt <asbu@sund.ku.dk>
 Description: Visualisation of the Rasch model as construct validity tool.
+URL: https://github.com/ERRTG/RASCHplot/
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
@@ -37,3 +41,4 @@ RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
+Date/Publication: 2022-08-11

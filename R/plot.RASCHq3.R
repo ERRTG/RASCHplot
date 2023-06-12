@@ -68,16 +68,16 @@ plot.RASCHq3 <- function(x, extreme = c("max", "min", "star"), probs, breaks, la
 
   if (missing(xtitle)) {
     xtitle <- switch(extreme,
-                "min" = expression(Q[3,min]),
-                "max" = expression(Q[3,max]),
-                "star" = expression(Q["3,*"])
+                "min" = expression(paste(Q["3,min"])),
+                "max" = expression(paste(Q["3,max"])),
+                "star" = expression(paste(Q["3,*"]))
                 )
   }
 
   if (missing(title)) {
     title <- switch(extreme,
-                     "min" = expression(Distribution~of~Q[3,min]),
-                     "max" = expression(Distribution~of~Q[3,max]),
+                     "min" = expression(paste(Distribution~of~Q["3,min"])),
+                     "max" = expression(paste(Distribution~of~Q["3,max"])),
                      "star" = expression(paste(Distribution~of~Q["3,*"]))
     )
   }
