@@ -15,20 +15,23 @@ RASCHresiduals <- function(beta, theta, data) {
     type <- "RMD"
   }
 
+  # Exclude
+  X.ex <- data[rowSums(data, na.rm = TRUE) != min(data, na.rm = TRUE) & rowSums(data, na.rm = TRUE) != ncol(data)*max(data, na.rm = TRUE),]
+
   if (type == "RMP") {
 
     if (all(any(class(beta) %in% c("matrix", "data.frame")))) {
       beta <- beta
     } else if (class(beta) == "numeric") {
-      beta <- PARmat(x = data, par = beta)
+      beta <- PARmat(x = X.ex, par = beta)
     } else {
       stop("beta is not numeric, matrix or data.frame")
     }
 
-    N <- nrow(data)
-    K <- ncol(data)
-    M <- max(data, na.rm = TRUE)            # max number of categories - 1 for items
-    mi <- apply(data, 2, max, na.rm = TRUE) # number of categories - 1 for each item
+    N <- nrow(X.ex)
+    K <- ncol(X.ex)
+    M <- max(X.ex, na.rm = TRUE)            # max number of categories - 1 for items
+    mi <- apply(X.ex, 2, max, na.rm = TRUE) # number of categories - 1 for each item
 
     if (ncol(beta) > 1) {
 
@@ -41,8 +44,6 @@ RASCHresiduals <- function(beta, theta, data) {
         probssim <- pcmfct(theta = theta, b = beta, ii = i)
         matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
         E[, i] <- rowSums(matx * probssim, na.rm = TRUE)
-        #W[, i] <- rowSums((matx - E[, i])^2 * probssim, na.rm = TRUE)
-        #Civ[, i] <- rowSums((matx - E[, i])^4 * probssim, na.rm = TRUE)
 
       }
 
@@ -52,10 +53,10 @@ RASCHresiduals <- function(beta, theta, data) {
 
   if (type == "RMD") {
 
-    N <- nrow(data)
-    K <- ncol(data)
-    M <- max(data, na.rm = TRUE)            # max number of categories - 1 for items
-    mi <- apply(data, 2, max, na.rm = TRUE) # number of categories - 1 for each item
+    N <- nrow(X.ex)
+    K <- ncol(X.ex)
+    M <- max(X.ex, na.rm = TRUE)            # max number of categories - 1 for items
+    mi <- apply(X.ex, 2, max, na.rm = TRUE) # number of categories - 1 for each item
 
     if (class(beta) == "numeric") {
 
@@ -70,7 +71,7 @@ RASCHresiduals <- function(beta, theta, data) {
 
   }
 
-  R <- data - E # unconditional residuals
+  R <- X.ex - E # unconditional residuals
 
   class(R) <- c(class(R),"RASCHresiduals")
   R
