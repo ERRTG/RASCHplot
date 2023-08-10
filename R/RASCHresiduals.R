@@ -15,23 +15,27 @@ RASCHresiduals <- function(beta, theta, data) {
     type <- "RMD"
   }
 
-  # Exclude
-  X.ex <- data[rowSums(data, na.rm = TRUE) != min(data, na.rm = TRUE) & rowSums(data, na.rm = TRUE) != ncol(data)*max(data, na.rm = TRUE),]
+  # Check dimensions
+  ntheta <- length(theta)
+  ndata <- nrow(data)
+  if (ntheta != ndata) {
+    stop("Length of theta must equal number of rows in data.")
+  }
 
   if (type == "RMP") {
 
     if (all(any(class(beta) %in% c("matrix", "data.frame")))) {
       beta <- beta
     } else if (class(beta) == "numeric") {
-      beta <- PARmat(x = X.ex, par = beta)
+      beta <- PARmat(x = data, par = beta)
     } else {
       stop("beta is not numeric, matrix or data.frame")
     }
 
-    N <- nrow(X.ex)
-    K <- ncol(X.ex)
-    M <- max(X.ex, na.rm = TRUE)            # max number of categories - 1 for items
-    mi <- apply(X.ex, 2, max, na.rm = TRUE) # number of categories - 1 for each item
+    N <- nrow(data)
+    K <- ncol(data)
+    M <- max(data, na.rm = TRUE)            # max number of categories - 1 for items
+    mi <- apply(data, 2, max, na.rm = TRUE) # number of categories - 1 for each item
 
     if (ncol(beta) > 1) {
 
@@ -53,10 +57,10 @@ RASCHresiduals <- function(beta, theta, data) {
 
   if (type == "RMD") {
 
-    N <- nrow(X.ex)
-    K <- ncol(X.ex)
-    M <- max(X.ex, na.rm = TRUE)            # max number of categories - 1 for items
-    mi <- apply(X.ex, 2, max, na.rm = TRUE) # number of categories - 1 for each item
+    N <- nrow(data)
+    K <- ncol(data)
+    M <- max(data, na.rm = TRUE)            # max number of categories - 1 for items
+    mi <- apply(data, 2, max, na.rm = TRUE) # number of categories - 1 for each item
 
     if (class(beta) == "numeric") {
 
@@ -71,7 +75,7 @@ RASCHresiduals <- function(beta, theta, data) {
 
   }
 
-  R <- X.ex - E # unconditional residuals
+  R <- data - E # unconditional residuals
 
   class(R) <- c(class(R),"RASCHresiduals")
   R

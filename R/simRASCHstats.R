@@ -2,11 +2,11 @@
 #'
 #' Does repeated random sampling to obtain a sampling distribution for an item fit statistic of interest.
 #'
-#' @param beta Input item parameters
-#' @param theta Input person parameters
-#' @param method.item Estimation method for item paramters
-#' @param method.person Estimation method for person parameters
-#' @param B Number of simulations
+#' @param beta Input item parameters. If items are dichotomous \code{beta} should be a vector. If items a polytomous \code{beta} should be a matrix or data.frame with number of columns equal to number of items and number of rows equal to (maximum) number of response categories and NA assigned to empty categories.
+#' @param theta Input person parameters.
+#' @param method.item Estimation method for item parameters.
+#' @param method.person Estimation method for person parameters.
+#' @param B Number of simulations.
 #' @param model Character string. Either "RMD" for dichotomous items or "RMP" for polytomous items.
 #' @param trace.it If \code{trace.it=1}, then progress bars are displayed.
 #'
@@ -24,19 +24,19 @@ simRASCHstats <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MM
 
   if (model == "RMP") {
 
+    if (all(any(class(beta) %in% c("matrix", "data.frame")))) {
+      beta <- beta
+    } else {
+      stop("beta is not a matrix or data.frame")
+    }
+
     N <- length(theta)
     K <- ncol(beta)
     M <- nrow(beta)
-    mi <- rep(nrow(beta), K) #apply(beta, 2, function(x) sum(!is.na(x)))
-
-    #-------------------- Compute probabilities ----------------------------
-    probs <- vector(mode = "list", length = K)
-    for (i in 1:K) {
-      probs[[i]] <- pcmfct(theta = theta, b = beta, ii = i)
-    }
+    mi <- apply(beta, 2, function(x) sum(!is.na(x))) #rep(nrow(beta), K) #
 
     #------------- Simulate polytomous item responses ------------------
-    X <- simResps(model, probs, B, M, mi)
+    X <- simRASCHdata(model, theta, beta, B, M, mi)
 
   }
   if (model == "RMD") {
@@ -44,11 +44,8 @@ simRASCHstats <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MM
     N <- length(theta)
     K <- length(beta)
 
-    #-------------------- Compute probabilities ----------------------------
-    probs <- sapply(1:K, function(ii) irffct(theta = theta, b = beta, ii)[, 2])
-
     #------------- Simulate item responses (0/1) -----------------------
-    X <- simResps(model = "RMD", probs, B)
+    X <- simRASCHdata(model = "RMD", theta, beta, B)
 
   }
 

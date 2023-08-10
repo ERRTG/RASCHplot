@@ -15,15 +15,15 @@ simRASCHstats(
 )
 }
 \arguments{
-\item{beta}{Input item parameters}
+\item{beta}{Input item parameters. If items are dichotomous \code{beta} should be a vector. If items a polytomous \code{beta} should be a matrix or data.frame with number of columns equal to number of items and number of rows equal to (maximum) number of response categories and NA assigned to empty categories.}
 
-\item{theta}{Input person parameters}
+\item{theta}{Input person parameters.}
 
-\item{method.item}{Estimation method for item paramters}
+\item{method.item}{Estimation method for item parameters.}
 
-\item{method.person}{Estimation method for person parameters}
+\item{method.person}{Estimation method for person parameters.}
 
-\item{B}{Number of simulations}
+\item{B}{Number of simulations.}
 
 \item{model}{Character string. Either "RMD" for dichotomous items or "RMP" for polytomous items.}
 

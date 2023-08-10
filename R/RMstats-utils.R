@@ -35,12 +35,19 @@ irffct <- function(theta, b, ii){
 }
 #' PCM function
 #'
-#' @param b Vector or matrix of item parameters.
+#' @param b Matrix of item parameters with number of columns equal to number of items and number of rows equal to (maximum) number of response categories and NA assigned to empty categories.
 #' @param theta Vector of person parameters.
 #' @param ii item index
 #'
 #' @noRd
 pcmfct <- function(theta, b, ii){
+
+  if (all(any(class(beta) %in% c("matrix", "data.frame")))) {
+    beta <- beta
+  } else {
+    stop("beta is not a matrix or data.frame")
+  }
+
   N <- length(theta)  # number of persons
   M <- nrow(b)        # max number of categories - 1 for items
 

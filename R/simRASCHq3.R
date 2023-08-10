@@ -29,14 +29,8 @@ simRASCHq3 <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MML")
     M <- nrow(beta)
     mi <- rep(nrow(beta), K) #apply(beta, 2, function(x) sum(!is.na(x)))
 
-    #-------------------- Compute probabilities ----------------------------
-    probs <- vector(mode = "list", length = K)
-    for (i in 1:K) {
-      probs[[i]] <- pcmfct(theta = theta, b = beta, ii = i)
-    }
-
     #------------- Simulate polytomous item responses ------------------
-    X <- simResps(model, probs, B, M, mi)
+    X <- simRASCHdata(model, theta, beta, B, M, mi)
 
   }
   if (model == "RMD") {
@@ -44,11 +38,8 @@ simRASCHq3 <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MML")
     N <- length(theta)
     K <- length(beta)
 
-    #-------------------- Compute probabilities ----------------------------
-    probs <- sapply(1:K, function(ii) irffct(theta = theta, b = beta, ii)[, 2])
-
     #------------- Simulate item responses (0/1) -----------------------
-    X <- simResps(model = "RMD", probs, B)
+    X <- simRASCHdata(model = "RMD", theta, beta, B)
 
   }
 

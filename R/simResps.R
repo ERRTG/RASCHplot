@@ -61,10 +61,11 @@ simResps <- function(model = c("RMD", "RMP"), probs, B, M = NULL, mi = NULL) {
           }
         }
         #------------- Remove obs. with extreme scores -----------------------------
-        test <- which(rowSums(X[[b]]) %in% c(0,ncol(X[[b]])))
-        if (!identical(test, integer(0))) {
-          X[[b]] <- X[[b]][-test,]
-        }
+        #test <- which(rowSums(X[[b]]) %in% c(0,ncol(X[[b]])))
+        #if (!identical(test, integer(0))) {
+        #  X[[b]] <- X[[b]][-test,]
+        #}
+        #------------- Check for extreme scores -------------------------
         novar <- any(apply(X[[b]], 2, function(x) var(x) == 0))
       }
     }

@@ -14,5 +14,11 @@ app <- function(name = "RMDitemfit", ...) {
   } else if (name == "RMPitemfit") {
     shiny::shinyApp(ui = RMPui,
                     server = RMPserver, ...)
+  } else if (name == "Q3RMD") {
+    shiny::shinyApp(ui = Q3Dui,
+                    server = Q3Dserver, ...)
+  } else if (name == "Q3RMP") {
+    shiny::shinyApp(ui = Q3Pui,
+                    server = Q3Pserver, ...)
   }
 }
