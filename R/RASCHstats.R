@@ -35,7 +35,7 @@ RASCHstats <- function(beta, theta, dat) {
 
 
     #--------- Dichotomous items -------------------------------------------------
-  } else if (class(beta) == "numeric") {
+  } else if (class(beta) %in% c("numeric", "integer")) {
 
     probssim <- sapply(1:K, function(ii) irffct(theta = theta, b = beta, ii)[, 2])
     E <- probssim
@@ -48,17 +48,17 @@ RASCHstats <- function(beta, theta, dat) {
   Z <- R / sqrt(W) # unconditional standardised residuals
   Z[Z %in% c(Inf, -Inf)] <- NA
 
-  outfitsim <- colSums(Z^2) / N
-  infitsim <- colSums(R^2) / colSums(W)
+  outfitsim <- colSums(Z^2, na.rm = TRUE) / N
+  infitsim <- colSums(R^2, na.rm = TRUE) / colSums(W, na.rm = TRUE)
 
-  Vout <- colSums(Civ / W^2) / N^2 - 1 / N
-  Vin <- colSums(Civ - W^2) / (colSums(W))^2
+  Vout <- colSums(Civ / W^2, na.rm = TRUE) / N^2 - 1 / N
+  Vin <- colSums(Civ - W^2, na.rm = TRUE) / (colSums(W, na.rm = TRUE))^2
 
   tinfit <- (infitsim^(1/3) - 1) * 3 / sqrt(Vin) + sqrt(Vin) / 3
   toutfit <- (outfitsim^(1/3) - 1) * 3 / sqrt(Vout) + sqrt(Vout) / 3
 
   f <- (N * K - N - sum(mi) + 1) / K
-  Y2 <- colSums(Z^2)
+  Y2 <- colSums(Z^2, na.rm = TRUE)
 
   fitresid <- (log(Y2) - log(f)) / sqrt(1 / f^2 * Vout * N^2)
 

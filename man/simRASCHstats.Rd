@@ -38,3 +38,7 @@ that produced this object} \item{statobj}{List of item fit statistics.}
 \description{
 Does repeated random sampling to obtain a sampling distribution for an item fit statistic of interest.
 }
+\details{
+For more details see the help vignette:
+\code{vignette("simRASCHstats", package = "RASCHplot")}
+}

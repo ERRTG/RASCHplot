@@ -1,6 +1,14 @@
 ---
 title: "Introduction to the RASCHplot package"
-output: rmarkdown::html_vignette
+author: 
+  - Ann-Sophie Buchardt
+  - Karl Bang Christensen
+  - Sidsel Normann Jensen
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
 vignette: >
   %\VignetteIndexEntry{Introduction to the RASCHplot package}
   %\VignetteEngine{knitr::rmarkdown}
@@ -37,12 +45,20 @@ options(ggplot2.discrete.fill = OkabeIto)
 
 Visualisation of Rasch item fit using a Conditional Item Characteristic Curve (CICC), which is a curve describing the expected item mean as a function of the total score. It is possible to make an empirical CICC based on the observed data as both the empirical expected item score and the total scores can be calculated from the data. This empirical curve can then be compared to the model-based CICC to visualise item fit. When data is stratified on levels of a factor the CICC can be used to identify differential item functioning (DIF).
 
-Here, you will learn how to use the `RASCHplot` package to do visualisation in the field of IRT models. In particular, visualisation of responses to tests or questionnaires (`BARplot`), visualisation of Rasch model fit (`CICCplot`), and visualisation of differential item functioning (`DIFplot`).
+Here, you will learn how to use the `RASCHplot` package to do visualisation in the field of IRT models. In particular, visualisation of responses to tests or questionnaires (`BARplot`), visualisation of Rasch model fit (`CICCplot`), and visualisation of differential item functioning (`DIFplot`). Furthermore, repeated random sampling to obtain a sampling distribution for an item fit statistic of interest (`simRASCHstats`).
 
 # Installation
 
-```{r, eval=FALSE}
-#devtools::install_github("ERRTG/RASCHplot", build_vignettes = TRUE)
+The package is available on GitHub. To install the package, start by installing the `devtools` package. The best way to do this is from CRAN, by typing:
+
+```{}
+install.packages("devtools")
+```
+
+Install the `RASCHplot` package from GitHub using the following code.
+
+```{}
+devtools::install_github("ERRTG/RASCHplot", build_vignettes = TRUE)
 ```
 
 
@@ -117,9 +133,11 @@ strat.vars <- list(gender = SPADI[, "gender"])
 DIFplot(model = fit, strat.vars = strat.vars)
 ```
 
-# Function: `BARplot()`
+# Visualizing Rasch item fit
 
-## Arguments
+## Function: `BARplot()`
+
+### Arguments
 
 ```{r, results = 'hide'}
 BARplot(itemsIncomp)
@@ -158,7 +176,7 @@ BARplot(itemsIncomp, which.item = 2, strat.var = strat.var.gender)
 BARplot(itemsIncomp, which.item = 2, freq = FALSE, strat.var = strat.var.gender)
 ```
 
-## Working with `ggplot2`
+### Working with `ggplot2`
 
 Default theme for `ggplot2`
 
@@ -191,9 +209,9 @@ barobj + ggtitle("Distribution of item responses")
 
 
 
-# Function: `CICCplot()`
+## Function: `CICCplot()`
 
-## Arguments
+### Arguments
 
 ```{r, results = 'hide'}
 CICCplot(fit)
@@ -230,7 +248,7 @@ Construct CICC plot for items 1 and 2
 ```
 
 
-## Working with `ggplot2`
+### Working with `ggplot2`
 
 Default theme for `ggplot2`
 
@@ -289,9 +307,9 @@ ciccobj +
 
 
 
-# Function: `DIFplot()`
+## Function: `DIFplot()`
 
-## Arguments
+### Arguments
 
 ```{r}
 DIFplot(fit)
@@ -334,3 +352,6 @@ DIFplot(model = fit, which.item = c(1,2),
         strat.vars = strat.vars, lower.groups = lower.groups)
 ```
 
+# Empirical critical values for Rasch item fit statistics
+
+## Function: simRASCHstats

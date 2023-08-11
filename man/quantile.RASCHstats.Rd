@@ -4,19 +4,10 @@
 \alias{quantile.RASCHstats}
 \title{Sample Quantiles}
 \usage{
-\method{quantile}{RASCHstats}(
-  x,
-  type = c(NULL, "Outfit", "Infit", "FitResid", "tOutfit", "tInfit"),
-  extreme = c(NULL, "min", "max"),
-  probs
-)
+\method{quantile}{RASCHstats}(x, probs)
 }
 \arguments{
 \item{x}{A \code{RASCHstats} object.}
-
-\item{type}{Type of item fit statistic. Default is NULL (returns quantiles for all types).}
-
-\item{extreme}{Extreme.}
 
 \item{probs}{Vector of percentiles for \code{extreme}.}
 }

@@ -5,7 +5,7 @@
 #'
 #' @docType package
 #'
-#' @author Karl Bang Christensen, Ann-Sophie Buchardt and Sidsel Normann Jensen\cr Maintainer:
+#' @author Ann-Sophie Buchardt, Karl Bang Christensen and Sidsel Normann Jensen\cr Maintainer:
 #' Ann-Sophie Buchardt <asbu@sund.ku.dk>
 #'
 #' @name RASCHplot
