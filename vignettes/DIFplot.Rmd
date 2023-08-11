@@ -1,20 +1,29 @@
 ---
 title: "Introduction to the DIFplot function"
-output: rmarkdown::html_vignette
+author: 
+  - Ann-Sophie Buchardt
+  - Karl Bang Christensen
+  - Sidsel Normann Jensen
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
 vignette: >
   %\VignetteIndexEntry{Introduction to the DIFplot function}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
+```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
+  collapse = FALSE,
   comment = "#>",
   #echo = TRUE, message=FALSE,
   tidy = TRUE, 
   tidy.opts = list(blank = TRUE, arrow = TRUE), 
   highlight = TRUE,
+  #collapse = FALSE,
   #cache.extra = R.version, autodep=TRUE,
   fig.width=6, fig.height=4, comment=NA,
   fig.align="center"
@@ -32,8 +41,95 @@ options(ggplot2.discrete.colour = OkabeIto)
 options(ggplot2.discrete.fill = OkabeIto)
 ```
 
-# Installation
+## Introduction
 
-```{r, eval=FALSE}
-devtools::install_github("ERRTG/RASCHplot", build_vignettes = TRUE)
+This vignette describes how one can use the `DIFplot` function to visualise potential differential item functioning (DIF).
+
+
+First, we load the `RASCHplot` package
+
+```{r setup}
+library(RASCHplot)
+```
+
+The functions in the package are applicable on polytomous as well as dichotomous items. 
+We load the polytomous SPADI data set from the package. Users can either load their own data or use those saved in the workspace.
+
+```{r}
+data(SPADI)
+```
+
+The command loads data from this saved R data archive. Data are from a Danish validation study containing responses to the shoulder pain and disability index (SPADI) from 228 patients with rotator-cuff related disorders. 
+
+```{r}
+str(SPADI)
+```
+
+Let us focus on the eight disability items. 
+
+```{r}
+itemsIncomp <- SPADI[,9:16]
+```
+
+Visualising Rasch model fit is main motivation for the package. 
+
+```{r}
+items <- SPADI[, 9:16]
+```
+
+
+We fit a partial credit model using the `PCM` function from the `eRm` package.
+
+```{r}
+fit <- eRm::PCM(items)
+```
+
+To visualise potential differential item functioning (DIF) we can use the `DIFplot` function.
+
+```{r}
+strat.vars <- list(gender = SPADI[, "gender"])
+DIFplot(model = fit, strat.vars = strat.vars)
+```
+
+## Arguments
+
+```{r}
+DIFplot(fit)
+```
+
+
+```{r}
+strat.vars <- list(gender = SPADI[, "gender"])
+DIFplot(model = fit, strat.vars = strat.vars)
+```
+
+```{r}
+DIFplot(model = fit, strat.vars = strat.vars, dodge.width = 0)
+```
+
+
+```{r}
+strat.vars <- list(gender = SPADI[, "gender"], over60 = SPADI[, "over60"])
+DIFplot(model = fit, strat.vars = strat.vars)
+```
+
+
+
+
+
+```{r}
+strat.vars <- list(over60 = SPADI[, "over60"])
+DIFplot(model = fit, which.item = c(1,4), strat.vars = strat.vars)
+```
+
+
+
+```{r}
+lower.groups <- list(over60 = list("0" = c(0, 8, 13, 16, 32), "1" = c(0, 11, 16, 18, 26, 30)))
+DIFplot(model = fit, which.item = c(1,4), strat.vars = strat.vars, lower.groups = lower.groups)
+```
+
+```{r}
+DIFplot(model = fit, which.item = c(1,2),
+        strat.vars = strat.vars, lower.groups = lower.groups)
 ```

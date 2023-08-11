@@ -120,237 +120,25 @@ CICCplot(fit)
 ```
 
 One of the key benefits of the `CICCplot()` function is the ability to impose a grouping on
-the total score. This is helpful in choosing the plot that best communicates the level of fit or
-misfit.
+the total score. This is helpful in choosing the plot that best communicates the level of fit or misfit.
 
 ```{r, results = 'hide'}
 CICCplot(fit, lower.groups = c(0,7,13,14,19,22,27,30,35))
 ```
 
+For more details on the `CICCplot` function see the help vignette `vignette("CICCplot", package = "RASCHplot")`.
+
+
+To visualise potential differential item functioning (DIF) we can use the `DIFplot` function.
 
 ```{r}
 strat.vars <- list(gender = SPADI[, "gender"])
 DIFplot(model = fit, strat.vars = strat.vars)
 ```
 
-# Visualizing Rasch item fit
+For more details on the `DIFplot` function see the help vignette `vignette("DIFplot", package = "RASCHplot")`.
 
-## Function: `BARplot()`
 
-### Arguments
-
-```{r, results = 'hide'}
-BARplot(itemsIncomp)
-```
-
-```{r, fig.height=1.5}
-BARplot(itemsIncomp, which.item = 1)
-```
-
-```{r, results = 'hide'}
-BARplot(itemsIncomp, freq = FALSE)
-```
-
-```{r, results = 'hide'}
-BARplot(itemsIncomp, na.action = "na.rm")
-```
-
-```{r, results = 'hide'}
-BARplot(itemsIncomp, addsums = TRUE)
-```
-
-```{r}
-strat.var.gender <- factor(SPADI$gender)
-levels(strat.var.gender) <-  list("male" = 1, "female" = 2)
-```
-
-```{r, results = 'hide', fig.height=7.5}
-BARplot(itemsIncomp, strat.var = strat.var.gender)
-```
-
-```{r, fig.height=2}
-BARplot(itemsIncomp, which.item = 2, strat.var = strat.var.gender)
-```
-
-```{r, fig.height=2}
-BARplot(itemsIncomp, which.item = 2, freq = FALSE, strat.var = strat.var.gender)
-```
-
-### Working with `ggplot2`
-
-Default theme for `ggplot2`
-
-```{r, results = 'hide'}
-theme_set(theme_gray())
-BARplot(itemsIncomp)
-```
-
-```{r}
-theme_set(theme_minimal())
-```
-
-```{r, results = 'hide'}
-barobj <- BARplot(itemsIncomp)
-```
-
-```{r, results = 'hide'}
-barobj + 
-  scale_fill_brewer(palette="Set3", na.value = "grey")
-```
-
-```{r, results = 'hide'}
-barobj + theme(legend.position="top")
-```
-
-```{r, results = 'hide'}
-barobj + ggtitle("Distribution of item responses")
-```
-
-
-
-
-## Function: `CICCplot()`
-
-### Arguments
-
-```{r, results = 'hide'}
-CICCplot(fit)
-```
-
-```{r, results = 'hide'}
-CICCplot(fit, lower.groups = c(1,5,15,20,30,35))
-```
-
-```{r, results = 'hide'}
-CICCplot(fit, error.bar = FALSE)
-```
-
-```{r, results = 'hide'}
-CICCplot(fit, which.item = c(3,4))
-```
-
-```{r, results = 'hide'}
-CICCplot(fit, which.item = "all")
-```
-
-Construc CICC plot for all items and grid the items in two columns
-
-```{r, results = 'hide', fig.height=16}
-CICCplot(model = fit, which.item = "all", grid.items = TRUE,
-          common.legend = TRUE, ncol = 2, nrow = 4)
-```
-
-Construct CICC plot for items 1 and 2
-
-```{r, results = 'hide'}
- p <- CICCplot(model = fit, which.item = c(1,2))
- p
-```
-
-
-### Working with `ggplot2`
-
-Default theme for `ggplot2`
-
-```{r, results = 'hide'}
-theme_set(theme_gray())
-CICCplot(fit)
-```
-
-```{r}
-theme_set(theme_minimal())
-```
-
-```{r, results = 'hide'}
-ciccobj <- CICCplot(fit)[[1]]
-```
-
-```{r, results = 'hide'}
-ciccobj +
-   scale_colour_manual(values = c("burlywood","cornflowerblue"))
-```
-
-Change colours and x axis limits
-
-```{r, results = 'hide'}
-ciccobj + 
-  scale_colour_manual(values = c("burlywood","cornflowerblue")) +
-  xlim(c(3, 37))
-```
-
-
-Change y axis limits
-
-```{r, results = 'hide'}
-ciccobj + 
-  ylim(c(0,5))
-```
-
-```{r}
-ciccobj +
-  scale_x_continuous(breaks = seq(0, 40, 5), minor_breaks = NULL) +
-  scale_y_continuous(breaks = 0:5, minor_breaks = NULL)   + 
-  ylim(c(0,5))
-```
-
-```{r, results = 'hide'}
-ciccobj + 
-  ylab("Item-score for item D1") + 
-  ggtitle("")
-```
-
-```{r}
-ciccobj + 
-  theme(plot.title = element_text(hjust = 0.5))
-```
-
-
-
-
-## Function: `DIFplot()`
-
-### Arguments
-
-```{r}
-DIFplot(fit)
-```
-
-
-```{r}
-strat.vars <- list(gender = SPADI[, "gender"])
-DIFplot(model = fit, strat.vars = strat.vars)
-```
-
-```{r}
-DIFplot(model = fit, strat.vars = strat.vars, dodge.width = 0)
-```
-
-
-```{r}
-strat.vars <- list(gender = SPADI[, "gender"], over60 = SPADI[, "over60"])
-DIFplot(model = fit, strat.vars = strat.vars)
-```
-
-
-
-
-
-```{r}
-strat.vars <- list(over60 = SPADI[, "over60"])
-DIFplot(model = fit, which.item = c(1,4), strat.vars = strat.vars)
-```
-
-
-
-```{r}
-lower.groups <- list(over60 = list("0" = c(0, 8, 13, 16, 32), "1" = c(0, 11, 16, 18, 26, 30)))
-DIFplot(model = fit, which.item = c(1,4), strat.vars = strat.vars, lower.groups = lower.groups)
-```
-
-```{r}
-DIFplot(model = fit, which.item = c(1,2),
-        strat.vars = strat.vars, lower.groups = lower.groups)
-```
 
 # Empirical critical values for Rasch item fit statistics
 

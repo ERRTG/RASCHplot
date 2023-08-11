@@ -1,20 +1,29 @@
 ---
 title: "Introduction to the CICCplot function"
-output: rmarkdown::html_vignette
+author: 
+  - Ann-Sophie Buchardt
+  - Karl Bang Christensen
+  - Sidsel Normann Jensen
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
 vignette: >
   %\VignetteIndexEntry{Introduction to the CICCplot function}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
+```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
+  collapse = FALSE,
   comment = "#>",
   #echo = TRUE, message=FALSE,
   tidy = TRUE, 
   tidy.opts = list(blank = TRUE, arrow = TRUE), 
   highlight = TRUE,
+  #collapse = FALSE,
   #cache.extra = R.version, autodep=TRUE,
   fig.width=6, fig.height=4, comment=NA,
   fig.align="center"
@@ -32,8 +41,141 @@ options(ggplot2.discrete.colour = OkabeIto)
 options(ggplot2.discrete.fill = OkabeIto)
 ```
 
-# Installation
+## Introduction
 
-```{r, eval=FALSE}
-devtools::install_github("ERRTG/RASCHplot", build_vignettes = TRUE)
+This vignette describes how one can use the `CICCplot` function to compute and visualise conditional item characteristic curves (CICCs).
+
+
+First, we load the `RASCHplot` package
+
+```{r setup}
+library(RASCHplot)
+```
+
+The functions in the package are applicable on polytomous as well as dichotomous items. 
+We load the polytomous SPADI data set from the package. Users can either load their own data or use those saved in the workspace.
+
+```{r}
+data(SPADI)
+```
+
+The command loads data from this saved R data archive. Data are from a Danish validation study containing responses to the shoulder pain and disability index (SPADI) from 228 patients with rotator-cuff related disorders. 
+
+```{r}
+str(SPADI)
+```
+
+Let us focus on the eight disability items. 
+
+```{r}
+itemsIncomp <- SPADI[,9:16]
+```
+
+Visualising Rasch model fit is main motivation for the package. 
+
+```{r}
+items <- SPADI[, 9:16]
+```
+
+
+We fit a partial credit model using the `PCM` function from the `eRm` package.
+
+```{r}
+fit <- eRm::PCM(items)
+```
+
+We use the most basic call to `CICCplot()` to visualise the model fit of the first item.
+
+
+## Arguments
+
+```{r, results = 'hide'}
+CICCplot(fit)
+```
+
+```{r, results = 'hide'}
+CICCplot(fit, lower.groups = c(1,5,15,20,30,35))
+```
+
+```{r, results = 'hide'}
+CICCplot(fit, error.bar = FALSE)
+```
+
+```{r, results = 'hide'}
+CICCplot(fit, which.item = c(3,4))
+```
+
+```{r, results = 'hide'}
+CICCplot(fit, which.item = "all")
+```
+
+Construc CICC plot for all items and grid the items in two columns
+
+```{r, results = 'hide', fig.height=16}
+CICCplot(model = fit, which.item = "all", grid.items = TRUE,
+          common.legend = TRUE, ncol = 2, nrow = 4)
+```
+
+Construct CICC plot for items 1 and 2
+
+```{r, results = 'hide'}
+ p <- CICCplot(model = fit, which.item = c(1,2))
+ p
+```
+
+
+## Working with `ggplot2`
+
+Default theme for `ggplot2`
+
+```{r, results = 'hide'}
+theme_set(theme_gray())
+CICCplot(fit)
+```
+
+```{r}
+theme_set(theme_minimal())
+```
+
+```{r, results = 'hide'}
+ciccobj <- CICCplot(fit)[[1]]
+```
+
+```{r, results = 'hide'}
+ciccobj +
+   scale_colour_manual(values = c("burlywood","cornflowerblue"))
+```
+
+Change colours and x axis limits
+
+```{r, results = 'hide'}
+ciccobj + 
+  scale_colour_manual(values = c("burlywood","cornflowerblue")) +
+  xlim(c(3, 37))
+```
+
+
+Change y axis limits
+
+```{r, results = 'hide'}
+ciccobj + 
+  ylim(c(0,5))
+```
+
+```{r}
+ciccobj +
+  scale_x_continuous(breaks = seq(0, 40, 5), minor_breaks = NULL) +
+  scale_y_continuous(breaks = 0:5, minor_breaks = NULL)   + 
+  ylim(c(0,5))
+```
+
+```{r, results = 'hide'}
+ciccobj + 
+  ylab("Item-score for item D1") + 
+  ggtitle("")
+```
+
+```{r}
+ciccobj + 
+  theme(plot.title = element_text(hjust = 0.5))
 ```
