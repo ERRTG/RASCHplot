@@ -1,0 +1,39 @@
+---
+title: "Introduction to the DIFplot function"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to the DIFplot function}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  #echo = TRUE, message=FALSE,
+  tidy = TRUE, 
+  tidy.opts = list(blank = TRUE, arrow = TRUE), 
+  highlight = TRUE,
+  #cache.extra = R.version, autodep=TRUE,
+  fig.width=6, fig.height=4, comment=NA,
+  fig.align="center"
+  )
+
+library(tidyverse)
+
+OkabeIto <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+
+theme_set(theme_minimal())
+
+options(ggplot2.continuous.colour = OkabeIto)
+options(ggplot2.continuous.fill = OkabeIto)
+options(ggplot2.discrete.colour = OkabeIto)
+options(ggplot2.discrete.fill = OkabeIto)
+```
+
+# Installation
+
+```{r, eval=FALSE}
+devtools::install_github("ERRTG/RASCHplot", build_vignettes = TRUE)
+```
