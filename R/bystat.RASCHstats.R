@@ -6,7 +6,7 @@
 #'
 #' @export bystat
 #'
-bystat <- function(x, ...) {
+bystat <- function(x) {
   UseMethod("bystat", x)
 }
 #' @rdname bystat

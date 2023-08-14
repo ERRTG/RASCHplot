@@ -54,13 +54,6 @@ simRASCHq3 <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MML")
     beta.sim <- fit$beta
     theta.sim <- fit$theta
 
-    while (all(is.na(beta.sim))) {
-      X[[b]] <- simResps(model, probs, B = 1, M, mi)[[1]]
-      fit <- RASCHfits(method.item, method.person, dat = X[[b]])
-      beta.sim <- fit$beta
-      theta.sim <- fit$theta
-    }
-
     #============= Compute Q3 statistics =======================================
 
     resids <- RASCHresiduals(beta = beta.sim, theta = theta.sim, data = X[[b]])

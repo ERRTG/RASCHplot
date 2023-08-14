@@ -4,12 +4,14 @@
 \alias{quantile.RASCHstats}
 \title{Sample Quantiles}
 \usage{
-\method{quantile}{RASCHstats}(x, probs)
+\method{quantile}{RASCHstats}(x, probs, ...)
 }
 \arguments{
 \item{x}{A \code{RASCHstats} object.}
 
 \item{probs}{Vector of percentiles for \code{extreme}.}
+
+\item{...}{Other arguments to be passed}
 }
 \description{
 Produces sample quantiles corresponding to the given probabilities for a \code{RASCHstats} object. The smallest observation corresponds to a probability of 0 and the largest to a probability of 1.

@@ -5,7 +5,7 @@
 \alias{bystat.RASCHstats}
 \title{Print function}
 \usage{
-bystat(x, ...)
+bystat(x)
 
 \method{bystat}{RASCHstats}(x)
 }

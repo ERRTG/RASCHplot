@@ -1,11 +1,12 @@
-## ----setup, include = FALSE---------------------------------------------------
+## ---- include = FALSE---------------------------------------------------------
 knitr::opts_chunk$set(
-  collapse = TRUE,
+  collapse = FALSE,
   comment = "#>",
   #echo = TRUE, message=FALSE,
   tidy = TRUE, 
   tidy.opts = list(blank = TRUE, arrow = TRUE), 
   highlight = TRUE,
+  #collapse = FALSE,
   #cache.extra = R.version, autodep=TRUE,
   fig.width=6, fig.height=4, comment=NA,
   fig.align="center"
@@ -21,7 +22,4 @@ options(ggplot2.continuous.colour = OkabeIto)
 options(ggplot2.continuous.fill = OkabeIto)
 options(ggplot2.discrete.colour = OkabeIto)
 options(ggplot2.discrete.fill = OkabeIto)
-
-## ---- eval=FALSE--------------------------------------------------------------
-#  devtools::install_github("ERRTG/RASCHplot", build_vignettes = TRUE)
 

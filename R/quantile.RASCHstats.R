@@ -4,12 +4,13 @@
 #'
 #' @param x A \code{RASCHstats} object.
 #' @param probs Vector of percentiles for \code{extreme}.
+#' @param ... Other arguments to be passed
 #'
 #' @method quantile RASCHstats
 #' @rdname quantile.RASCHstats
 #' @export
 #'
-quantile.RASCHstats <- function(x, probs) {
+quantile.RASCHstats <- function(x, probs, ...) {
 
   if (!inherits(x, "RASCHstats")) {
     stop("use only with \"RASCHstats\" objects")
