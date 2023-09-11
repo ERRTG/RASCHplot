@@ -42,8 +42,8 @@ irffct <- function(theta, b, ii){
 #' @noRd
 pcmfct <- function(theta, b, ii){
 
-  if (all(any(class(beta) %in% c("matrix", "data.frame")))) {
-    beta <- beta
+  if (all(any(class(b) %in% c("matrix", "data.frame")))) {
+    b <- b
   } else {
     stop("beta is not a matrix or data.frame")
   }

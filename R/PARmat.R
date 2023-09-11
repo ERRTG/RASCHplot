@@ -28,7 +28,7 @@ PARmat <- function(x, par, byrows = c("levels", "items")) {
   mi <- apply(x, 2, max, na.rm = TRUE)
   cols <- do.call(c, lapply(1:k, function(i) 1:mi[i]))
   rows <- do.call(c, lapply(1:k, function(i) rep(i, mi[i])))
-  thr <- matrix(NA, nrow = ncol(x), ncol = max(x))
+  thr <- matrix(NA, nrow = ncol(x), ncol = max(x, na.rm = TRUE))
 
   for (i in 1:length(par)) {
     thr[rows[i], cols[i]] <- par[i]
