@@ -3,10 +3,11 @@
 #' @param beta A numeric vector or matrix of item parameters with compatible dimensions to data.
 #' @param theta A vector of person parameters with compatible dimensions to data.
 #' @param data Matrix with item responses.
+#' @param stdresid Logical flag for standardising residulas. Default is \code{stdresid = TRUE}.
 #'
 #' @export
 #'
-RASCHresiduals <- function(beta, theta, data) {
+RASCHresiduals <- function(beta, theta, data, stdresid = TRUE) {
 
   # Check if data is dichotomous or polytomous
   if(nlevels(as.factor(as.matrix(data))) > 2) {
@@ -40,6 +41,7 @@ RASCHresiduals <- function(beta, theta, data) {
     if (ncol(beta) > 1) {
 
       E <- matrix(nrow = N, ncol = K)
+      E2 <- matrix(nrow = N, ncol = K)
       W <- matrix(nrow = N, ncol = K)
       Civ <- matrix(nrow = N, ncol = K)
 
@@ -48,6 +50,8 @@ RASCHresiduals <- function(beta, theta, data) {
         probssim <- pcmfct(theta = theta, b = beta, ii = i)
         matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
         E[, i] <- rowSums(matx * probssim, na.rm = TRUE)
+        E2[, i] <- rowSums(matx^2 * probssim, na.rm = TRUE)
+        W[, i] <- E2[, i] - E[, i]^2
 
       }
 
@@ -66,7 +70,7 @@ RASCHresiduals <- function(beta, theta, data) {
 
       probssim <- sapply(1:K, function(ii) irffct(theta = theta, b = beta, ii)[, 2])
       E <- probssim
-      #W <- probssim * (1-probssim)
+      W <- probssim * (1-probssim)
       #Civ <- E^4 * (1 - probssim) + (1 - E)^4 * probssim
 
     } else {
@@ -75,7 +79,12 @@ RASCHresiduals <- function(beta, theta, data) {
 
   }
 
-  R <- data - E # unconditional residuals
+  if (stdresid) {
+    R <- (data - E) / sqrt(W) # unconditional residuals
+  } else {
+    R <- data - E # unconditional residuals
+  }
+
 
   class(R) <- c(class(R),"RASCHresiduals")
   R
