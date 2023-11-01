@@ -50,7 +50,7 @@ q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", mo
 Christensen, K. B., Makransky, G. and Horton, M. (2017)
 \emph{Critical Values for Yen’s Q3: Identification of Local Dependence in the Rasch Model Using Residual Correlations, Applied Psychological Measurement, Vol. 41(3), 178-194},
 \doi{https://doi.org/10.1177/0146621616677520}.\cr
-Yen W. M. (1993)
-\emph{Scaling performance assessments: Strategies for managing local item dependence, Journal of Educational Measurement, Vol. 30, 187-213},
+Yen W. M. (1984)
+\emph{Effects of local item dependence on the fit and equating performance of the three-parameter logistic model, Applied Psychological Measurement, Vol. 8, 125-145},
 \doi{10.18637/jss.v039.i05}.
 }

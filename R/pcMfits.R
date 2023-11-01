@@ -10,18 +10,27 @@
 #' @export pcMfits
 pcMfits <- function(method.item, method.person, dat) {
 
+  #============= Data check as in eRm package ========================
+  ri.min <- apply(dat,2,min,na.rm=TRUE)                     #if no 0 responses
+  if(any(ri.min > 0)){
+    warning(paste0(
+      "\n",
+      paste("The following items have no 0-responses:"),
+      "\n",
+      paste(colnames(dat)[ri.min > 0], collapse=" "),
+      "\n",
+      paste("Responses are shifted such that lowest category is 0.")
+    ), call. = FALSE, immediate.=TRUE)
+  }
+  dat <- t(apply(dat,1,function(y) {y-ri.min}))           #shift down to 0
+  #===================================================================
+
   mi <- apply(dat, 2, max, na.rm = TRUE) # number of categories - 1 for each item
   K <- ncol(dat)                         # number of items
 
   #============= Fit item parameters =================================
 
   if (method.item == "CML") {
-
-    ri.min <- apply(dat,2,min,na.rm=TRUE)                     #if no 0 responses
-    if(any(ri.min > 0)){
-      dat <- t(apply(dat,1,function(y) {y-ri.min}))           #shift down to 0
-    }
-
 
     item.fit <- eRm::PCM(dat, sum0 = TRUE)
     cl <- call("eRm::PCM", X = dat, sum0 = TRUE)

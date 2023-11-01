@@ -49,9 +49,13 @@ Q3star <- function(items, method.item = c("PCML", "CML", "JML", "MML"), method.p
 
   Q3matrix <- Q3(object = resids, ...)
   Q3max <- max(Q3matrix[upper.tri(Q3matrix, diag = FALSE)])
-  Q3star <- Q3max - mean(Q3matrix[upper.tri(Q3matrix, diag = FALSE)])
+  Q3stjerne <- Q3max - mean(Q3matrix[upper.tri(Q3matrix, diag = FALSE)])
+  Q3nodiag <- Q3matrix
+  diag(Q3nodiag) <- NA
+  idx <- which(Q3nodiag == Q3max, arr.ind = TRUE)[,2]
+  names(Q3stjerne) <- paste(colnames(Q3matrix)[idx], collapse = ":")
 
-  out <- list(Q3matrix = Q3matrix, Q3max = Q3max, Q3star = Q3star)
+  out <- list(Q3matrix = Q3matrix, Q3max = Q3max, Q3star = Q3stjerne)
   class(out) <- c(class(out),"Q3star")
 
   out

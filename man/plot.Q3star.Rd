@@ -14,3 +14,23 @@
 \description{
 Visualise the Yen's Q3 statistics for a \code{Q3star} object.
 }
+\examples{
+data(SPADI)
+SPADI.complete <- SPADI[complete.cases(SPADI), ]
+it.SPADI <- SPADI.complete[, 9:16]
+q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
+plot(q3obj)
+it.SPADI$D4D5 <- it.SPADI$D4 + it.SPADI$D5
+it.SPADI.2 <- it.SPADI[,-c(4,5)]
+q3obj2 <- Q3star(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
+plot(q3obj2)
+
+}
+\references{
+Christensen, K. B., Makransky, G. and Horton, M. (2017)
+\emph{Critical Values for Yen’s Q3: Identification of Local Dependence in the Rasch Model Using Residual Correlations, Applied Psychological Measurement, Vol. 41(3), 178-194},
+\doi{https://doi.org/10.1177/0146621616677520}.\cr
+Yen W. M. (1984)
+\emph{Effects of local item dependence on the fit and equating performance of the three-parameter logistic model, Applied Psychological Measurement, Vol. 8, 125-145},
+\doi{10.18637/jss.v039.i05}.
+}

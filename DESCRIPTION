@@ -31,11 +31,11 @@ Imports:
   sirt,
   eRm,
   grDevices,
-  methods
+  methods,
+  corrplot
 Suggests:
   knitr,
-  rmarkdown,
-  iarm
+  rmarkdown
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Depends: 
