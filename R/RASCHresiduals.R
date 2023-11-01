@@ -3,11 +3,11 @@
 #' @param beta A numeric vector or matrix of item parameters with compatible dimensions to data.
 #' @param theta A vector of person parameters with compatible dimensions to data.
 #' @param data Matrix with item responses.
-#' @param stdresid Logical flag for standardising residulas. Default is \code{stdresid = TRUE}.
+#' @param standardize Logical flag for standardization of residuals. Default is \code{standardize=TRUE}.
 #'
 #' @export
 #'
-RASCHresiduals <- function(beta, theta, data, stdresid = TRUE) {
+RASCHresiduals <- function(beta, theta, data, standardize = TRUE) {
 
   # Check if data is dichotomous or polytomous
   if(nlevels(as.factor(as.matrix(data))) > 2) {
@@ -79,7 +79,7 @@ RASCHresiduals <- function(beta, theta, data, stdresid = TRUE) {
 
   }
 
-  if (stdresid) {
+  if (standardize) {
     R <- (data - E) / sqrt(W) # unconditional residuals
   } else {
     R <- data - E # unconditional residuals

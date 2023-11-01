@@ -4,7 +4,7 @@
 \alias{RASCHresiduals}
 \title{Compute residuals from item fit}
 \usage{
-RASCHresiduals(beta, theta, data)
+RASCHresiduals(beta, theta, data, standardize = TRUE)
 }
 \arguments{
 \item{beta}{A numeric vector or matrix of item parameters with compatible dimensions to data.}
@@ -12,6 +12,8 @@ RASCHresiduals(beta, theta, data)
 \item{theta}{A vector of person parameters with compatible dimensions to data.}
 
 \item{data}{Matrix with item responses.}
+
+\item{standardize}{Logical flag for standardization of residuals. Default is \code{standardize=TRUE}.}
 }
 \description{
 Compute residuals from item fit

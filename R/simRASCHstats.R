@@ -57,7 +57,7 @@ simRASCHstats <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MM
   if (trace.it) cat("Simulating\n")
   for (b in 1:B) {
 
-    #============= Fit item parameters =================================
+    #============= Fit parameters ==============================================
 
     fit <- RASCHfits(method.item, method.person, X[[b]])
     beta.sim <- fit$beta
@@ -70,7 +70,7 @@ simRASCHstats <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MM
     #  theta.sim <- fit$theta
     #}
 
-    #============= Compute fit statistics ========================================
+    #============= Compute fit statistics ======================================
 
     statobj[[b]] <- RASCHstats(beta = beta.sim, theta = theta.sim, dat = X[[b]])
 
