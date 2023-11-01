@@ -22,7 +22,6 @@ Imports:
   dplyr,
   magrittr,
   forcats,
-  tidyverse,
   rlang,
   data.table,
   DT,

@@ -43,7 +43,7 @@ Yen's Q3 statistic can be used to detect local dependence.
 data(SPADI)
 SPADI.complete <- SPADI[complete.cases(SPADI), ]
 it.SPADI <- SPADI.complete[, 9:16]
-
+q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
 
 }
 \references{

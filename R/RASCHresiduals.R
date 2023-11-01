@@ -25,9 +25,9 @@ RASCHresiduals <- function(beta, theta, data, standardize = TRUE) {
 
   if (type == "RMP") {
 
-    if (all(any(class(beta) %in% c("matrix", "data.frame")))) {
+    if (inherits(beta, c("matrix", "data.frame"))) {
       beta <- beta
-    } else if (class(beta) == "numeric") {
+    } else if (inherits(beta, "numeric")) {
       beta <- PARmat(x = data, par = beta)
     } else {
       stop("beta is not numeric, matrix or data.frame")
@@ -66,7 +66,7 @@ RASCHresiduals <- function(beta, theta, data, standardize = TRUE) {
     M <- max(data, na.rm = TRUE)            # max number of categories - 1 for items
     mi <- apply(data, 2, max, na.rm = TRUE) # number of categories - 1 for each item
 
-    if (class(beta) == "numeric") {
+    if (inherits(beta, "numeric")) {
 
       probssim <- sapply(1:K, function(ii) irffct(theta = theta, b = beta, ii)[, 2])
       E <- probssim

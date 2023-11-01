@@ -20,8 +20,8 @@
 #' @references Christensen, K. B., Makransky, G. and Horton, M. (2017)
 #' \emph{Critical Values for Yen’s Q3: Identification of Local Dependence in the Rasch Model Using Residual Correlations, Applied Psychological Measurement, Vol. 41(3), 178-194},
 #' \doi{https://doi.org/10.1177/0146621616677520}.\cr
-#' Yen W. M. (1993)
-#' \emph{Scaling performance assessments: Strategies for managing local item dependence, Journal of Educational Measurement, Vol. 30, 187-213},
+#' Yen W. M. (1984)
+#' \emph{Effects of local item dependence on the fit and equating performance of the three-parameter logistic model, Applied Psychological Measurement, Vol. 8, 125-145},
 #' \doi{10.18637/jss.v039.i05}.
 #'
 #' @examples
@@ -48,8 +48,8 @@ Q3star <- function(items, method.item = c("PCML", "CML", "JML", "MML"), method.p
   #============= Compute Q3 statistics ======================================
 
   Q3matrix <- Q3(object = resids, ...)
-  Q3max <- max(upper.tri(Q3matrix))
-  Q3star <- Q3max - mean(Q3matrix)
+  Q3max <- max(Q3matrix[upper.tri(Q3matrix, diag = FALSE)])
+  Q3star <- Q3max - mean(Q3matrix[upper.tri(Q3matrix, diag = FALSE)])
 
   out <- list(Q3matrix = Q3matrix, Q3max = Q3max, Q3star = Q3star)
   class(out) <- c(class(out),"Q3star")

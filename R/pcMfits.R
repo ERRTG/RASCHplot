@@ -16,6 +16,13 @@ pcMfits <- function(method.item, method.person, dat) {
   #============= Fit item parameters =================================
 
   if (method.item == "CML") {
+
+    ri.min <- apply(dat,2,min,na.rm=TRUE)                     #if no 0 responses
+    if(any(ri.min > 0)){
+      dat <- t(apply(dat,1,function(y) {y-ri.min}))           #shift down to 0
+    }
+
+
     item.fit <- eRm::PCM(dat, sum0 = TRUE)
     cl <- call("eRm::PCM", X = dat, sum0 = TRUE)
 
