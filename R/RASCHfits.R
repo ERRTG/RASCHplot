@@ -10,6 +10,12 @@ RASCHfits <- function(method.item = c("PCML", "CML", "JML", "MML"), method.perso
   method.item <- match.arg(method.item)
   method.person <- match.arg(method.person)
 
+  if(is.data.frame(dat)){
+    dat <- as.matrix(dat)   # X as data frame allowed
+  }
+
+  #dat <- apply(dat, 2, as.numeric) # make sure dat is numeric
+
   if (all(range(dat, na.rm = TRUE) == c(0,1))) {
     model <- "RMD"
   } else {

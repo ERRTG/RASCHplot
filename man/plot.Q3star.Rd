@@ -2,17 +2,47 @@
 % Please edit documentation in R/plot.Q3star.R
 \name{plot.Q3star}
 \alias{plot.Q3star}
-\title{Heatmap plot function}
+\title{Heatmap plot function for Yen's Q3}
 \usage{
-\method{plot}{Q3star}(x, ...)
+\method{plot}{Q3star}(
+  x,
+  markQ3star = TRUE,
+  lower.col = NULL,
+  upper.col = NULL,
+  col.lim = NULL,
+  tl.pos = c("lt", "ld", "td", "d", "n"),
+  tl.cex = 0.8,
+  tl.col = "black",
+  number.cex = 0.8,
+  colQ3star = "black",
+  ...
+)
 }
 \arguments{
 \item{x}{\code{Q3star} object, typically result of \link[RASCHplot]{Q3star}.}
 
-\item{...}{Other paramters to be passed through to plotting functions.}
+\item{markQ3star}{Logical flag for highlighting the \eqn{Q_{3\ast}}{Q3*} value by a rectangle.}
+
+\item{lower.col}{Passed as col parameter to the lower matrix.}
+
+\item{upper.col}{Passed as col parameter to the upper matrix.}
+
+\item{col.lim}{= NULL,}
+
+\item{tl.pos}{Character or logical, position of text labels. If character, it must be one of 'lt', 'ld', 'td', 'd' or 'n'. 'lt' (default) means left and top, 'ld' means left and diagonal, 'td' means top and diagonal(near), 'l' means left, 'd' means diagonal, 'n' means don't add text-label.}
+
+\item{tl.cex}{Numeric, for the size of text label (variable names).}
+
+\item{tl.col}{The color of text label.}
+
+\item{number.cex}{The cex parameter to send to the call to text when writing the correlation coefficients into the plot.}
+
+\item{colQ3star}{Color of rectangle highlighting the \eqn{Q_{3\ast}}{Q3*} value.}
+
+\item{...}{Other paramters to be passed through to plotting functions. See \link[corrplot]{corrplot.mixed} for further details.}
 }
 \description{
-Visualise the Yen's Q3 statistics for a \code{Q3star} object.
+Visualise the Yen's Q3 statistics for a \code{Q3star} object using \link[corrplot]{corrplot.mixed} with mixed circle visualization (upper triangle) and numbers (lower triangle). The \eqn{Q_{3\ast}}{Q3*} value may be highlighted by a rectangle.
 }
 \examples{
 data(SPADI)
@@ -28,9 +58,9 @@ plot(q3obj2)
 }
 \references{
 Christensen, K. B., Makransky, G. and Horton, M. (2017)
-\emph{Critical Values for Yen’s Q3: Identification of Local Dependence in the Rasch Model Using Residual Correlations, Applied Psychological Measurement, Vol. 41(3), 178-194},
+\emph{Critical Values for Yen’s Q3: Identification of Local Dependence in the Rasch Model Using Residual Correlations, Applied Psychological Measurement, Vol. 41(3), 178-194},\cr
 \doi{https://doi.org/10.1177/0146621616677520}.\cr
 Yen W. M. (1984)
-\emph{Effects of local item dependence on the fit and equating performance of the three-parameter logistic model, Applied Psychological Measurement, Vol. 8, 125-145},
+\emph{Effects of local item dependence on the fit and equating performance of the three-parameter logistic model, Applied Psychological Measurement, Vol. 8, 125-145},\cr
 \doi{10.18637/jss.v039.i05}.
 }

@@ -18,13 +18,13 @@
 #' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
 #' @param ... Arguments to be passed to \code{ggarrange}. The arguments will only be used if \code{grid.items = TRUE}.
 #'
+#' @rawNamespace import(stats, except = filter)
 #' @importFrom ggplot2 ggplot aes scale_x_continuous guide_legend geom_errorbar ggtitle scale_colour_manual geom_point geom_line xlab ylab position_dodge
 #' @importFrom rlang .data
 #' @importFrom dplyr bind_rows
 #' @importFrom methods is
 #' @import memoise
 #' @import ggpubr
-#' @import stats
 #'
 #' @return CICC plot
 #'

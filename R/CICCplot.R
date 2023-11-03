@@ -21,6 +21,7 @@
 #' @param legend.title Legend title. Defult is empty.
 #' @param ... Arguments to be passed to \code{ggarrange}. The arguments will only be used if 'grid.items = TRUE'.
 #'
+#' @rawNamespace import(stats, except = filter)
 #' @importFrom ggplot2 ggplot aes scale_x_continuous guide_legend geom_errorbar ggtitle scale_colour_manual geom_point geom_line geom_rect xlab ylab theme_bw scale_fill_manual
 #' @importFrom rlang .data
 #' @importFrom dplyr bind_rows
@@ -28,7 +29,6 @@
 #' @importFrom ggpubr ggarrange
 #' @importFrom grDevices rgb
 #' @import scales
-#' @import stats
 #'
 #' @return CICC plot
 #'
