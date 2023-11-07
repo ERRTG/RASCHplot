@@ -2,7 +2,7 @@
 #'
 #' Visualise the Yen's Q3 statistics for a \code{Q3star} object using \link[ggcorrplot]{ggcorrplot} with mixed circle visualization (upper triangle) and numbers (lower triangle). The \eqn{Q_{3\ast}}{Q3*} value may be highlighted by a rectangle.
 #'
-#' @param obj \code{Q3star} object, typically result of \link[RASCHplot]{Q3star}.
+#' @param object \code{Q3star} object, typically result of \link[RASCHplot]{Q3star}.
 #' @param method character, the visualization method of Q3star matrix to be
 #'   used. Allowed values are "circle" (default), "square".
 #' @param type character, "mixed" (default), "full", "lower" or "upper" display.
@@ -31,6 +31,7 @@
 #'
 #' @importFrom reshape2 melt
 #' @importFrom ggplot2 ggplot aes geom_tile geom_point scale_size guides scale_fill_gradient2 geom_text geom_label theme element_blank geom_label element_text coord_fixed theme_minimal
+#' @importFrom rlang .data
 #' @importFrom dplyr filter
 #' @importFrom grDevices colorRampPalette
 #'
@@ -46,7 +47,7 @@
 #' SPADI.complete <- SPADI[complete.cases(SPADI), ]
 #' it.SPADI <- SPADI.complete[, 9:16]
 #' q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
-#' ggQ3star(obj = q3obj)
+#' ggQ3star(object = q3obj)
 #' it.SPADI$D4D5 <- it.SPADI$D4 + it.SPADI$D5
 #' it.SPADI.2 <- it.SPADI[,-c(4,5)]
 #' q3obj2 <- Q3star(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
@@ -54,9 +55,9 @@
 #'
 #' @export
 #'
-ggQ3star <- function(obj, method = c("circle", "square"), type = c("mixed", "full", "lower", "upper"), markQ3star = c("circle", "pch"), lower = NULL, upper = NULL, ggtheme = theme_minimal, title = "", show.legend = TRUE, legend.title = "Q3star", show.diag = NULL, colors = NULL, outline.color = NULL, lab = FALSE, lab_col = "black", lab_size = 4, pch = 8, pch.col = "black", pch.cex = 5, tl.cex = 12, tl.col = "black", tl.srt = 45, digits = 2) {
+ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "full", "lower", "upper"), markQ3star = c("circle", "pch"), lower = NULL, upper = NULL, ggtheme = theme_minimal, title = "", show.legend = TRUE, legend.title = "Q3star", show.diag = NULL, colors = NULL, outline.color = NULL, lab = FALSE, lab_col = "black", lab_size = 4, pch = 8, pch.col = "black", pch.cex = 5, tl.cex = 12, tl.col = "black", tl.srt = 45, digits = 2) {
 
-  if (!inherits(obj, "Q3star")) {
+  if (!inherits(object, "Q3star")) {
     stop("use only with \"Q3star\" objects")
   }
 
@@ -79,12 +80,6 @@ ggQ3star <- function(obj, method = c("circle", "square"), type = c("mixed", "ful
       upper <- method
     }
   }
-  #if (markQ3star) {
-  #  p.mat <- matrix(nrow = nrow(obj$Q3matrix), ncol = ncol(obj$Q3matrix))
-  #  idx <- which(obj$Q3matrix == obj$Q3max, arr.ind = TRUE)[,2]
-  #  p.mat[idx[1], idx[2]] <- "*"
-  #  p.mat[idx[2], idx[1]] <- "*"
-  #}
 
   mypal <- c("#374E55FF", "#DF8F44FF", "#00A1D5FF", "#B24745FF", "#79AF97FF",
              "#6A6599FF", "#80796BFF")
@@ -95,11 +90,11 @@ ggQ3star <- function(obj, method = c("circle", "square"), type = c("mixed", "ful
     outline.color <- "gray"
   }
 
-  corr <- obj$Q3matrix
+  corr <- object$Q3matrix
 
   Q3nodiag <- corr
   diag(Q3nodiag) <- NA
-  idx <- which(Q3nodiag == obj$Q3max, arr.ind = TRUE)[,2]
+  idx <- which(Q3nodiag == object$Q3max, arr.ind = TRUE)[,2]
   r <- colnames(corr)[idx]
 
   Q3mean <- mean(corr[upper.tri(corr, diag = FALSE)])
@@ -107,8 +102,6 @@ ggQ3star <- function(obj, method = c("circle", "square"), type = c("mixed", "ful
   corr <- corr - Q3mean
   corr <- base::round(x = corr, digits = digits)
   lims <- corr
-
-  col.lim <- range(lims) * 1.1
 
   if (!show.diag) {
     diag(corr) <- NA
@@ -120,20 +113,16 @@ ggQ3star <- function(obj, method = c("circle", "square"), type = c("mixed", "ful
     if (markQ3star == "circle") {
       corr[idx[1], idx[2]] <- corr[idx[2], idx[1]]
     }
-    #p.mat <- data.frame(Var1 = r[2], Var2 = r[1], value = corr[idx[2], idx[1]])
   } else if (type == "upper" | (type == "mixed" & upper == method)) {
     corr[lower.tri(corr)] <- NA
     if (markQ3star == "circle") {
       corr[idx[2], idx[1]] <- corr[idx[1], idx[2]]
     }
-    #p.mat <- data.frame(Var1 = r[1], Var2 = r[2], value = corr[idx[1], idx[2]])
   }
 
-  # Melt corr and pmat
-  corr <- reshape2::melt(corr, na.rm = TRUE)
+  # Melt corr
+  corr <- melt(corr, na.rm = TRUE)
   colnames(corr) <- c("Var1", "Var2", "value")
-  #corr$pvalue <- rep(NA, nrow(corr))
-  #corr$signif <- rep(NA, nrow(corr))
 
   corr$abs_corr <- abs(corr$value) * 10
 
@@ -144,11 +133,9 @@ ggQ3star <- function(obj, method = c("circle", "square"), type = c("mixed", "ful
     corr$lab[corr$Var1 == r[2] & corr$Var2 == r[1]] <- FALSE
   }
 
-  #p.mat$abs_corr <- abs(p.mat$value) * 10
-
   # heatmap
   p <- ggplot(data = corr,
-              mapping = aes(x = Var1, y = Var2, fill = value))
+              mapping = aes(x = .data$Var1, y = .data$Var2, fill = .data$value))
 
   # modification based on method
   if (method == "square") {
@@ -157,7 +144,7 @@ ggQ3star <- function(obj, method = c("circle", "square"), type = c("mixed", "ful
   } else if (method == "circle") {
     p <- p + geom_point(color = outline.color,
                         shape = 21,
-                        aes(size = abs_corr)) +
+                        aes(size = .data$abs_corr)) +
       scale_size(range = c(4, 10)) +
       guides(size = "none")
   }
@@ -175,8 +162,7 @@ ggQ3star <- function(obj, method = c("circle", "square"), type = c("mixed", "ful
   # matrix cell glyphs
   if (markQ3star == "pch") {
     p <- p + geom_point(
-      data = p.mat,
-      mapping = aes(x = Var1, y = Var2),
+      mapping = aes(x = .data$Var1, y = .data$Var2),
       shape = pch,
       size = pch.cex,
       color = pch.col
@@ -186,17 +172,19 @@ ggQ3star <- function(obj, method = c("circle", "square"), type = c("mixed", "ful
   # adding values
   if (type == "full") {
     p <- p +
-      geom_text(aes(x = Var1, y = Var2),
-                label = value,
+      geom_text(aes(x = .data$Var1, y = .data$Var2),
+                label = .data$value,
                 color = lab_col,
                 size = lab_size)
   } else if (type == "lower" | lower == "number" ) {
     p <- p +
-      geom_text(data = . %>% dplyr::filter(lab == TRUE), aes(x = Var2, y = Var1, label = value)) +
+      geom_text(data = . %>% dplyr::filter(lab == TRUE),
+                aes(x = .data$Var2, y = .data$Var1, label = .data$value)) +
       theme(axis.text.x = element_blank(), axis.text.y = element_blank())
   } else if (type == "upper" | upper == "number") {
     p <- p +
-      geom_text(data = . %>% dplyr::filter(lab == TRUE), aes(x = Var2, y = Var1, label = value)) +
+      geom_text(data = . %>% dplyr::filter(lab == TRUE),
+                aes(x = .data$Var2, y = .data$Var1, label = .data$value)) +
       theme(axis.text.x = element_blank(), axis.text.y = element_blank())
   }
 

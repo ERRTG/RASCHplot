@@ -32,7 +32,10 @@ Imports:
   eRm,
   grDevices,
   methods,
-  corrplot
+  corrplot,
+  reshape2,
+  ggstance,
+  gtable
 Suggests:
   knitr,
   rmarkdown

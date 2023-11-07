@@ -5,7 +5,7 @@
 \title{Heatmap plot function for Yen's Q3}
 \usage{
 ggQ3star(
-  obj,
+  object,
   method = c("circle", "square"),
   type = c("mixed", "full", "lower", "upper"),
   markQ3star = c("circle", "pch"),
@@ -31,7 +31,7 @@ ggQ3star(
 )
 }
 \arguments{
-\item{obj}{\code{Q3star} object, typically result of \link[RASCHplot]{Q3star}.}
+\item{object}{\code{Q3star} object, typically result of \link[RASCHplot]{Q3star}.}
 
 \item{method}{character, the visualization method of Q3star matrix to be
 used. Allowed values are "circle" (default), "square".}
@@ -84,7 +84,7 @@ data(SPADI)
 SPADI.complete <- SPADI[complete.cases(SPADI), ]
 it.SPADI <- SPADI.complete[, 9:16]
 q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
-ggQ3star(obj = q3obj)
+ggQ3star(object = q3obj)
 it.SPADI$D4D5 <- it.SPADI$D4 + it.SPADI$D5
 it.SPADI.2 <- it.SPADI[,-c(4,5)]
 q3obj2 <- Q3star(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
