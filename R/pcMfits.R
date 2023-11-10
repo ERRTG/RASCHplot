@@ -97,12 +97,18 @@ pcMfits <- function(method.item, method.person, dat) {
 
   #============= Fit person parameters: WML/MLE ======================
 
-  #------------- Define item response function -----------------------
-  arg.list <- list("b" = beta.sim)
-  person.fit <- sirt::IRT.mle(data = dat, irffct = pcmfct, arg.list = arg.list,
-                        type = method.person, progress = FALSE)
-  theta.sim <- person.fit$est
-  theta.sim[theta.sim %in% c(Inf, -Inf)] <- NA
+  if (!is.null(method.person)) {
+    #------------- Define item response function -----------------------
+    arg.list <- list("b" = beta.sim)
+    person.fit <- sirt::IRT.mle(data = dat, irffct = pcmfct, arg.list = arg.list,
+                                type = method.person, progress = FALSE)
+    theta.sim <- person.fit$est
+    theta.sim[theta.sim %in% c(Inf, -Inf)] <- NA
+  } else {
+    theta.sim <- NULL
+    preson.fit <- NULL
+  }
+
 
   #============= End fit person parameters ===========================
 

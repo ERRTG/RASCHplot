@@ -80,13 +80,13 @@ RASCHresiduals <- function(beta, theta, data, standardize = TRUE) {
   }
 
   if (standardize) {
-    R <- (data - E) / sqrt(W) # unconditional residuals
+    R <- as.matrix((data - E) / sqrt(W)) # unconditional residuals
   } else {
-    R <- data - E # unconditional residuals
+    R <- as.matrix(data - E) # unconditional residuals
   }
 
 
-  class(R) <- c(class(R),"RASCHresiduals")
+  class(R) <- c(class(R), "RASCHresiduals")
   R
 
 }

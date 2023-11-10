@@ -2,7 +2,7 @@
 #'
 #' Visualise the alignment of the item parameters.
 #'
-#' @param object Either a \code{eRm} or \code{Rm} object -- result of \link[eRm]{RM} or \link[eRm]{PCM}. Or a list including a vector of person parameters, a vector (for dichotomous items) or data frame or matrix (for polytomous items) of item-category (difficulty) parameters, and data frame or matrix with location and threshold parameters. If \code{object} is
+#' @param object A list including a vector of person parameters, a vector (for dichotomous items) or data frame or matrix (for polytomous items) of item-category (difficulty) parameters, and data frame or matrix with location and threshold parameters. If \code{object} is
 #' not provided, then all of \code{beta} and \code{threshtable} must be
 #' provided.
 #' @param beta The item parameters. This must be a vector or list of vectors in case of stratification. Ignored if \code{object} is provided.
@@ -37,15 +37,15 @@
 #' #pp <- eRm::person.parameter(object)
 #' #theta <- unlist(pp$thetapar)
 #' threshtable <- eRm::thresholds(object)$threshtable[[1]]
-#' ggPImap(object)
+#' ggPImap_cloud(object)
 #'
 #' if (FALSE) {
 #' SPADI1 <- SPADI[SPADI$gender == 1,]
 #' SPADI2 <- SPADI[SPADI$gender == 2,]
 #' SPADI.complet1 <- SPADI1[complete.cases(SPADI1), ]
 #' SPADI.complet2 <- SPADI2[complete.cases(SPADI2), ]
-#' it.SPADI1 <- SPADI.complet1[SPADI.complet1$gender == 1, 9:16]
-#' it.SPADI2 <- SPADI.complet2[SPADI.complet2$gender == 2, 9:16]
+#' it.SPADI1 <- SPADI.complet1[, 9:16]
+#' it.SPADI2 <- SPADI.complet2[, 9:16]
 #' object1 <- eRm::PCM(it.SPADI1)
 #' object2 <- eRm::PCM(it.SPADI2)
 #' beta1 <- object1$betapar
@@ -56,56 +56,38 @@
 #' theta2 <- unlist(pp2$thetapar)
 #' threshtable1 <- eRm::thresholds(object1)$threshtable[[1]]
 #' threshtable2 <- eRm::thresholds(object2)$threshtable[[1]]
+#'
+#' ggPImap_cloud(beta = list(beta1 = beta1, beta2 = beta2),
+#'              threshtable = list(threshtable1 = threshtable1,
+#'                                 threshtable2 = threshtable2),
+#'              legend.title = "Gender", legend.labels = c("1", "2"))
+#'
 #' objlist <- list(beta = list(beta1 = beta1, beta2 = beta2),
 #'                 theta = list(theta1 = theta1, theta2 = theta2),
 #'                 threshtable = list(threshtable1 = threshtable1,
 #'                                    threshtable2 = threshtable2))
-#' ggPImap(objlist, legend.title = "Gender", legend.labels = c("1", "2"))
+#' ggPImap_cloud(objlist, legend.title = "Gender", legend.labels = c("1", "2"))
 #' }
 #' @export
 #'
-ggPImap <- function(object, beta, threshtable, item.subset = "all", ggtheme = theme_minimal, xlab.label = "", title = "", legend.title = NULL, legend.labels = NULL) {
+ggPImap_cloud <- function(object, beta, threshtable, item.subset = "all", ggtheme = theme_minimal, xlab.label = "", title = "", legend.title = NULL, legend.labels = NULL) {
 
-  if (inherits(object, c("Rm", "eRm"))) {
-    object$beta <- object$betapar
-    # compute threshtable from beta for dichotomous models and item names
-    if (is.null(object$threshtable)) {
-      if (object$model == "RMD" || max(object$X,na.rm=TRUE) < 2){
-        dRm <- TRUE
-        threshtable <- cbind(beta, beta) * -1 # betapars are easiness parameteres
-        rownames(threshtable) <- substring(rownames(threshtable), first=6, last=9999)
-      } else {
-        dRm <- FALSE
-        threshtable <- eRm::thresholds(object)$threshtable[[1]]
-      }
-    }
-
-    # Extract subset of items to be plotted
-    threshmat <- as.matrix(threshtable)
-    if (is.character(item.subset)){
-      if (length(item.subset) > 1 && all(item.subset %in% rownames(threshtable))) {
-        threshmat <- threshmat[item.subset, ]
-      } else if (length(item.subset)!=1 || !(item.subset=="all")) {
-        stop("item.subset misspecified. Use 'all' or vector of at least two valid item indices/names.")
-      }
-    } else {
-      if (length(item.subset) > 1 && all(item.subset %in% 1:nrow(threshmat)))
-        threshmat <- threshmat[item.subset,]
-      else
-        stop("item.subset misspecified. Use 'all' or vector of at least two valid item indices/names.")
-    }
-
-
-    threshdf <- data.frame(Item = rownames(threshmat), threshmat)
-    threshlong <- melt(threshdf, id.vars = c("Item", "Location"))
-
-
+  if (!is.null(object) && !inherits(object, "list")) {
+    stop("...")
+  }
+  if (!is.null(object) && length(object) != 3) {
+    stop("...")
+  }
+  if (!is.null(beta) && !inherits(object$beta, "list")) {
+    stop("...")
+  }
+  if (!is.null(threshtable) && !inherits(object$threshtable, "list")) {
+    stop("...")
+  }
+  if (length(beta) != length(theta)) {
+    stop("...")
   }
 
-  if (!inherits(object, c("Rm", "eRm")) && inherits(object, "list")) {
-    if (length(object) != 3) {
-      stop("...")
-    } else {
       if (inherits(object$beta, "list")) {
 
         # Extract subset of items to be plotted
@@ -125,7 +107,7 @@ ggPImap <- function(object, beta, threshtable, item.subset = "all", ggtheme = th
 
         threshlistdf <- lapply(object$threshtable, function(x) {
           data.frame(Item = rownames(x), x)}
-          )
+        )
         threshdf <- data.table::rbindlist(threshlistdf, idcol = "index")
         threshlong <- reshape2::melt(threshdf, id.vars = c("index", "Item", "Location"))
 
@@ -152,16 +134,11 @@ ggPImap <- function(object, beta, threshtable, item.subset = "all", ggtheme = th
         threshlong <- reshape2::melt(threshdf, id.vars = c("Item", "Location"))
 
       }
-    }
-  }
 
 
 
-  #if (sorted)
-  #  threshmat<-threshmat[order(threshmat[,1],decreasing=FALSE),]
 
-  #loc <- as.matrix(threshmat[,1])
-  #threshmat <- as.matrix(threshmat[,-1])
+
 
 
 
@@ -180,7 +157,7 @@ ggPImap <- function(object, beta, threshtable, item.subset = "all", ggtheme = th
       geom_point(aes(color = .data$index),
                  position=position_dodgev(height = 0.3),
                  shape=21, fill="white"#, color="black"
-                 )
+      )
 
     # Adding location
     p <- p +
@@ -226,12 +203,12 @@ ggPImap <- function(object, beta, threshtable, item.subset = "all", ggtheme = th
       scale_color_discrete(labels = legend.labels)
   }
 
-  ggPImap <- p
+  ggPImap_cloud <- p
 
-  # Add a class for S3 method dispatch for printing the ggPImap plot
-  class(ggPImap) <- c("ggPImap", class(ggPImap))
+  # Add a class for S3 method dispatch for printing the ggPImap_cloud plot
+  class(ggPImap_cloud) <- c("ggPImap_cloud", class(ggPImap_cloud))
 
-  ggPImap
+  ggPImap_cloud
 
 
 }

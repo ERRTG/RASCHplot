@@ -32,7 +32,7 @@
 #' @importFrom reshape2 melt
 #' @importFrom ggplot2 ggplot aes geom_tile geom_point scale_size guides scale_fill_gradient2 geom_text geom_label theme element_blank geom_label element_text coord_fixed theme_minimal
 #' @importFrom rlang .data
-#' @importFrom dplyr filter
+#' @importFrom dplyr filter case_when
 #' @importFrom grDevices colorRampPalette
 #'
 #' @references Christensen, K. B., Makransky, G. and Horton, M. (2017)
@@ -90,52 +90,35 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "
     outline.color <- "gray"
   }
 
-  corr <- object$Q3matrix
+  corrmat <- object$Q3matrix
 
-  Q3nodiag <- corr
+  Q3nodiag <- corrmat
   diag(Q3nodiag) <- NA
-  idx <- which(Q3nodiag == object$Q3max, arr.ind = TRUE)[,2]
-  r <- colnames(corr)[idx]
+  Q3mean <- mean(Q3nodiag, na.rm = TRUE)
+  diag(corrmat) <- Q3mean
 
-  Q3mean <- mean(corr[upper.tri(corr, diag = FALSE)])
-  diag(corr) <- Q3mean
-  corr <- corr - Q3mean
-  corr <- base::round(x = corr, digits = digits)
-  lims <- corr
+  corr <- reshape2::melt(corrmat - Q3mean, value.name = "value") %>%
+    mutate(rid = as.integer(as.factor(.data$Var1)),
+           cid = as.integer(as.factor(.data$Var2))) %>%
+    mutate(part = case_when(
+      .$rid < .$cid ~ "upper",
+      .$rid == .$cid ~ "diag",
+      .$rid > .$cid ~ "lower"
+    )) %>%
+    mutate(abs_corr = abs(.data$value),
+           value.lab = round(value, digits),
+           lab = .data$Var1)
 
-  if (!show.diag) {
-    diag(corr) <- NA
-  }
-
-  # Get lower or upper triangle
-  if (type == "lower" | (type == "mixed" & lower == method)) {
-    corr[upper.tri(corr)] <- NA
-    if (markQ3star == "circle") {
-      corr[idx[1], idx[2]] <- corr[idx[2], idx[1]]
-    }
-  } else if (type == "upper" | (type == "mixed" & upper == method)) {
-    corr[lower.tri(corr)] <- NA
-    if (markQ3star == "circle") {
-      corr[idx[2], idx[1]] <- corr[idx[1], idx[2]]
-    }
-  }
-
-  # Melt corr
-  corr <- melt(corr, na.rm = TRUE)
-  colnames(corr) <- c("Var1", "Var2", "value")
-
-  corr$abs_corr <- abs(corr$value) * 10
-
-  corr$lab <- TRUE
-  if (type == "lower" | (type == "mixed" & lower == method)) {
-    corr$lab[corr$Var1 == r[1] & corr$Var2 == r[2]] <- FALSE
-  } else if (type == "upper" | (type == "mixed" & upper == method)) {
-    corr$lab[corr$Var1 == r[2] & corr$Var2 == r[1]] <- FALSE
-  }
+  lims <- range(corr$value) * 1.1
 
   # heatmap
-  p <- ggplot(data = corr,
-              mapping = aes(x = .data$Var1, y = .data$Var2, fill = .data$value))
+  #p <- corrlong %>%
+  #  mutate(Var1 = factor(Var1, levels(corrlong$Var1)),
+  #         Var2 = factor(Var2, levels(corrlong$Var1))) %>%
+   p <- ggplot(data = corr %>% filter(part == "upper"),
+              mapping = aes(x = .data$cid,
+                            y = .data$rid,
+                            fill = .data$value))
 
   # modification based on method
   if (method == "square") {
@@ -155,7 +138,7 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "
     high = colors[3],
     mid = colors[2],
     midpoint = 0,
-    limit = range(lims),
+    limit = lims,
     name = legend.title
   )
 
@@ -171,23 +154,38 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "
 
   # adding values
   if (type == "full") {
-    p <- p +
-      geom_text(aes(x = .data$Var1, y = .data$Var2),
-                label = .data$value,
-                color = lab_col,
-                size = lab_size)
-  } else if (type == "lower" | lower == "number" ) {
-    p <- p +
-      geom_text(data = . %>% dplyr::filter(lab == TRUE),
-                aes(x = .data$Var2, y = .data$Var1, label = .data$value)) +
-      theme(axis.text.x = element_blank(), axis.text.y = element_blank())
-  } else if (type == "upper" | upper == "number") {
-    p <- p +
-      geom_text(data = . %>% dplyr::filter(lab == TRUE),
-                aes(x = .data$Var2, y = .data$Var1, label = .data$value)) +
-      theme(axis.text.x = element_blank(), axis.text.y = element_blank())
+
+    tri.dat <- corr %>%
+      dplyr::filter(part != "diag")
+
+  } else if (type == "lower" || lower == "number") {
+
+    tri.dat <- corr %>%
+      dplyr::filter(part == "lower")
+
+    if (markQ3star == "circle") {
+      Q3stardat <- corr %>%
+        dplyr::filter(.$value == object$Q3max - Q3mean & .$part == "upper")
+    }
+
+  } else if (type == "upper" || upper == "number") {
+
+    tri.dat <- corr %>%
+      dplyr::filter(part == "upper")
+
+    if (markQ3star == "circle") {
+      Q3stardat <- corr %>%
+        dplyr::filter(.$value == object$Q3max - Q3mean & .$part == "lower")
+    }
+
   }
 
+  p <- p +
+    geom_text(data = tri.dat,
+              aes(x = .data$cid, y = .data$rid), label = tri.dat$value.lab) +
+    geom_text(data = Q3stardat,
+              aes(x = .data$cid, y = .data$rid), label = Q3stardat$value.lab) +
+    theme(axis.text.x = element_blank(), axis.text.y = element_blank())
 
   # depending on the class of the object, add the specified theme
   if (class(ggtheme)[[1]] == "function") {
@@ -215,6 +213,11 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "
     p <- p +
       ggtitle(title)
   }
+
+  # add labels
+  #labels <- levels(corr$Var1)
+  #breaks <- seq(labels)
+  #p <- p + scale_x_discrete(labels = labs)
 
   # removing legend
   if (!show.legend) {

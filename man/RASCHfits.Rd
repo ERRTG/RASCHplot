@@ -6,7 +6,7 @@
 \usage{
 RASCHfits(
   method.item = c("PCML", "CML", "JML", "MML"),
-  method.person = c("WML", "MLE"),
+  method.person = c("WML", "MLE", NULL),
   dat
 )
 }

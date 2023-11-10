@@ -43,11 +43,14 @@ Q3star <- function(items, method.item = c("PCML", "CML", "JML", "MML"), method.p
 
   #============= Compute residuals ==========================================
 
-  resids  <- RASCHresiduals(fit$beta, fit$theta, items, standardize)
+  resids  <- RASCHresiduals(beta = fit$beta,
+                            theta = fit$theta,
+                            data = items,
+                            standardize = standardize)
 
   #============= Compute Q3 statistics ======================================
 
-  Q3matrix <- Q3(object = resids, ...)
+  Q3matrix <- RASCHplot::Q3(object = resids, ...)
   Q3max <- max(Q3matrix[upper.tri(Q3matrix, diag = FALSE)])
   Q3stjerne <- Q3max - mean(Q3matrix[upper.tri(Q3matrix, diag = FALSE)])
   Q3nodiag <- Q3matrix

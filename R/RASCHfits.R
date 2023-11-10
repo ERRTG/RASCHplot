@@ -5,7 +5,7 @@
 #' @param dat Matrix of item responses.
 #'
 #' @export RASCHfits
-RASCHfits <- function(method.item = c("PCML", "CML", "JML", "MML"), method.person = c("WML", "MLE"), dat) {
+RASCHfits <- function(method.item = c("PCML", "CML", "JML", "MML"), method.person = c("WML", "MLE", NULL), dat) {
 
   method.item <- match.arg(method.item)
   method.person <- match.arg(method.person)
@@ -22,7 +22,7 @@ RASCHfits <- function(method.item = c("PCML", "CML", "JML", "MML"), method.perso
     model <- "RMP"
   }
 
-  #============= Fit item parameters =================================
+  #============= Fit parameters =================================
 
   fit <- switch(model,
                 "RMD"= rMfits(method.item, method.person, dat),

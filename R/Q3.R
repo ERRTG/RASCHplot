@@ -11,6 +11,7 @@ Q3 <- function(object, ...) {
     stop("use only with \"RASCHresiduals\" objects")
   }
 
+  object[is.infinite(object)] <- NA
   Q3 <- cor(x = object, method = "pearson", use = "pairwise.complete.obs")
 
   Q3

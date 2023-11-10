@@ -49,11 +49,17 @@ rMfits <- function(method.item = c("PCML", "CML", "JML", "MML"), method.person =
 
   #============= Fit person parameters: WML/MLE ======================
 
-  arg.list <- list("b" = beta.sim)
-  person.fit <- sirt::IRT.mle(data = dat, irffct = irffct, arg.list = arg.list,
-                        type = method.person, progress = FALSE)
-  theta.sim <- person.fit$est
-  theta.sim[theta.sim %in% c(Inf, -Inf)] <- NA
+  if (!is.null(method.person)) {
+    arg.list <- list("b" = beta.sim)
+    person.fit <- sirt::IRT.mle(data = dat, irffct = irffct, arg.list = arg.list,
+                                type = method.person, progress = FALSE)
+    theta.sim <- person.fit$est
+    theta.sim[theta.sim %in% c(Inf, -Inf)] <- NA
+  } else {
+    theta.sim <- NULL
+    person.fit <- NULL
+  }
+
 
   #============= End fit person parameters ===========================
 
