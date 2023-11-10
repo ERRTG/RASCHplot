@@ -1,0 +1,18 @@
+---
+title: "Introduction to the Yen's Q3 functions"
+author: 
+  - Ann-Sophie Buchardt
+  - Karl Bang Christensen
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Introduction to the Yen's Q3 functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r child = "ggQ3star.Rmd"}
+```

@@ -7,10 +7,9 @@
 ggQ3star(
   object,
   method = c("circle", "square"),
-  type = c("mixed", "full", "lower", "upper"),
-  markQ3star = c("circle", "pch"),
-  lower = NULL,
-  upper = NULL,
+  type = c("lower", "upper", "full"),
+  labels = c(NA, "upper", "lower", "full", "none"),
+  markQ3star = c("circle", "square", "pch", NA),
   ggtheme = theme_minimal,
   title = "",
   show.legend = TRUE,
@@ -19,12 +18,11 @@ ggQ3star(
   colors = NULL,
   outline.color = NULL,
   outline.width = 0,
-  lab = FALSE,
   lab_col = "black",
   lab_size = 4,
   pch = 8,
   pch.col = "black",
-  pch.cex = 5,
+  pch.cex = 2,
   tl.cex = 12,
   tl.col = "black",
   tl.srt = 45,
@@ -37,13 +35,11 @@ ggQ3star(
 \item{method}{character, the visualization method of Q3star matrix to be
 used. Allowed values are "circle" (default), "square".}
 
-\item{type}{character, "mixed" (default), "full", "lower" or "upper" display.}
+\item{type}{character, "lower" (default), "upper", or "full" display.}
 
-\item{markQ3star}{Logical flag for highlighting the \eqn{Q_{3\ast}}{Q3*} value by a rectangle.}
+\item{labels}{character, "upper" (default), "lower", "full" or "none"/NULL, Q3 value labels.}
 
-\item{lower}{character, the visualisation method of lower triangular part of Q3star matrix to be used (only valid when \code{type = "mixed"}). Allowed values are "number" (default), "circle", "square".}
-
-\item{upper}{character, the visualisation method of upper triangular part of Q3star matrix to be used (only valid when \code{type = "mixed"}). Allowed values are "number", "circle" (default), "square".}
+\item{markQ3star}{character, for highlighting the \eqn{Q_{3\ast}}{Q3*} value by a rectangle.}
 
 \item{ggtheme}{ggplot2 function or theme object. Default value is \code{theme_minimal}. Allowed values are the official ggplot2 themes including \code{theme_gray}, \code{theme_bw}, \code{theme_classic}, \code{theme_void}, .... Theme objects are also allowed (e.g., \code{theme_classic()}).}
 
@@ -64,10 +60,8 @@ show diagonal correlation for \code{type = "full"} and to remove it when
 
 \item{outline.width}{the outline width of square or circle. Default value is 0 (no outline).}
 
-\item{lab}{logical value. If TRUE, add correlation coefficient on the plot.}
-
 \item{lab_col, lab_size}{size and color to be used for the correlation
-coefficient labels. used when lab = TRUE.}
+coefficient labels when showed.}
 
 \item{pch}{add character on the glyphs of Q3star value (only valid when markQ3star is TRUE). Default value is 4.}
 
@@ -96,7 +90,7 @@ ggQ3star(object = q3obj)
 # The \eqn{Q_{3\ast}}{Q3*} value is obtained for items D4 and D5:
 q3obj$Q3star
 
-# With the reasoning that these items holds the same information,
+# With the reasoning that these items hold the same information,
 # we create a new variable as the sum of D4 and D5:
 it.SPADI$D4D5 <- it.SPADI$D4 + it.SPADI$D5
 # and remove the two:

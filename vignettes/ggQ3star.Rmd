@@ -1,0 +1,205 @@
+---
+title: "Introduction to the Yen's Q3 functions"
+author: 
+  - Ann-Sophie Buchardt
+  - Karl Bang Christensen
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Introduction to the Yen's Q3 functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  comment = "#>",
+  #echo = TRUE, message=FALSE,
+  tidy = TRUE, 
+  tidy.opts = list(blank = TRUE, arrow = TRUE), 
+  highlight = TRUE,
+  #collapse = FALSE,
+  #cache.extra = R.version, autodep=TRUE,
+  fig.width=6, fig.height=5, comment=NA,
+  fig.align="center"
+  )
+
+library(ggsci)
+jama <- pal_jama(palette = c("default"), alpha = 1)(7)
+
+library(ggplot2)
+
+theme_set(theme_minimal())
+
+options(ggplot2.continuous.colour = jama)
+options(ggplot2.continuous.fill = jama)
+options(ggplot2.discrete.colour = jama)
+options(ggplot2.discrete.fill = jama)
+```
+
+## Introduction
+
+This R tutorial describes how to compute and visualize Yen's $Q_{3}$ statistics using R software and the `RASCHplot` package. In particular, it illustrates the usage of the following functions:
+
+- `Q3star()`
+- `ggQ3star()`
+
+First, we load the `RASCHplot` package:
+
+```{r setup}
+library(RASCHplot)
+```
+
+The functions in the package are applicable on polytomous as well as dichotomous items. 
+We load the polytomous SPADI data set from the package. Users can either load their own data or use those saved in the workspace.
+
+## Prepare the data
+
+The `SPADI` is used:
+
+```{r}
+data(SPADI)
+
+head(SPADI)
+```
+
+We remove incomplete cases:
+
+```{r}
+SPADI.complete <- SPADI[complete.cases(SPADI), ]
+```
+
+We create an object containing only items:
+
+```{r}
+it.SPADI <- SPADI.complete[, 9:16]
+```
+
+## Compute Yen's Q3 statistics
+
+Yen's Q3 statistics are computed using the `Q3star()` function:
+
+```{r}
+q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
+```
+
+Here CML is used for estimating item parameters and WML is used for estimating person parameters. Other options are available, see `?Q3star`.
+
+The `q3obj` includes the following values:
+
+```{r}
+names(q3obj)
+```
+
+We can, e.g., extract the $Q_{3\ast$ value from the `q3obj` object:
+
+```{r}
+q3obj$Q3star
+```
+
+## Visualise Yen's Q3 statistics
+
+The `ggQ3star()` function is used to visualise Yen's Q3 statistics:
+
+```{r}
+ggQ3star(object = q3obj)
+```
+
+Below, we give examples of how to change the appearance of the plot.
+
+As we saw above, the $Q_{3\ast}$ value is obtained for items D4 and D5:
+
+```{r}
+q3obj$Q3star
+```
+
+We observe that $Q_{3\ast} > 0.2$ and with the reasoning that these items hold the same information, we create a new variable as the sum of D4 and D5:
+
+```{r}
+it.SPADI$D4D5 <- it.SPADI$D4 + it.SPADI$D5
+```
+
+and remove the two:
+
+```{r}
+it.SPADI.2 <- it.SPADI[,-c(4,5)]
+```
+
+We compute Yen's Q3 statistics for this new set of items:
+
+```{r}
+q3obj2 <- Q3star(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
+```
+
+Again, we visualise Yen's Q3 statistics using `ggQ3star()`:
+
+```{r}
+ggQ3star(object = q3obj2)
+```
+
+We see that $Q_{3\ast} < 0.2$.
+
+
+## Appearance
+
+```{r}
+ggQ3star(object = q3obj, title = "Yen's Q3(*) statistics")
+```
+
+```{r}
+ggQ3star(object = q3obj, colors = c("chartreuse", "gray", "orchid"))
+```
+
+
+```{r}
+ggQ3star(object = q3obj, lab_col = "goldenrod")
+```
+
+
+```{r}
+ggQ3star(object = q3obj, method = "square")
+```
+
+```{r}
+ggQ3star(object = q3obj, type = "upper", labels = "lower")
+```
+
+```{r}
+ggQ3star(object = q3obj, type = "full")
+```
+
+
+```{r}
+ggQ3star(object = q3obj, type = "full", markQ3star = "pch")
+```
+
+## Appearance and `ggplot2`
+
+```{r}
+ggQ3star(object = q3obj) +
+  theme_void()
+```
+
+```{r}
+ggQ3star(object = q3obj) + 
+  theme_dark() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(), 
+        panel.grid.minor = element_blank())
+```
+
+
+## Cobination
+
+```{r}
+ggQ3star(object = q3obj, lab_col = "white", outline.color = "white", outline.width = .5) + 
+  theme_dark() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(), 
+        panel.grid.minor = element_blank())
+```
+
