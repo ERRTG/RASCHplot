@@ -19,6 +19,7 @@
 #'   \code{type} is one of "upper" or "lower".
 #' @param colors a vector of 3 colors for low, mid and high correlation values.
 #' @param outline.color the outline color of square or circle. Default value is "gray".
+#' @param outline.width the outline width of square or circle. Default value is 0 (no outline).
 #' @param lab logical value. If TRUE, add correlation coefficient on the plot.
 #' @param lab_col,lab_size size and color to be used for the correlation
 #'   coefficient labels. used when lab = TRUE.
@@ -67,7 +68,7 @@
 #'
 #' @export
 #'
-ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "full", "lower", "upper"), markQ3star = c("circle", "pch"), lower = NULL, upper = NULL, ggtheme = theme_minimal, title = "", show.legend = TRUE, legend.title = "Q3star", show.diag = NULL, colors = NULL, outline.color = NULL, lab = FALSE, lab_col = "black", lab_size = 4, pch = 8, pch.col = "black", pch.cex = 5, tl.cex = 12, tl.col = "black", tl.srt = 45, digits = 2) {
+ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "full", "lower", "upper"), markQ3star = c("circle", "pch"), lower = NULL, upper = NULL, ggtheme = theme_minimal, title = "", show.legend = TRUE, legend.title = "Q3star", show.diag = NULL, colors = NULL, outline.color = NULL, outline.width = 0, lab = FALSE, lab_col = "black", lab_size = 4, pch = 8, pch.col = "black", pch.cex = 5, tl.cex = 12, tl.col = "black", tl.srt = 45, digits = 2) {
 
   if (!inherits(object, "Q3star")) {
     stop("use only with \"Q3star\" objects")
@@ -142,7 +143,7 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "
   } else if (method == "circle") {
 
     p <- p + geom_point(color = outline.color,
-                        shape = 21, stroke = 0,
+                        shape = 21, stroke = outline.width,
                         aes(size = .data$value))
   }
 

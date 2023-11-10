@@ -18,6 +18,7 @@ ggQ3star(
   show.diag = NULL,
   colors = NULL,
   outline.color = NULL,
+  outline.width = 0,
   lab = FALSE,
   lab_col = "black",
   lab_size = 4,
@@ -61,6 +62,8 @@ show diagonal correlation for \code{type = "full"} and to remove it when
 
 \item{outline.color}{the outline color of square or circle. Default value is "gray".}
 
+\item{outline.width}{the outline width of square or circle. Default value is 0 (no outline).}
+
 \item{lab}{logical value. If TRUE, add correlation coefficient on the plot.}
 
 \item{lab_col, lab_size}{size and color to be used for the correlation
@@ -92,6 +95,7 @@ q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", mo
 ggQ3star(object = q3obj)
 # The \eqn{Q_{3\ast}}{Q3*} value is obtained for items D4 and D5:
 q3obj$Q3star
+
 # With the reasoning that these items holds the same information,
 # we create a new variable as the sum of D4 and D5:
 it.SPADI$D4D5 <- it.SPADI$D4 + it.SPADI$D5
