@@ -80,13 +80,24 @@ text label (variable names).}
 Visualise the Yen's Q3 statistics for a \code{Q3star} object using \link[ggcorrplot]{ggcorrplot} with mixed circle visualization (upper triangle) and numbers (lower triangle). The \eqn{Q_{3\ast}}{Q3*} value may be highlighted by a rectangle.
 }
 \examples{
+# Load data
 data(SPADI)
+# Remove incomplete cases
 SPADI.complete <- SPADI[complete.cases(SPADI), ]
+# Subset items
 it.SPADI <- SPADI.complete[, 9:16]
+# Compute Yen's Q3 statistics and the \eqn{Q_{3\ast}}{Q3*} value
 q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
+# Visualise Yen's Q3
 ggQ3star(object = q3obj)
+# The \eqn{Q_{3\ast}}{Q3*} value is obtained for items D4 and D5:
+q3obj$Q3star
+# With the reasoning that these items holds the same information,
+# we create a new variable as the sum of D4 and D5:
 it.SPADI$D4D5 <- it.SPADI$D4 + it.SPADI$D5
+# and remove the two:
 it.SPADI.2 <- it.SPADI[,-c(4,5)]
+# We compute new Yen's Q3 statistics:
 q3obj2 <- Q3star(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
 ggQ3star(q3obj2)
 

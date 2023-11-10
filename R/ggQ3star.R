@@ -43,13 +43,25 @@
 #' \doi{10.18637/jss.v039.i05}.
 #'
 #' @examples
+#' # Load data
 #' data(SPADI)
+#' # Remove incomplete cases
 #' SPADI.complete <- SPADI[complete.cases(SPADI), ]
+#' # Subset items
 #' it.SPADI <- SPADI.complete[, 9:16]
+#' # Compute Yen's Q3 statistics and the \eqn{Q_{3\ast}}{Q3*} value
 #' q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
+#' # Visualise Yen's Q3
 #' ggQ3star(object = q3obj)
+#' # The \eqn{Q_{3\ast}}{Q3*} value is obtained for items D4 and D5:
+#' q3obj$Q3star
+#'
+#' # With the reasoning that these items holds the same information,
+#' # we create a new variable as the sum of D4 and D5:
 #' it.SPADI$D4D5 <- it.SPADI$D4 + it.SPADI$D5
+#' # and remove the two:
 #' it.SPADI.2 <- it.SPADI[,-c(4,5)]
+#' # We compute new Yen's Q3 statistics:
 #' q3obj2 <- Q3star(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
 #' ggQ3star(q3obj2)
 #'
@@ -64,6 +76,7 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "
   markQ3star <- match.arg(markQ3star)
   type <- match.arg(type)
   method <- match.arg(method)
+
   if (is.null(show.diag)) {
     if (type == "full") {
       show.diag <- TRUE
@@ -81,10 +94,8 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "
     }
   }
 
-  mypal <- c("#374E55FF", "#DF8F44FF", "#00A1D5FF", "#B24745FF", "#79AF97FF",
-             "#6A6599FF", "#80796BFF")
   if (is.null(colors)) {
-    colors <- c("#00A1D5FF", "white", "#DF8F44FF")
+    colors <- c("#4575b4", "lightgray", "#B24745FF")
   }
   if (is.null(outline.color)) {
     outline.color <- "gray"
@@ -109,27 +120,30 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "
            value.lab = round(value, digits),
            lab = .data$Var1)
 
-  lims <- range(corr$value) * 1.1
+  #lims <- range(corr$value) * 1.1
+  lims <- c(floor(min(corr$value)*100)/100, ceiling(max(corr$value)*100)/100)
 
-  # heatmap
-  #p <- corrlong %>%
-  #  mutate(Var1 = factor(Var1, levels(corrlong$Var1)),
-  #         Var2 = factor(Var2, levels(corrlong$Var1))) %>%
+  maxabsval <- ceiling(max(corr$abs_corr)*100)/100
+  lims <- c(-maxabsval, maxabsval)
+
    p <- ggplot(data = corr %>% filter(part == "upper"),
               mapping = aes(x = .data$cid,
                             y = .data$rid,
                             fill = .data$value))
+
+   # add labels
+   p <- p + scale_x_continuous(breaks = seq(levels(corr$Var1)), labels = levels(corr$Var1))
+   p <- p + scale_y_continuous(breaks = seq(levels(corr$Var1)), labels = levels(corr$Var1))
 
   # modification based on method
   if (method == "square") {
     p <- p +
       geom_tile(color = outline.color)
   } else if (method == "circle") {
+
     p <- p + geom_point(color = outline.color,
-                        shape = 21,
-                        aes(size = .data$abs_corr)) +
-      scale_size(range = c(4, 10)) +
-      guides(size = "none")
+                        shape = 21, stroke = 0,
+                        aes(size = .data$value))
   }
 
   # adding colors
@@ -139,8 +153,15 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "
     mid = colors[2],
     midpoint = 0,
     limit = lims,
-    name = legend.title
+    #name = legend.title,
+    guide = "legend"
   )
+
+  # Change guide
+  p <- p +
+    #scale_fill_continuous(guide = "legend", limits = limits) +
+    #scale_size_continuous(range = limits) +
+    scale_size(limits = lims, range = c(4, 14))
 
   # matrix cell glyphs
   if (markQ3star == "pch") {
@@ -214,11 +235,6 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "
       ggtitle(title)
   }
 
-  # add labels
-  #labels <- levels(corr$Var1)
-  #breaks <- seq(labels)
-  #p <- p + scale_x_discrete(labels = labs)
-
   # removing legend
   if (!show.legend) {
     p <- p +
@@ -229,7 +245,7 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("mixed", "
   p <- p +
     theme(
       axis.title.x = element_blank(),
-      axis.title.y = element_blank()
+      axis.title.y = element_blank(), panel.grid.minor = element_blank()
     )
   p
 

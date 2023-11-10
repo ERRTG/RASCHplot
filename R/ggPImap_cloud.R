@@ -37,37 +37,8 @@
 #' #pp <- eRm::person.parameter(object)
 #' #theta <- unlist(pp$thetapar)
 #' threshtable <- eRm::thresholds(object)$threshtable[[1]]
-#' ggPImap_cloud(object)
+#' #ggPImap_cloud(object)
 #'
-#' if (FALSE) {
-#' SPADI1 <- SPADI[SPADI$gender == 1,]
-#' SPADI2 <- SPADI[SPADI$gender == 2,]
-#' SPADI.complet1 <- SPADI1[complete.cases(SPADI1), ]
-#' SPADI.complet2 <- SPADI2[complete.cases(SPADI2), ]
-#' it.SPADI1 <- SPADI.complet1[, 9:16]
-#' it.SPADI2 <- SPADI.complet2[, 9:16]
-#' object1 <- eRm::PCM(it.SPADI1)
-#' object2 <- eRm::PCM(it.SPADI2)
-#' beta1 <- object1$betapar
-#' beta2 <- object2$betapar
-#' pp1 <- eRm::person.parameter(object2) #eRm::person.parameter(object1)
-#' pp2 <- eRm::person.parameter(object2)
-#' theta1 <- unlist(pp1$thetapar)
-#' theta2 <- unlist(pp2$thetapar)
-#' threshtable1 <- eRm::thresholds(object1)$threshtable[[1]]
-#' threshtable2 <- eRm::thresholds(object2)$threshtable[[1]]
-#'
-#' ggPImap_cloud(beta = list(beta1 = beta1, beta2 = beta2),
-#'              threshtable = list(threshtable1 = threshtable1,
-#'                                 threshtable2 = threshtable2),
-#'              legend.title = "Gender", legend.labels = c("1", "2"))
-#'
-#' objlist <- list(beta = list(beta1 = beta1, beta2 = beta2),
-#'                 theta = list(theta1 = theta1, theta2 = theta2),
-#'                 threshtable = list(threshtable1 = threshtable1,
-#'                                    threshtable2 = threshtable2))
-#' ggPImap_cloud(objlist, legend.title = "Gender", legend.labels = c("1", "2"))
-#' }
 #' @export
 #'
 ggPImap_cloud <- function(object, beta, threshtable, item.subset = "all", ggtheme = theme_minimal, xlab.label = "", title = "", legend.title = NULL, legend.labels = NULL) {

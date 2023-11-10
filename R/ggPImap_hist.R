@@ -34,7 +34,7 @@
 #' be a character or factor variable. See examples below.
 #'
 #' @importFrom reshape2 melt
-#' @importFrom ggplot2 ggplot aes geom_tile geom_point scale_size guides scale_fill_gradient2 geom_text geom_label theme element_blank geom_label element_text coord_fixed theme_minimal coord_cartesian geom_histogram scale_color_discrete theme_void geom_density
+#' @importFrom ggplot2 ggplot aes geom_tile geom_point scale_size guides scale_fill_gradient2 geom_text geom_label theme element_blank geom_label element_text coord_fixed theme_minimal coord_cartesian geom_histogram scale_color_discrete theme_void geom_density after_stat
 #' @importFrom rlang .data
 #' @importFrom dplyr filter
 #' @importFrom ggstance position_dodgev
@@ -120,7 +120,7 @@ ggPImap_hist <- function(p, theta, beta, threshtable,
 
     if ("histogram" %in% type) {
       h <- h +
-        geom_histogram(aes(y = .data$..density..), position="identity", alpha=0.5)
+        geom_histogram(aes(y = after_stat(!!str2lang("density"))), position="identity", alpha=0.5)
     }
     if ("density" %in% type) {
       h <- h +
@@ -133,7 +133,7 @@ ggPImap_hist <- function(p, theta, beta, threshtable,
 
     if ("histogram" %in% type) {
       h <- h +
-        geom_histogram(aes(y = ..density..), position="identity", alpha=0.5)
+        geom_histogram(aes(y = after_stat(!!str2lang("density"))), position="identity", alpha=0.5)
     }
     if ("density" %in% type) {
       h <- h +
