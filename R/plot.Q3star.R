@@ -1,8 +1,8 @@
 #' Heatmap plot function for Yen's Q3
 #'
-#' Visualise the Yen's Q3 statistics for a \code{Q3star} object using \link[corrplot]{corrplot.mixed} with mixed circle visualization (upper triangle) and numbers (lower triangle). The \eqn{Q_{3\ast}}{Q3*} value may be highlighted by a rectangle.
+#' Visualise the matrix of Yen's Q3 statistics for a \code{Q3} object, e.g., with mixed circle visualization (upper triangle) and numbers (lower triangle). The \eqn{Q_{3\ast}}{Q3*} value may be highlighted by a rectangle. Great attention has been paid to details and appearance may be further tweaked through the function arguments.
 #'
-#' @param x \code{Q3star} object, typically result of \link[RASCHplot]{Q3star}.
+#' @param x \code{Q3} object, typically result of \link[RASCHplot]{Q3}.
 #' @param markQ3star Logical flag for highlighting the \eqn{Q_{3\ast}}{Q3*} value by a rectangle.
 #' @param lower.col Passed as col parameter to the lower matrix.
 #' @param upper.col Passed as col parameter to the upper matrix.
@@ -28,21 +28,21 @@
 #' data(SPADI)
 #' SPADI.complete <- SPADI[complete.cases(SPADI), ]
 #' it.SPADI <- SPADI.complete[, 9:16]
-#' q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
+#' q3obj <- Q3(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
 #' plot(q3obj)
 #' it.SPADI$D4D5 <- it.SPADI$D4 + it.SPADI$D5
 #' it.SPADI.2 <- it.SPADI[,-c(4,5)]
-#' q3obj2 <- Q3star(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
+#' q3obj2 <- Q3(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
 #' plot(q3obj2)
 #'
-#' @method plot Q3star
-#' @rdname plot.Q3star
+#' @method plot Q3
+#' @rdname plot.Q3
 #' @export
 #'
-plot.Q3star <- function(x, markQ3star = TRUE, lower.col = NULL, upper.col = NULL, col.lim = NULL, tl.pos = c('lt', 'ld', 'td', 'd', 'n'), tl.cex = 0.8, tl.col = "black", number.cex=0.8, colQ3star = "black", ...) {
+plot.Q3 <- function(x, markQ3star = TRUE, lower.col = NULL, upper.col = NULL, col.lim = NULL, tl.pos = c('lt', 'ld', 'td', 'd', 'n'), tl.cex = 0.8, tl.col = "black", number.cex=0.8, colQ3star = "black", ...) {
 
-  if (!inherits(x, "Q3star")) {
-    stop("use only with \"Q3star\" objects")
+  if (!inherits(x, "Q3")) {
+    stop("use only with \"Q3\" objects")
   }
 
   tl.pos <- match.arg(tl.pos)

@@ -11,12 +11,12 @@ ggQ3star(
   labels = c(NA, "upper", "lower", "full", "none"),
   markQ3star = c("circle", "square", "pch", NA),
   ggtheme = theme_minimal,
-  title = "",
+  title,
   show.legend = TRUE,
-  legend.title = "Q3star",
-  show.diag = NULL,
-  colors = NULL,
-  outline.color = NULL,
+  legend.title,
+  show.diag,
+  colors,
+  outline.color,
   outline.width = 0,
   lab_col = "black",
   lab_size = 4,
@@ -30,9 +30,9 @@ ggQ3star(
 )
 }
 \arguments{
-\item{object}{\code{Q3star} object, typically result of \link[RASCHplot]{Q3star}.}
+\item{object}{\code{Q3} object, typically result of \link[RASCHplot]{Q3}.}
 
-\item{method}{character, the visualization method of Q3star matrix to be
+\item{method}{character, the visualization method of Q3 matrix to be
 used. Allowed values are "circle" (default), "square".}
 
 \item{type}{character, "lower" (default), "upper", or "full" display.}
@@ -56,7 +56,7 @@ show diagonal correlation for \code{type = "full"} and to remove it when
 
 \item{colors}{a vector of 3 colors for low, mid and high correlation values.}
 
-\item{outline.color}{the outline color of square or circle. Default value is "gray".}
+\item{outline.color}{the outline color of square or circle. Default value is "#CFCFC2".}
 
 \item{outline.width}{the outline width of square or circle. Default value is 0 (no outline).}
 
@@ -74,7 +74,7 @@ text label (variable names).}
 \item{digits}{Decides the number of decimal digits to be displayed (Default is 2).}
 }
 \description{
-Visualise the Yen's Q3 statistics for a \code{Q3star} object using \link[ggcorrplot]{ggcorrplot} with mixed circle visualization (upper triangle) and numbers (lower triangle). The \eqn{Q_{3\ast}}{Q3*} value may be highlighted by a rectangle.
+Visualise the matrix of Yen's Q3 statistics for a \code{Q3} object using \link[ggplot2]{ggplot2}, e.g., with mixed circle visualization (upper triangle) and numbers (lower triangle). The \eqn{Q_{3\ast}}{Q3*} value may be highlighted by a rectangle. Great attention has been paid to details and appearance may be further tweaked through the function arguments or the `ggplot2` functionality.
 }
 \examples{
 # Load data
@@ -84,7 +84,7 @@ SPADI.complete <- SPADI[complete.cases(SPADI), ]
 # Subset items
 it.SPADI <- SPADI.complete[, 9:16]
 # Compute Yen's Q3 statistics and the \eqn{Q_{3\ast}}{Q3*} value
-q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
+q3obj <- Q3(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
 # Visualise Yen's Q3
 ggQ3star(object = q3obj)
 # The \eqn{Q_{3\ast}}{Q3*} value is obtained for items D4 and D5:
@@ -96,7 +96,7 @@ it.SPADI$D4D5 <- it.SPADI$D4 + it.SPADI$D5
 # and remove the two:
 it.SPADI.2 <- it.SPADI[,-c(4,5)]
 # We compute new Yen's Q3 statistics:
-q3obj2 <- Q3star(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
+q3obj2 <- Q3(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
 ggQ3star(q3obj2)
 
 }

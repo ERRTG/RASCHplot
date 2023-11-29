@@ -1,6 +1,6 @@
-#' Simulate Yen's Q3
+#' Simulate Yen's Q3 statistics
 #'
-#' Does repeated random sampling to obtain a sampling distribution for Yen's Q3
+#' Does repeated random sampling to obtain a sampling distribution for Yen's Q3 statistics.
 #'
 #' @param beta Input item parameters
 #' @param theta Input person parameters
@@ -8,6 +8,7 @@
 #' @param method.person Estimation method for person parameters
 #' @param B Number of simulations
 #' @param model Character string. Either "RMD" for dichotomous items or "RMP" for polytomous items.
+#' @param standardize Logical flag for standardization of residuals. Default is \code{standardize=TRUE}.
 #' @param trace.it If \code{trace.it=1}, then progress bars are displayed.
 #'
 #' @return An object with S3 class \code{"RASCHq3"}.  \item{call}{the call
@@ -15,8 +16,28 @@
 #' \item{method.item}{Estimation method used for item parameters}
 #' \item{method.person}{Estimation method used for person parameters}
 #'
+#' @references Christensen, K. B., Makransky, G. and Horton, M. (2017)
+#' \emph{Critical Values for Yen’s Q3: Identification of Local Dependence in the Rasch Model Using Residual Correlations, Applied Psychological Measurement, Vol. 41(3), 178-194},\cr
+#' \doi{https://doi.org/10.1177/0146621616677520}.\cr
+#' Yen W. M. (1984)
+#' \emph{Effects of local item dependence on the fit and equating performance of the three-parameter logistic model, Applied Psychological Measurement, Vol. 8, 125-145},\cr
+#' \doi{10.18637/jss.v039.i05}.
+#'
+#' @examples
+#' data(SPADI)
+#' SPADI.complete <- SPADI[complete.cases(SPADI), ]
+#' it.SPADI <- SPADI.complete[, 9:16]
+#' object <- eRm::PCM(it.SPADI)
+#' beta <- object$betapar
+#' betamat <- PARmat(it.SPADI, beta)
+#' pp <- eRm::person.parameter(object)
+#' theta <- unlist(pp$thetapar)
+#' sims <- simRASCHq3(beta = betamat, theta,
+#'                    method.item = "CML", method.person = "MLE",
+#'                    B = 10, model = "RMP")
+#'
 #' @export simRASCHq3
-simRASCHq3 <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MML"), method.person = c("WML", "MLE"), B, model = c("RMD", "RMP"), trace.it = 0){
+simRASCHq3 <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MML"), method.person = c("WML", "MLE"), B, model = c("RMD", "RMP"), standardize = TRUE, trace.it = 0){
 
   method.item <- match.arg(method.item)
   method.person <- match.arg(method.person)
@@ -57,8 +78,9 @@ simRASCHq3 <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MML")
     #============= Compute Q3 statistics =======================================
 
     resids <- RASCHresiduals(beta = beta.sim, theta = theta.sim, data = X[[b]])
-    fitQ3 <- Q3(resids)
-    statobj[[b]] <- fitQ3 #max(fitQ3) - mean(fitQ3)
+    fitQ3 <- Q3(items = X[[b]], method.item = method.item, method.person = method.person,
+                model = model, standardize = standardize)
+    statobj[[b]] <- fitQ3$Q3matrix #max(fitQ3) - mean(fitQ3)
 
     if (trace.it) message(paste(b)) #cat(sprintf("Iteration: %d/%d\n", b, B))
   }

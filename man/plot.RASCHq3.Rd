@@ -47,3 +47,27 @@
 \description{
 Visualise the empirical distribution of Yen's Q3 for a \code{RASCHq3} object.
 }
+\examples{
+data(SPADI)
+SPADI.complete <- SPADI[complete.cases(SPADI), ]
+it.SPADI <- SPADI.complete[, 9:16]
+set.seed(3)
+object <- eRm::PCM(it.SPADI)
+beta <- object$betapar
+betamat <- PARmat(it.SPADI, beta)
+pp <- eRm::person.parameter(object)
+theta <- unlist(pp$thetapar)
+sims <- simRASCHq3(beta = betamat, theta,
+                   method.item = "CML", method.person = "MLE",
+                   B = 10, model = "RMP", trace.it = 1)
+plot(sims)
+
+}
+\references{
+Christensen, K. B., Makransky, G. and Horton, M. (2017)
+\emph{Critical Values for Yen’s Q3: Identification of Local Dependence in the Rasch Model Using Residual Correlations, Applied Psychological Measurement, Vol. 41(3), 178-194},\cr
+\doi{https://doi.org/10.1177/0146621616677520}.\cr
+Yen W. M. (1984)
+\emph{Effects of local item dependence on the fit and equating performance of the three-parameter logistic model, Applied Psychological Measurement, Vol. 8, 125-145},\cr
+\doi{10.18637/jss.v039.i05}.
+}

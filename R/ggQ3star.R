@@ -1,9 +1,9 @@
 #' Heatmap plot function for Yen's Q3
 #'
-#' Visualise the Yen's Q3 statistics for a \code{Q3star} object using \link[ggcorrplot]{ggcorrplot} with mixed circle visualization (upper triangle) and numbers (lower triangle). The \eqn{Q_{3\ast}}{Q3*} value may be highlighted by a rectangle.
+#' Visualise the matrix of Yen's Q3 statistics for a \code{Q3} object using \link[ggplot2]{ggplot2}, e.g., with mixed circle visualization (upper triangle) and numbers (lower triangle). The \eqn{Q_{3\ast}}{Q3*} value may be highlighted by a rectangle. Great attention has been paid to details and appearance may be further tweaked through the function arguments or the `ggplot2` functionality.
 #'
-#' @param object \code{Q3star} object, typically result of \link[RASCHplot]{Q3star}.
-#' @param method character, the visualization method of Q3star matrix to be
+#' @param object \code{Q3} object, typically result of \link[RASCHplot]{Q3}.
+#' @param method character, the visualization method of Q3 matrix to be
 #'   used. Allowed values are "circle" (default), "square".
 #' @param type character, "lower" (default), "upper", or "full" display.
 #' @param labels character, "upper" (default), "lower", "full" or "none"/NULL, Q3 value labels.
@@ -17,7 +17,7 @@
 #'   show diagonal correlation for \code{type = "full"} and to remove it when
 #'   \code{type} is one of "upper" or "lower".
 #' @param colors a vector of 3 colors for low, mid and high correlation values.
-#' @param outline.color the outline color of square or circle. Default value is "gray".
+#' @param outline.color the outline color of square or circle. Default value is "#CFCFC2".
 #' @param outline.width the outline width of square or circle. Default value is 0 (no outline).
 #' @param lab_col,lab_size size and color to be used for the correlation
 #'   coefficient labels when showed.
@@ -49,7 +49,7 @@
 #' # Subset items
 #' it.SPADI <- SPADI.complete[, 9:16]
 #' # Compute Yen's Q3 statistics and the \eqn{Q_{3\ast}}{Q3*} value
-#' q3obj <- Q3star(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
+#' q3obj <- Q3(items = it.SPADI, method.item = "CML", method.person = "WML", model = "RMP")
 #' # Visualise Yen's Q3
 #' ggQ3star(object = q3obj)
 #' # The \eqn{Q_{3\ast}}{Q3*} value is obtained for items D4 and D5:
@@ -61,15 +61,15 @@
 #' # and remove the two:
 #' it.SPADI.2 <- it.SPADI[,-c(4,5)]
 #' # We compute new Yen's Q3 statistics:
-#' q3obj2 <- Q3star(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
+#' q3obj2 <- Q3(items = it.SPADI.2, method.item = "CML", method.person = "WML", model = "RMP")
 #' ggQ3star(q3obj2)
 #'
 #' @export
 #'
-ggQ3star <- function(object, method = c("circle", "square"), type = c("lower", "upper", "full"), labels = c(NA, "upper", "lower", "full", "none"), markQ3star = c("circle", "square", "pch", NA), ggtheme = theme_minimal, title = "", show.legend = TRUE, legend.title = "Q3star", show.diag = NULL, colors = NULL, outline.color = NULL, outline.width = 0, lab_col = "black", lab_size = 4, pch = 8, pch.col = "black", pch.cex = 2, tl.cex = 12, tl.col = "black", tl.srt = 45, digits = 2) {
+ggQ3star <- function(object, method = c("circle", "square"), type = c("lower", "upper", "full"), labels = c(NA, "upper", "lower", "full", "none"), markQ3star = c("circle", "square", "pch", NA), ggtheme = theme_minimal, title, show.legend = TRUE, legend.title, show.diag, colors, outline.color, outline.width = 0, lab_col = "black", lab_size = 4, pch = 8, pch.col = "black", pch.cex = 2, tl.cex = 12, tl.col = "black", tl.srt = 45, digits = 2) {
 
-  if (!inherits(object, "Q3star")) {
-    stop("use only with \"Q3star\" objects")
+  if (!inherits(object, "Q3")) {
+    stop("use only with \"Q3\" objects")
   }
 
 
@@ -92,7 +92,7 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("lower", "
     labels <- c("lower", "upper")
   }
 
-  if (is.null(show.diag)) {
+  if (missing(show.diag)) {
     if (all(type == c("lower", "upper"))) {
       show.diag <- TRUE
     } else {
@@ -100,11 +100,15 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("lower", "
     }
   }
 
-  if (is.null(colors)) {
-    colors <- c("#4575B4", "lightgray", "#b24745")
+  if (missing(colors)) {
+    colors <- c("#4575B4", "#CFCFC2", "#b24745")
   }
-  if (is.null(outline.color)) {
-    outline.color <- "gray"
+  if (missing(outline.color)) {
+    outline.color <- "#CFCFC2"
+  }
+
+  if (missing(legend.title)) {
+    legend.title <- expression(paste(Q["3,max"]))
   }
 
   corrmat <- object$Q3matrix
@@ -141,7 +145,7 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("lower", "
   }
 
 
-  p <- ggplot(data = corr %>% filter(part %in% type),
+  p <- ggplot(data = corr %>% filter(.data$part %in% type),
               mapping = aes(x = .data$rid,
                             y = .data$cid,
                             fill = .data$value))
@@ -237,7 +241,7 @@ ggQ3star <- function(object, method = c("circle", "square"), type = c("lower", "
 
 
   # add titles
-  if (title != "") {
+  if (!missing(title)) {
     p <- p +
       ggtitle(title)
   }

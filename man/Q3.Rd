@@ -2,15 +2,58 @@
 % Please edit documentation in R/Q3.R
 \name{Q3}
 \alias{Q3}
-\title{Compute Yen's Q3 from item fit}
+\title{Compute Yen's Q3 statistics}
 \usage{
-Q3(object, ...)
+Q3(
+  items,
+  method.item = c("PCML", "CML", "JML", "MML"),
+  method.person = c("WML", "MLE"),
+  model = c("RMD", "RMP"),
+  standardize = TRUE,
+  ...
+)
 }
 \arguments{
-\item{object}{Object of class \code{RASCHresiduals}.}
+\item{items}{Input data matrix or data frame; rows represent indiviiduals, columns represent items. Or a model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()} or \code{PCM()} from the \code{eRm} package.}
 
-\item{...}{Other arguments.}
+\item{method.item}{Estimation method for item parameters.}
+
+\item{method.person}{Estimation method for person parameters.}
+
+\item{model}{Character string. Either "RMD" for dichotomous items or "RMP" for polytomous items.}
+
+\item{standardize}{Logical flag for standardization of residuals, prior to
+computing Yen's Q3. Default is \code{standardize=TRUE}.}
+
+\item{...}{Arguments to be passed to \code{stats::cor}.}
+}
+\value{
+An object with S3 class \code{"Q3star"}.  \item{call}{the call
+that produced this object} \item{statobj}{List of Q3 statistics.}
+\item{method.item}{Estimation method used for item parameters}
+\item{method.person}{Estimation method used for person parameters}
 }
 \description{
-Compute Yen's Q3 from item fit
+This function computes Yen's Q3 for selected items in a Rasch-model. This can be used to investigate item misfit.
+}
+\details{
+Yen's Q3 statistic can be used to detect local dependence.
+}
+\examples{
+data(SPADI)
+SPADI.complete <- SPADI[complete.cases(SPADI), ]
+it.SPADI <- SPADI.complete[, 9:16]
+q3obj <- Q3(items = it.SPADI,
+            method.item = "CML", method.person = "WML",
+            model = "RMP",
+            standardize = FALSE)
+
+}
+\references{
+Christensen, K. B., Makransky, G. and Horton, M. (2017)
+\emph{Critical Values for Yen’s Q3: Identification of Local Dependence in the Rasch Model Using Residual Correlations, Applied Psychological Measurement, Vol. 41(3), 178-194},
+\doi{https://doi.org/10.1177/0146621616677520}.\cr
+Yen W. M. (1984)
+\emph{Effects of local item dependence on the fit and equating performance of the three-parameter logistic model, Applied Psychological Measurement, Vol. 8, 125-145},
+\doi{10.18637/jss.v039.i05}.
 }
