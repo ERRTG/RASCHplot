@@ -1,4 +1,4 @@
-#' Model fit for dicotomous Rasch model
+#' Model fit for dichotomous Rasch model
 #'
 #' @param method.item Estimation method for item parameters.
 #' @param method.person Estimation method for person parameters.
@@ -16,7 +16,7 @@ rMfits <- function(method.item = c("PCML", "CML", "JML", "MML"), method.person =
 
   if (method.item == "CML") {
     item.fit <- eRm::RM(X = dat, sum0 = TRUE)
-    beta.sim <- - item.fit$betapar
+    delta.sim <- - item.fit$betapar
     cl <- call("eRm::RM", X = dat, sum0 = TRUE)
   }
   if (method.item == "JML") {
@@ -25,22 +25,22 @@ rMfits <- function(method.item = c("PCML", "CML", "JML", "MML"), method.person =
                         constraint = "items",
                         verbose = FALSE)
     cl <- call("TAM::tam.jml", resp = dat, constraint = "items", verbose = FALSE)
-    beta.sim <- c(item.fit$xsi, -sum(item.fit$xsi))
+    delta.sim <- c(item.fit$xsi, -sum(item.fit$xsi))
   }
   if (method.item == "MML") {
     item.fit <- TAM::tam.mml(resp = dat, verbose = FALSE)
-    beta.sim <- item.fit$xsi$xsi - mean(item.fit$xsi$xsi)
+    delta.sim <- item.fit$xsi$xsi - mean(item.fit$xsi$xsi)
     cl <- call("TAM::tam.mml", resp = dat, verbose = FALSE)
   }
   if (method.item == "PCML") {
     item.fit <- sirt::rasch.pairwise(dat = dat, zerosum = TRUE)
     tmp <- which(!colnames(dat) %in% item.fit$item$item)
     if (identical(tmp, integer(0))) {
-      beta.sim <- item.fit$item$b   # extract item difficulties
+      delta.sim <- item.fit$item$b   # extract item difficulties
     } else {
       nottmp <- (1:K)[-tmp]
-      beta.sim <- rep(NA, K)
-      beta.sim[nottmp] <- item.fit$item$b   # extract item difficulties
+      delta.sim <- rep(NA, K)
+      delta.sim[nottmp] <- item.fit$item$b   # extract item difficulties
     }
     cl <- call("sirt::rasch.pairwise", dat = dat, zerosum = TRUE)
   }
@@ -50,8 +50,16 @@ rMfits <- function(method.item = c("PCML", "CML", "JML", "MML"), method.person =
   #============= Fit person parameters: WML/MLE ======================
 
   if (!is.null(method.person)) {
-    arg.list <- list("b" = beta.sim)
-    person.fit <- sirt::IRT.mle(data = dat, irffct = irffct, arg.list = arg.list,
+    arg.list <- list("b" = delta.sim)
+
+    irffct0 <- function(theta, b, ii){
+      eta <- exp(theta - b[ii])
+      pbs <- eta / (1 + eta)
+      pbs <- cbind(1 - pbs, pbs)
+      return(pbs)
+    }
+
+    person.fit <- sirt::IRT.mle(data = dat, irffct = irffct0, arg.list = arg.list,
                                 type = method.person, progress = FALSE)
     theta.sim <- person.fit$est
     theta.sim[theta.sim %in% c(Inf, -Inf)] <- NA
@@ -63,7 +71,7 @@ rMfits <- function(method.item = c("PCML", "CML", "JML", "MML"), method.person =
 
   #============= End fit person parameters ===========================
 
-  out <- list(beta = beta.sim, theta = theta.sim,
+  out <- list(delta = delta.sim, theta = theta.sim,
               item.fit = item.fit, person.fit = person.fit)
   out$call <- cl
 

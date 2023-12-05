@@ -2,54 +2,84 @@
 % Please edit documentation in R/ggPImap.R
 \name{ggPImap}
 \alias{ggPImap}
-\title{Person-Item Map}
+\title{Histogram for Person-Item Map}
 \usage{
 ggPImap(
-  object,
-  beta,
-  threshtable,
-  item.subset = "all",
-  ggtheme = theme_minimal,
-  xlab.label = "",
-  title = "",
-  legend.title = NULL,
-  legend.labels = NULL
+  p,
+  theta,
+  delta,
+  group = NULL,
+  type = c("histogram", "density", "boxplot", "violin", "densigram"),
+  margins = c("top", "right", "bottom", "left"),
+  size = 5,
+  ggtheme = theme_void,
+  ...,
+  xparams = list(),
+  yparams = list(),
+  groupColour = FALSE,
+  groupFill = FALSE
 )
 }
 \arguments{
-\item{object}{Either a \code{eRm} or \code{Rm} object -- result of \link[eRm]{RM} or \link[eRm]{PCM}. Or a list including a vector of person parameters, a vector (for dichotomous items) or data frame or matrix (for polytomous items) of item-category (difficulty) parameters, and data frame or matrix with location and threshold parameters. If \code{object} is
-not provided, then all of \code{beta} and \code{threshtable} must be
+\item{p}{A \link[RASCHplot]{ggImap} to add marginal plots to. If \code{p} is
+not provided, then all of \code{theta}, and \code{delta} must be
 provided.}
 
-\item{beta}{The item parameters. This must be a vector or list of vectors in case of stratification. Ignored if \code{object} is provided.}
+\item{theta}{The person parameters to use for creating the marginal plots.}
 
-\item{threshtable}{The item-category threshold parameters. This must be a matrix or data frame or list of matrices/data frames in case of stratification. Ignored if \code{object} is provided.}
+\item{delta}{Input delta (item-category threshold) parameters. This must be a matrix or list of matrices in case of stratification. Ignored if \code{object} is provided. Ignored if \code{p} is provided.}
 
-\item{item.subset}{Subset of items to be plotted. Either a numeric vector indicating the column in X or a character vector indicating the column name. If "all", all items are plotted. The number of items to be plotted must be > 1.}
+\item{group}{group}
 
-\item{ggtheme}{ggplot2 function or theme object. Default value is \code{theme_minimal}. Allowed values are the official ggplot2 themes including \code{theme_gray}, \code{theme_bw}, \code{theme_classic}, \code{theme_void}, .... Theme objects are also allowed (e.g., \code{theme_classic()}).}
+\item{type}{What type of marginal plot to show. One of: [density, histogram, boxplot, violin, densigram]
+(a "densigram" is when a density plot is overlaid on a histogram).}
 
-\item{xlab.label}{character, label on x-axis of the graph.}
+\item{margins}{Along which margins to show the plots. One of: [both, x, y].}
 
-\item{title}{character, title of the graph.}
+\item{size}{Integer describing the relative size of the marginal plots
+compared to the main plot. A size of 5 means that the main plot is 5x wider
+and 5x taller than the marginal plots.}
 
-\item{legend.title}{...}
+\item{ggtheme}{ggplot2 function or theme object. Default value is \code{theme_void}. Allowed values are the official ggplot2 themes including \code{theme_gray}, \code{theme_bw}, \code{theme_classic}, \code{theme_void}, .... Theme objects are also allowed (e.g., \code{theme_classic()}).}
 
-\item{legend.labels}{...}
+\item{...}{Extra parameters to pass to the marginal plots. Any parameter that
+\code{geom_line()}, \code{geom_histogram()}, \code{geom_boxplot()}, or \code{geom_violin()} accepts
+can be used. For example, \code{colour = "red"} can be used for any marginal plot type,
+and \code{binwidth = 10} can be used for histograms.}
+
+\item{xparams}{List of extra parameters to use only for the marginal plot along
+the x axis.}
+
+\item{yparams}{List of extra parameters to use only for the marginal plot along
+the y axis.}
+
+\item{groupColour}{If \code{TRUE}, the colour (or outline) of the marginal
+plots will be grouped according to the variable mapped to \code{colour} in the
+scatter plot. The variable mapped to \code{colour} in the scatter plot must
+be a character or factor variable. See examples below.}
+
+\item{groupFill}{If \code{TRUE}, the fill of the marginal
+plots will be grouped according to the variable mapped to \code{colour} in the
+scatter plot. The variable mapped to \code{colour} in the scatter plot must
+be a character or factor variable. See examples below.}
 }
 \description{
-Visualise the alignment of the item parameters.
+Visualise the alignment of the item and person parameters.
 }
 \examples{
 data(SPADI)
 SPADI.complete <- SPADI[complete.cases(SPADI), ]
 it.SPADI <- SPADI.complete[, 9:16]
 object <- eRm::PCM(it.SPADI)
-beta <- object$betapar
-#pp <- eRm::person.parameter(object)
-#theta <- unlist(pp$thetapar)
-threshtable <- eRm::thresholds(object)$threshtable[[1]]
-ggPImap(object)
+pp <- eRm::person.parameter(object)
+p <- ggImap(object)
+ggPImap(p, theta = unlist(pp$thetapar))
+
+delta <- beta2delta(beta = object$betapar, x = it.SPADI)
+p <- ggImap(delta = delta)
+ggPImap(p, theta = unlist(pp$thetapar))
+
+ggPImap(p, theta = unlist(pp$thetapar), group = as.factor(SPADI.complete$gender[-pp$pers.ex]))
 
 if (FALSE) {
 SPADI1 <- SPADI[SPADI$gender == 1,]
@@ -64,7 +94,7 @@ beta1 <- object1$betapar
 beta2 <- object2$betapar
 pp1 <- eRm::person.parameter(object2) #eRm::person.parameter(object1)
 pp2 <- eRm::person.parameter(object2)
-theta1 <- unlist(pp1$thetapar)
+theta1 <- unlist(pp1$thetapar)*rnorm(nrow(it.SPADI2))
 theta2 <- unlist(pp2$thetapar)
 threshtable1 <- eRm::thresholds(object1)$threshtable[[1]]
 threshtable2 <- eRm::thresholds(object2)$threshtable[[1]]
@@ -72,7 +102,9 @@ objlist <- list(beta = list(beta1 = beta1, beta2 = beta2),
                 theta = list(theta1 = theta1, theta2 = theta2),
                 threshtable = list(threshtable1 = threshtable1,
                                    threshtable2 = threshtable2))
-ggPImap(objlist, legend.title = "Gender", legend.labels = c("1", "2"))
+p <- ggImap(objlist, legend.title = "Gender", legend.labels = c("Male", "Female"))
+ggPImap(p, theta = list(theta1 = theta1, theta2 = theta2),
+             legend.title = "Gender", legend.labels = c("1", "2"))
 }
 }
 \references{

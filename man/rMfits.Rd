@@ -2,7 +2,7 @@
 % Please edit documentation in R/rMfits.R
 \name{rMfits}
 \alias{rMfits}
-\title{Model fit for dicotomous Rasch model}
+\title{Model fit for dichotomous Rasch model}
 \usage{
 rMfits(
   method.item = c("PCML", "CML", "JML", "MML"),
@@ -18,5 +18,5 @@ rMfits(
 \item{dat}{Matrix of item responses.}
 }
 \description{
-Model fit for dicotomous Rasch model
+Model fit for dichotomous Rasch model
 }

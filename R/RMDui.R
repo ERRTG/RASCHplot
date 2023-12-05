@@ -32,12 +32,12 @@ RMDui <- function() {
                          type = "text/css", "a{color: #8B8682;}",
                          HTML('#go{background-color:#8B8682}'))),
     # Input: Select a file ----
-    fileInput('beta', 'Choose CSV File with Item Parameters',
+    fileInput('delta', 'Choose CSV File with Item Parameters',
               accept=c('text/csv',
                        'text/comma-separated-values,text/plain',
                        '.csv')),
     # Input: Checkbox if file has header ----
-    checkboxInput("headerBeta", "Header", TRUE),
+    checkboxInput("headerDelta", "Header", TRUE),
     fileInput('theta', 'Choose CSV File with Person Parameters',
               accept=c('text/csv',
                        'text/comma-separated-values,text/plain',

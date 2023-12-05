@@ -2,7 +2,7 @@
 #'
 #' Does repeated random sampling to obtain a sampling distribution for Yen's Q3 statistics.
 #'
-#' @param beta Input item parameters
+#' @param delta Input tem-category threshold parameters
 #' @param theta Input person parameters
 #' @param method.item Estimation method for item paramters
 #' @param method.person Estimation method for person parameters
@@ -27,17 +27,17 @@
 #' data(SPADI)
 #' SPADI.complete <- SPADI[complete.cases(SPADI), ]
 #' it.SPADI <- SPADI.complete[, 9:16]
+#' set.seed(1)
 #' object <- eRm::PCM(it.SPADI)
-#' beta <- object$betapar
-#' betamat <- PARmat(it.SPADI, beta)
+#' delta <- beta2delta(beta = object$betapar, x = it.SPADI)
 #' pp <- eRm::person.parameter(object)
 #' theta <- unlist(pp$thetapar)
-#' sims <- simRASCHq3(beta = betamat, theta,
-#'                    method.item = "CML", method.person = "MLE",
+#' sims <- simRASCHq3(delta, theta,
+#'                    method.item = "JML", method.person = "MLE",
 #'                    B = 10, model = "RMP")
 #'
 #' @export simRASCHq3
-simRASCHq3 <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MML"), method.person = c("WML", "MLE"), B, model = c("RMD", "RMP"), standardize = TRUE, trace.it = 0){
+simRASCHq3 <- function(delta, theta, method.item = c("PCML", "CML", "JML", "MML"), method.person = c("WML", "MLE"), B, model = c("RMD", "RMP"), standardize = TRUE, trace.it = 0){
 
   method.item <- match.arg(method.item)
   method.person <- match.arg(method.person)
@@ -46,12 +46,10 @@ simRASCHq3 <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MML")
   if (model == "RMP") {
 
     N <- length(theta)
-    K <- ncol(beta)
-    M <- nrow(beta)
-    mi <- rep(nrow(beta), K) #apply(beta, 2, function(x) sum(!is.na(x)))
+    K <- ncol(delta)
 
     #------------- Simulate polytomous item responses ------------------
-    X <- simRASCHdata(model, theta, beta, B, M, mi)
+    X <- rRMP(delta = delta, theta = theta, B = B)
 
   }
   if (model == "RMD") {
@@ -60,7 +58,7 @@ simRASCHq3 <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MML")
     K <- length(beta)
 
     #------------- Simulate item responses (0/1) -----------------------
-    X <- simRASCHdata(model = "RMD", theta, beta, B)
+    X <- rRMD(delta = delta, theta = theta, B = B)
 
   }
 
@@ -72,12 +70,12 @@ simRASCHq3 <- function(beta, theta, method.item = c("PCML", "CML", "JML", "MML")
     #============= Fit item parameters =================================
 
     fit <- RASCHfits(method.item, method.person, X[[b]])
-    beta.sim <- fit$beta
+    delta.sim <- fit$delta
     theta.sim <- fit$theta
 
     #============= Compute Q3 statistics =======================================
 
-    resids <- RASCHresiduals(beta = beta.sim, theta = theta.sim, data = X[[b]])
+    resids <- RASCHresiduals(delta = delta.sim, theta = theta.sim, data = X[[b]])
     fitQ3 <- Q3(items = X[[b]], method.item = method.item, method.person = method.person,
                 model = model, standardize = standardize)
     statobj[[b]] <- fitQ3$Q3matrix #max(fitQ3) - mean(fitQ3)

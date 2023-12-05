@@ -4,9 +4,8 @@
 #'
 #' ...
 #'
-#' @param x Matrix of item responses.
-#' @param par Vector of item parameters.
-#' @param byrows Items or response levels in rows.
+#' @param x Matrix (nobs x K) of K item responses.
+#' @param beta Vector of item parameters.
 #'
 #' @return Matrix of item parameters.
 #'
@@ -16,23 +15,21 @@
 #' SPADI.complete <- SPADI[complete.cases(SPADI), ]
 #' it.SPADI <- SPADI.complete[, 9:16]
 #' model.SPADI <- eRm::PCM(it.SPADI)
-#' thr <- PARmat(x = it.SPADI, par = model.SPADI$betapar)
+#' betamat <- beta2mat(x = it.SPADI, beta = model.SPADI$betapar)
 #'
-#' @export PARmat
+#' @export beta2mat
 #'
-PARmat <- function(x, par, byrows = c("levels", "items")) {
-
-  byrows <- match.arg(byrows)
+beta2mat <- function(x, beta) {
 
   k <- ncol(x)
   mi <- apply(x, 2, max, na.rm = TRUE)
   cols <- do.call(c, lapply(1:k, function(i) 1:mi[i]))
   rows <- do.call(c, lapply(1:k, function(i) rep(i, mi[i])))
-  thr <- matrix(NA, nrow = ncol(x), ncol = max(x, na.rm = TRUE))
+  betamat <- matrix(NA, nrow = ncol(x), ncol = max(x, na.rm = TRUE))
 
-  for (i in 1:length(par)) {
-    thr[rows[i], cols[i]] <- par[i]
+  for (i in 1:length(beta)) {
+    betamat[rows[i], cols[i]] <- beta[i]
   }
 
-  if(byrows == "items") thr else t(thr)
+  betamat
 }

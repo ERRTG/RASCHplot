@@ -6,6 +6,16 @@
 #' @rawNamespace import(shiny, except = dataTableOutput)
 #' @importFrom utils read.csv
 #'
+#' @examples
+#' data(SPADI)
+#' SPADI.complete <- SPADI[complete.cases(SPADI), ]
+#' it.SPADI <- SPADI.complete[, 9:16]
+#' object <- eRm::PCM(it.SPADI)
+#' pp <- eRm::person.parameter(object)
+#' delta <- beta2delta(beta = object$betapar, x = it.SPADI)
+#' theta <- pp$thetapar$NAgroup1
+#' shinyApp(RMPui, RMPserver)
+#'
 #' @noRd
 RMPserver <- function(input, output, session) {
 
@@ -16,36 +26,36 @@ RMPserver <- function(input, output, session) {
   my_colors <- colpal[c(12, 28, 1)]
   names(my_colors) <- c("2.5%", "5%", "other")
 
-  betaRea <- reactive({
+  deltaRea <- reactive({
 
     validate(
-      need(input$beta != "", "Please select CSV file with item parameters")
+      need(input$delta != "", "Please select CSV file with item-category threshold parameters")
     )
 
-    beta0 <- input$beta
-    if (is.null(beta0)) return(NULL)
+    delta0 <- input$delta
+    if (is.null(delta0)) return(NULL)
 
-    beta1 <- read.csv(beta0$datapath,
-                      header = input$headerBeta#,
-                      #sep = input$sepBeta,
-                      #quote = input$quoteBeta
+    delta1 <- read.csv(delta0$datapath,
+                      header = input$headerDelta#,
+                      #sep = input$sepDelta,
+                      #quote = input$quoteDelta
     )
 
-    if (is.integer(beta1[,1])) {
-      beta <- apply(beta1[, -1], 2, as.numeric)
+    if (is.integer(delta1[,1]) | !is.numeric(delta1[,1])) {
+      delta <- apply(delta1[, -1], 2, as.numeric)
     } else {
-      beta <- apply(beta1, 2, as.numeric)
+      delta <- apply(delta1, 2, as.numeric)
     }
 
 
     validate(
-      need(!is.null(beta), "Cannot identify item parameters from input file.")
+      need(!is.null(delta), "Cannot identify item-category threshold parameters from input file.")
     )
 
-    idb <<- showNotification(paste("Number of items: ", ncol(beta)),
+    idb <<- showNotification(paste("Number of items: ", nrow(delta)),
                              duration = NULL, type = "warning")
 
-    beta
+    delta
 
   })
 
@@ -72,7 +82,7 @@ RMPserver <- function(input, output, session) {
     if (any(class(theta1) %in% c("matrix", "data.frame", "array"))) {
       if (any(colnames(theta1) == "theta")) {
         theta <- as.numeric(theta1[,"theta"])
-      } else if (is.integer(theta1[, 1])) {
+      } else if (is.integer(theta1[, 1]) | !is.numeric(theta1[, 1])) {
         theta <- as.numeric(theta1[, 2])
       } else if (ncol(theta1) == 1) {
         theta <- as.numeric(theta1[,1])
@@ -91,19 +101,19 @@ RMPserver <- function(input, output, session) {
 
   })
 
-  observeEvent(betaRea(), {
+  observeEvent(deltaRea(), {
     if(input$method == "JML") {
-      beta <- betaRea()
-      if(!dplyr::near(mean(beta), 0, tol = .Machine$double.eps^0.5)) {
+      delta <- deltaRea()
+      if(!dplyr::near(mean(delta), 0, tol = .Machine$double.eps^0.5)) {
         showModal(zeromean_confirm)
       }
     }
   })
 
   observeEvent(input$ok, {
-    beta <- betaRea()
+    delta <- deltaRea()
     showNotification(paste("Continue without zero-mean constraint:",
-                           "mean = ", signif(mean(beta), digits = 1), collapse = "\n"),
+                           "mean = ", signif(mean(delta), digits = 1), collapse = "\n"),
                      duration = NULL)
     removeModal()
   })
@@ -111,45 +121,16 @@ RMPserver <- function(input, output, session) {
     removeModal()
   })
 
-  #toListen <- reactive({
-  #  list(thetaRea(),betaRea())
-  #})
-
-  #observeEvent(toListen(), {
-  #  beta <- as.numeric(betaRea()[, 2]) #betaRea()
-  #  theta <- as.numeric(thetaRea()[, 2]) #thetaRea()
-  #  if (length(beta) == length(theta)) {
-  #    if (all(beta == theta)) {
-  #      showModal(nobsnitms_confirm)
-  #    }
-  #  }
-  #})
-
-  #observeEvent(input$okn, {
-  #  showNotification("Files of item parameters and person parameters are the same",
-  #                   duration = NULL)
-  #  removeModal()
-  #})
-  #observeEvent(input$canceln, {
-  #  removeModal()
-  #})
-
-  #output$table1 <- renderDataTable({
-  #  beta <- as.numeric(betaRea()[,"beta"])
-  #  theta <- as.numeric(thetaRea()[,"theta"])
-  #
-  #  data.frame("Item paramters" = beta,
-  #             "Person parameters" = theta)
-  #})
-
-  output$tbl1 <- DT::renderDataTable(DT::datatable(data.frame(betaRea()),
+  output$tbl1 <- DT::renderDataTable(DT::datatable(data.frame(deltaRea()),
                                  options = list(searching = FALSE, scrollX = T),
-                                 rownames= FALSE)
+                                 rownames= FALSE) %>%
+                                   DT::formatRound(1:ncol(deltaRea()), 4)
   )
 
   output$tbl2 <- DT::renderDataTable(DT::datatable(data.frame(thetaRea()),
                                  options = list(searching = FALSE, scrollX = T),
-                                 rownames= FALSE)
+                                 rownames= FALSE) %>%
+                                   DT::formatRound(1, 4)
   )
 
   observeEvent(input$go, {
@@ -164,7 +145,7 @@ RMPserver <- function(input, output, session) {
 
     removeNotification(idb)
 
-    beta <- betaRea()
+    delta <- deltaRea()
     theta <- thetaRea()
 
     method.item <- input$method
@@ -182,11 +163,10 @@ RMPserver <- function(input, output, session) {
                  value = 0,
                  expr = {
                    withCallingHandlers(
-                     selectedData <- simRASCHstats(beta, theta,
-                                                   method.item, method.person,
-                                                   B,
-                                                   model = "RMP",
-                                                   trace.it = 1),
+                     selectedData <- rRMPstats(delta = delta, theta = theta,
+                                          method.item = method.item, method.person = method.person,
+                                          B = B,
+                                          trace.it = 1),
                      message = function(m) {
                        val <- as.numeric(m$message)
                        shiny::setProgress(value=val, detail = paste("Iteration", val))

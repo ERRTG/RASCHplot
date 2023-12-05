@@ -33,15 +33,14 @@
 #' data(SPADI)
 #' SPADI.complete <- SPADI[complete.cases(SPADI), ]
 #' it.SPADI <- SPADI.complete[, 9:16]
-#' set.seed(3)
+#' set.seed(1)
 #' object <- eRm::PCM(it.SPADI)
-#' beta <- object$betapar
-#' betamat <- PARmat(it.SPADI, beta)
+#' delta <- beta2delta(beta = object$betapar, x = it.SPADI)
 #' pp <- eRm::person.parameter(object)
-#' theta <- unlist(pp$thetapar)
-#' sims <- simRASCHq3(beta = betamat, theta,
-#'                    method.item = "CML", method.person = "MLE",
-#'                    B = 10, model = "RMP", trace.it = 1)
+#' theta <- pp$thetapar$NAgroup1
+#' sims <- simRASCHq3(delta = delta, theta = theta,
+#'                    method.item = "JML", method.person = "MLE",
+#'                    B = 2, model = "RMP", trace.it = 1)
 #' plot(sims)
 #'
 #' @method plot RASCHq3

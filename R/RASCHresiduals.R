@@ -1,13 +1,13 @@
 #' Compute residuals from item fit
 #'
-#' @param beta A numeric vector or matrix of item parameters with compatible dimensions to data.
+#' @param delta A numeric vector or matrix of item (-category) parameters with compatible dimensions to data.
 #' @param theta A vector of person parameters with compatible dimensions to data.
 #' @param data Matrix with item responses.
 #' @param standardize Logical flag for standardization of residuals. Default is \code{standardize=TRUE}.
 #'
 #' @export
 #'
-RASCHresiduals <- function(beta, theta, data, standardize = TRUE) {
+RASCHresiduals <- function(delta, theta, data, standardize = TRUE) {
 
   # Check if data is dichotomous or polytomous
   if(nlevels(as.factor(as.matrix(data))) > 2) {
@@ -25,12 +25,8 @@ RASCHresiduals <- function(beta, theta, data, standardize = TRUE) {
 
   if (type == "RMP") {
 
-    if (inherits(beta, c("matrix", "data.frame"))) {
-      beta <- beta
-    } else if (inherits(beta, "numeric")) {
-      beta <- PARmat(x = data, par = beta)
-    } else {
-      stop("beta is not numeric, matrix or data.frame")
+    if (!inherits(delta, c("matrix", "data.frame"))) {
+      stop("delta is not a matrix or data.frame")
     }
 
     N <- nrow(data)
@@ -38,24 +34,22 @@ RASCHresiduals <- function(beta, theta, data, standardize = TRUE) {
     M <- max(data, na.rm = TRUE)            # max number of categories - 1 for items
     mi <- apply(data, 2, max, na.rm = TRUE) # number of categories - 1 for each item
 
-    if (ncol(beta) > 1) {
+    E <- matrix(nrow = N, ncol = K)
+    E2 <- matrix(nrow = N, ncol = K)
+    W <- matrix(nrow = N, ncol = K)
+    Civ <- matrix(nrow = N, ncol = K)
 
-      E <- matrix(nrow = N, ncol = K)
-      E2 <- matrix(nrow = N, ncol = K)
-      W <- matrix(nrow = N, ncol = K)
-      Civ <- matrix(nrow = N, ncol = K)
+    for (i in 1:K) {
 
-      for (i in 1:K) {
-
-        probssim <- pcmfct(theta = theta, b = beta, ii = i)
-        matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
-        E[, i] <- rowSums(matx * probssim, na.rm = TRUE)
-        E2[, i] <- rowSums(matx^2 * probssim, na.rm = TRUE)
-        W[, i] <- E2[, i] - E[, i]^2
-
-      }
+      probssim <- pcmfct(delta = delta, theta = theta, ii = i)
+      matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
+      E[, i] <- rowSums(matx * probssim, na.rm = TRUE)
+      E2[, i] <- rowSums(matx^2 * probssim, na.rm = TRUE)
+      W[, i] <- E2[, i] - E[, i]^2
 
     }
+
+
 
   }
 
@@ -66,15 +60,15 @@ RASCHresiduals <- function(beta, theta, data, standardize = TRUE) {
     M <- max(data, na.rm = TRUE)            # max number of categories - 1 for items
     mi <- apply(data, 2, max, na.rm = TRUE) # number of categories - 1 for each item
 
-    if (inherits(beta, "numeric")) {
+    if (inherits(delta, "numeric")) {
 
-      probssim <- sapply(1:K, function(ii) irffct(theta = theta, b = beta, ii)[, 2])
+      probssim <- sapply(1:K, function(ii) irffct(delta = delta, theta = theta, ii)[, 2])
       E <- probssim
       W <- probssim * (1-probssim)
       #Civ <- E^4 * (1 - probssim) + (1 - E)^4 * probssim
 
     } else {
-      stop("beta is not numeric")
+      stop("delta is not numeric")
     }
 
   }

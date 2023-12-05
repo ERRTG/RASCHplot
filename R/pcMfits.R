@@ -89,7 +89,7 @@ pcMfits <- function(method.item, method.person, dat) {
     }
     if (all(is.na(beta.sim))) {
       theta.sim <- rep(NA, nrow(dat))
-      return(list(beta.sim = beta.sim, theta.sim = theta.sim))
+      return(list(delta.sim = beta.sim, theta.sim = theta.sim))
     }
   }
 
@@ -100,7 +100,25 @@ pcMfits <- function(method.item, method.person, dat) {
   if (!is.null(method.person)) {
     #------------- Define item response function -----------------------
     arg.list <- list("b" = beta.sim)
-    person.fit <- sirt::IRT.mle(data = dat, irffct = pcmfct, arg.list = arg.list,
+
+    pcmfct0 <- function(theta, b, ii){
+
+      if (!all(any(class(b) %in% c("matrix", "data.frame")))) {
+        stop("b is not a matrix or data.frame")
+      }
+
+      N <- length(theta)  # number of persons
+      M <- nrow(b)        # max number of categories - 1 for items
+
+      beta0 <- 0# - sum(beta[, i]) #
+      matb <- matrix(c(beta0, b[, ii]), nrow = N, ncol = M+1, byrow = TRUE)
+      matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
+      eta <- exp(theta * matx + matb)
+      pbs <- eta / rowSums(eta, na.rm=TRUE)
+      return(pbs)
+    }
+
+    person.fit <- sirt::IRT.mle(data = dat, irffct = pcmfct0, arg.list = arg.list,
                                 type = method.person, progress = FALSE)
     theta.sim <- person.fit$est
     theta.sim[theta.sim %in% c(Inf, -Inf)] <- NA
@@ -112,7 +130,9 @@ pcMfits <- function(method.item, method.person, dat) {
 
   #============= End fit person parameters ===========================
 
-  out <- list(beta = beta.sim, theta = theta.sim,
+  delta.sim <- beta2delta(beta = beta.sim)
+
+  out <- list(delta = delta.sim, theta = theta.sim,
               item.fit = item.fit, person.fit = person.fit)
   out$call <- cl
 

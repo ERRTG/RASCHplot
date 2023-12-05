@@ -6,6 +6,19 @@
 #' @rawNamespace import(shiny, except = dataTableOutput)
 #' @importFrom utils read.csv
 #'
+#' @examples
+#' library(iarm)
+#' data(amts)
+#' it.AMTS <- amts[,4:13]
+#' it.AMTSc <- it.AMTS[complete.cases(it.AMTS), ]
+#' idx <- which(rowSums(it.AMTSc) %in% c(0,ncol(it.AMTSc)))
+#' dat <- it.AMTSc[-idx,]
+#' object <- eRm::RM(dat)
+#' pp <- eRm::person.parameter(object)
+#' delta <- -object$betapar
+#' theta <- pp$thetapar$NAgroup1
+#' shinyApp(RMDui, RMDserver)
+#'
 #' @noRd
 RMDserver <- function(input, output, session) {
 
@@ -14,40 +27,40 @@ RMDserver <- function(input, output, session) {
   my_colors <- colpal[c(12, 28, 1)]
   names(my_colors) <- c("2.5%", "5%", "other")
 
-  betaRea <- reactive({
+  deltaRea <- reactive({
 
     validate(
-      need(input$beta != "", "Please select CSV file with item parameters")
+      need(input$delta != "", "Please select CSV file with item parameters")
     )
 
-    beta0 <- input$beta
-    if (is.null(beta0)) return(NULL)
+    delta0 <- input$delta
+    if (is.null(delta0)) return(NULL)
 
-    beta1 <- read.csv(beta0$datapath,
-                      header = input$headerBeta#,
-                      #sep = input$sepBeta,
-                      #quote = input$quoteBeta
+    delta1 <- read.csv(delta0$datapath,
+                      header = input$headerDelta#,
+                      #sep = input$sepDelta,
+                      #quote = input$quoteDelta
     )
 
-    if (any(class(beta1) %in% c("matrix", "data.frame", "array"))) {
-      if (any(colnames(beta1) == "beta")) {
-        beta <- as.numeric(beta1[,"beta"])
-      } else if (is.integer(beta1[, 1])) {
-        beta <- as.numeric(beta1[, 2])
-      } else if (ncol(beta1) == 1) {
-        beta <- as.numeric(beta1[,1])
+    if (any(class(delta1) %in% c("matrix", "data.frame", "array"))) {
+      if (any(colnames(delta1) == "delta")) {
+        delta <- as.numeric(delta1[,"delta"])
+      } else if (is.integer(delta1[, 1])) {
+        delta <- as.numeric(delta1[, 2])
+      } else if (ncol(delta1) == 1) {
+        delta <- as.numeric(delta1[,1])
       }
-    } else if (any(class(beta1) == "numeric")) {
-      beta <- beta1
+    } else if (any(class(delta1) == "numeric")) {
+      delta <- delta1
     } else {
-      beta <- NULL
+      delta <- NULL
     }
 
     validate(
-      need(!is.null(beta), "Cannot identify item parameters from input file.")
+      need(!is.null(delta), "Cannot identify item parameters from input file.")
     )
 
-    beta
+    delta
 
   })
 
@@ -89,10 +102,10 @@ RMDserver <- function(input, output, session) {
 
   })
 
-  observeEvent(betaRea(), {
+  observeEvent(deltaRea(), {
 
     if(input$method == "JML") {
-      if(!dplyr::near(mean(betaRea()), 0, tol = .Machine$double.eps^0.5)) {
+      if(!dplyr::near(mean(deltaRea()), 0, tol = .Machine$double.eps^0.5)) {
         showModal(zeromean_confirm)
       }
     }
@@ -102,7 +115,7 @@ RMDserver <- function(input, output, session) {
   observeEvent(input$ok, {
 
     showNotification(paste("Continue without zero-mean constraint:",
-                           "mean = ", signif(mean(betaRea()), digits = 1), collapse = "\n"),
+                           "mean = ", signif(mean(deltaRea()), digits = 1), collapse = "\n"),
                      duration = NULL)
     removeModal()
 
@@ -113,14 +126,14 @@ RMDserver <- function(input, output, session) {
   })
 
   toListen <- reactive({
-    list(thetaRea(),betaRea())
+    list(thetaRea(),deltaRea())
   })
 
   observeEvent(toListen(), {
-    beta <- betaRea()
+    delta <- deltaRea()
     theta <- thetaRea()
-    if (length(beta) == length(theta)) {
-      if (all(beta == theta)) {
+    if (length(delta) == length(theta)) {
+      if (all(delta == theta)) {
         showModal(nobsnitms_confirm)
       }
     }
@@ -135,14 +148,16 @@ RMDserver <- function(input, output, session) {
     removeModal()
   })
 
-  output$tbl1 <- DT::renderDataTable(DT::datatable(data.frame(betaRea()),
+  output$tbl1 <- DT::renderDataTable(DT::datatable(data.frame(deltaRea()),
                                  options = list(searching = FALSE, scrollX = T),
-                                 rownames= FALSE)
+                                 rownames= FALSE) %>%
+                                   DT::formatRound(1, 4)
   )
 
   output$tbl2 <- DT::renderDataTable(DT::datatable(data.frame(thetaRea()),
                                  options = list(searching = FALSE, scrollX = T),
-                                 rownames= FALSE)
+                                 rownames= FALSE) %>%
+                                   DT::formatRound(1, 4)
   )
 
   observeEvent(input$go, {
@@ -154,7 +169,7 @@ RMDserver <- function(input, output, session) {
 
   selectedData <- eventReactive(input$go, {
 
-      beta <- betaRea()
+      delta <- deltaRea()
       theta <- thetaRea()
 
       method.item <- input$method
@@ -171,11 +186,10 @@ RMDserver <- function(input, output, session) {
                    value = 0,
                    expr = {
                      withCallingHandlers(
-                       selectedData <- simRASCHstats(beta, theta,
-                                                     method.item, method.person,
-                                                     B,
-                                                     model = "RMD",
-                                                     trace.it = 1),
+                       selectedData <- rRMDstats(delta = delta, theta = theta,
+                                            method.item = method.item, method.person = method.person,
+                                            B = B,
+                                            trace.it = 1),
                        message = function(m) {
                          val <- as.numeric(m$message)
                          shiny::setProgress(value=val, detail = paste("Iteration", val))

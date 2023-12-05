@@ -46,7 +46,7 @@ Q3 <- function(items, method.item = c("PCML", "CML", "JML", "MML"), method.perso
 
   #============= Compute residuals ==========================================
 
-  resids  <- RASCHresiduals(beta = fit$beta,
+  resids  <- RASCHresiduals(delta = fit$delta,
                             theta = fit$theta,
                             data = items,
                             standardize = standardize)

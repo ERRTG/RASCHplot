@@ -5,7 +5,7 @@
 \title{Simulate Yen's Q3 statistics}
 \usage{
 simRASCHq3(
-  beta,
+  delta,
   theta,
   method.item = c("PCML", "CML", "JML", "MML"),
   method.person = c("WML", "MLE"),
@@ -16,7 +16,7 @@ simRASCHq3(
 )
 }
 \arguments{
-\item{beta}{Input item parameters}
+\item{delta}{Input tem-category threshold parameters}
 
 \item{theta}{Input person parameters}
 
@@ -45,13 +45,13 @@ Does repeated random sampling to obtain a sampling distribution for Yen's Q3 sta
 data(SPADI)
 SPADI.complete <- SPADI[complete.cases(SPADI), ]
 it.SPADI <- SPADI.complete[, 9:16]
+set.seed(1)
 object <- eRm::PCM(it.SPADI)
-beta <- object$betapar
-betamat <- PARmat(it.SPADI, beta)
+delta <- beta2delta(beta = object$betapar, x = it.SPADI)
 pp <- eRm::person.parameter(object)
 theta <- unlist(pp$thetapar)
-sims <- simRASCHq3(beta = betamat, theta,
-                   method.item = "CML", method.person = "MLE",
+sims <- simRASCHq3(delta, theta,
+                   method.item = "JML", method.person = "MLE",
                    B = 10, model = "RMP")
 
 }
