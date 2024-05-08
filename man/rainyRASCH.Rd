@@ -2,18 +2,28 @@
 % Please edit documentation in R/rainyRASCH.R
 \name{rainyRASCH}
 \alias{rainyRASCH}
-\title{Histogram for Person-Item Map}
+\title{Rain cloud plot}
 \usage{
 rainyRASCH(
   theta,
   delta,
+  which.item = NULL,
   rain.title,
   cloud.title,
   rain.colour,
   rain.fill,
   cloud.colour,
   cloud.fill,
-  drop.size
+  drop.size,
+  facets.nrow = NULL,
+  facets.ncol = NULL,
+  facets.scales = "free",
+  facets.shrink = TRUE,
+  facets.labeller = "label_value",
+  facets.as.table = TRUE,
+  facets.drop = TRUE,
+  facets.dir = "h",
+  facets.strip.position = "top"
 )
 }
 \arguments{
@@ -21,6 +31,8 @@ rainyRASCH(
 
 \item{delta}{Input delta (item-category threshold) parameters.
 This must be a matrix or list of matrices in case of stratification.}
+
+\item{which.item}{Either \code{NULL} (default) for constructing a joint rain cloud plot for all items, an integer or vector of integers giving the item(s), for which separate plots should be constructed. Or a character string \code{"all"} for constructing separate plots for all items in the data.}
 
 \item{rain.title}{Label of axis for the latent dimension.}
 
@@ -35,6 +47,8 @@ This must be a matrix or list of matrices in case of stratification.}
 \item{cloud.fill}{The color of fill of the density.}
 
 \item{drop.size}{The size of the points relative to the binwidth.}
+
+\item{facets.nrow, facets.ncol, facets.scales, facets.shrink, facets.labeller, facets.as.table, facets.drop, facets.dir, facets.strip.position}{Arguments to be passed to \link[ggplot2]{facet_wrap} to display thresholds item separately but in the same graph.}
 }
 \description{
 Visualise the alignment of the item and person parameters.
@@ -44,12 +58,13 @@ data(SPADI)
 SPADI.complete <- SPADI[complete.cases(SPADI), ]
 it.SPADI <- SPADI.complete[, 9:16]
 object <- eRm::PCM(it.SPADI)
-delta <- beta2delta(beta = object$betapar, x = it.SPADI)
+delta <- beta2delta(beta = object$betapar, x = it.SPADI)[,-1]
 pp <- eRm::person.parameter(object)
 theta <- unlist(pp$thetapar)
 pp <- eRm::person.parameter(object)
 
 rainyRASCH(theta, delta)
 
+rainyRASCH(theta, delta, which.item = 3:4)
 
 }

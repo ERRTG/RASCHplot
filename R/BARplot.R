@@ -177,7 +177,7 @@ barplt <- function(longdf, addsums, na.action, freq, strat.var) {
       pp <- ggplot(longdf, aes(x = .data$item, y = .data$y, fill = .data$Score))
     } else {
       pp <- ggplot(longdf, aes(x = .data$strat.var, y = .data$y, fill = .data$Score))+
-        facet_grid(rows = vars(.data$item), switch = "y") +
+        facet_grid(rows = vars(.data$item), switch = "y", scales = "free", space = "free") +
         theme(strip.placement = "outside")
     }
 

@@ -51,14 +51,19 @@
 #'
 #' @export DIFplot
 #'
-DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5, point.size= 1, line.size = 1, line.type = 1, errorbar.width = 0, errorbar.size = 1, ...) {
+DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all",
+                    grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5,
+                    point.size= 1, line.size = 1, line.type = 1,
+                    errorbar.width = 0, errorbar.size = 1, ...) {
 
   if (!inherits(model, c("Rm", "eRm"))) {
     stop("Object must be of class Rm or eRm")
   }
 
   if (missing(strat.vars)) {
-    pp <- CICCplot(model, which.item, lower.groups, grid.items, observed = TRUE, error.bar, point.size, line.size, line.type, errorbar.width, errorbar.size, lower.group.bg = NULL, legend.title = "", ...)
+    pp <- CICCplot(model, which.item, lower.groups, grid.items, observed = TRUE,
+                   error.bar, point.size, line.size, line.type, errorbar.width,
+                   errorbar.size, lower.group.bg = NULL, legend.title = "", ...)
     warning("no variables for stratification; running CICCplot")
     return(pp)
   }
@@ -284,9 +289,11 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", gri
       names(col) <- c("Expected", levels(as.factor(data_obs_long$strat.var)))
 
       datalist <- list(data_exp, data_obs_long, rects)
-      df <- bind_rows(datalist, .id="data_frame")
+      df <- dplyr::bind_rows(datalist, .id="data_frame")
 
-      pp[[plotidx]][[l]] <- difplot(df, itmtit, stratname, col, dodge.width, point.size, line.size, line.type, errorbar.width, errorbar.size, ...)
+      pp[[plotidx]][[l]] <- difplot(df, itmtit, stratname, col, dodge.width,
+                                    point.size, line.size, line.type,
+                                    errorbar.width, errorbar.size)#, ...)
 
     }
 
@@ -314,19 +321,22 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all", gri
 #' @param errorbar.width Width aesthetics for \code{geom_line()}.
 #' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
 #' @noRd
-difplot <- function(df, itmtit, stratname, col, dodge.width, point.size, line.size, line.type, errorbar.width, errorbar.size, ...) {
+difplot <- function(df, itmtit, stratname, col, dodge.width, point.size,
+                    line.size, line.type, errorbar.width, errorbar.size, ...) {
+
+  nlev <- nlevels(as.factor(df$strat.var))
 
   x <- ggplot(data = df, aes(x = .data$Tot.val, y= .data$exp.val)) +
     ggtitle(paste0("Item: ", itmtit)) +
     xlab("Total Score") +
     ylab("Item-Score") +
     scale_x_continuous(breaks = integer_breaks(), minor_breaks = df$Tot.val) +
-    geom_line(aes(color = "Expected"), linewidth = line.size, linetype = line.type, na.rm = TRUE, ...) +
+    geom_line(aes(color = "Expected"), linewidth = line.size, linetype = line.type, na.rm = TRUE)+#, ...) +
     geom_point(aes(x = .data$Tot.val_grp,
                    y = .data$obs.val_grp,
                    color = .data$strat.var),
                position = position_dodge(width = dodge.width),
-               size = point.size, na.rm = TRUE, ...) +
+               size = point.size, na.rm = TRUE)+#, ...) +
     geom_errorbar(aes(x = .data$Tot.val_grp,
                       y = .data$obs.val_grp,
                       ymin = .data$obs.val_grp - .data$CI.bound,
@@ -335,9 +345,9 @@ difplot <- function(df, itmtit, stratname, col, dodge.width, point.size, line.si
                   width = errorbar.width,
                   linewidth = errorbar.size,
                   position = position_dodge(width = dodge.width)) +
-    scale_colour_manual(values = col) +
+    scale_colour_manual(values = col, limits = names(col)) +
     guides(colour = guide_legend(title = stratname,
-                                 override.aes = list(shape = c(rep(19, nlevels(as.factor(df$strat.var))), NA))))
+                                 override.aes = list(shape = c(rep(19, nlev), NA))))
   #+ guides(colour = guide_legend(stratname)) #
   #+ #+ labs(fill = stratname)
   #+ #+ theme(legend.title=element_blank()) #scale_color_discrete(name = "")

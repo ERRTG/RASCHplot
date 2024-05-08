@@ -144,3 +144,10 @@ barobj + theme(legend.position="top")
 ```{r, results = 'hide'}
 barobj + ggtitle("Distribution of item responses")
 ```
+
+
+```{r}
+barobj +
+  scale_x_discrete(labels = paste0("Item ", 1:8))
+```
+

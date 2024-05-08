@@ -38,7 +38,7 @@ cloud <- function(items, group, method.item = c("PCML", "CML", "JML", "MML"), B,
 
       #============= Fit item parameters =================================
       fit <- RASCHfits(method.item, method.person = NULL, items[])
-      beta.sim <- fit$beta
+      delta.sim <- fit$delta
 
       if (model == "RMD" || max(items,na.rm=TRUE) < 2){
         threshtable <- cbind(beta, beta) * -1 # betapars are easiness parameteres
@@ -55,7 +55,7 @@ cloud <- function(items, group, method.item = c("PCML", "CML", "JML", "MML"), B,
 
     #============= Compute Q3 statistics =======================================
 
-    resids <- RASCHresiduals(beta = beta.sim, theta = theta.sim, data = X[[b]])
+    resids <- RASCHresiduals(delta = delta.sim, theta = theta.sim, data = X[[b]])
     fitQ3 <- Q3(resids)
     statobj[[b]] <- fitQ3 #max(fitQ3) - mean(fitQ3)
 
