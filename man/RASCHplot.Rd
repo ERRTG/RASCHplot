@@ -2,10 +2,18 @@
 % Please edit documentation in R/RASCHplotpackage.R
 \docType{package}
 \name{RASCHplot}
+\alias{RASCHplot-package}
 \alias{RASCHplot}
 \title{\code{RASCHplot} package}
 \description{
 Visualisation of Rasch item fit
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/ERRTG/RASCHplot/}
+}
+
 }
 \author{
 Ann-Sophie Buchardt, Karl Bang Christensen and Sidsel Normann Jensen\cr Maintainer:

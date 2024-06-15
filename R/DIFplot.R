@@ -347,7 +347,7 @@ difplot <- function(df, itmtit, stratname, col, dodge.width, point.size,
                   position = position_dodge(width = dodge.width)) +
     scale_colour_manual(values = col, limits = names(col)) +
     guides(colour = guide_legend(title = stratname,
-                                 override.aes = list(shape = c(rep(19, nlev), NA))))
+                                 override.aes = list(shape = c(NA, rep(19, nlev)))))
   #+ guides(colour = guide_legend(stratname)) #
   #+ #+ labs(fill = stratname)
   #+ #+ theme(legend.title=element_blank()) #scale_color_discrete(name = "")

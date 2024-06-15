@@ -12,6 +12,7 @@
 #' @param grid.items  Logical flag for arranging the items selected by which.item in grids using the \code{ggarrange} function from the \code{ggpubr} package. Default value is \code{FALSE}.
 #' @param observed Logical flag for adding observed average item scores. Default value is \code{TRUE}.
 #' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.
+#' @param error.level The confidence level required. Default is a 95% confidence level.
 #' @param point.size Size aesthetics for \code{geom_point()}.
 #' @param line.size Size aesthetics for \code{geom_line()}.
 #' @param line.type Linetype aesthetics for \code{geom_line()}.
@@ -19,6 +20,7 @@
 #' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
 #' @param lower.group.bg Altering lower group background colour. Default is rgb(.6,.6,.6) and rgb(.8,.8,.8).
 #' @param legend.title Legend title. Defult is empty.
+#' @param lower.group.col Color of observed points.
 #' @param ... Arguments to be passed to \code{ggarrange}. The arguments will only be used if 'grid.items = TRUE'.
 #'
 #' @rawNamespace import(stats, except = filter)
@@ -42,6 +44,9 @@
 #' # Plot using score groups specifying lower end of grouping intervals
 #' lowerg <- c(0, 10, 20, 30)
 #' CICCplot(model = model.SPADI, lower.groups = lowerg)
+#' # Adding color
+#' lower.group.col <- 1:4
+#' CICCplot(model = model.SPADI, lower.groups = lowerg, lower.group.col = lower.group.col)
 #' # Plot item 3 and 4
 #' CICCplot(model = model.SPADI, which.item = c(3,4))
 #' # Combined CICC plot for four items and with a common legend
@@ -53,9 +58,17 @@
 #'   ggplot2::scale_colour_manual(values = c("burlywood","cornflowerblue")) +
 #'     ggplot2::xlim(c(2,8))
 #'
+#' lower.group.col <- c(rep("red", 21), rep("blue", 20))
+#' CICCplot(model = model.SPADI, lower.group.col = lower.group.col)
+#'
 #' @export CICCplot
 #'
-CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = FALSE, observed = TRUE, error.bar = TRUE, point.size = 1, line.size = 1, line.type = 1, errorbar.width = 0, errorbar.size = 1, lower.group.bg = NULL, legend.title = "", ...) {
+CICCplot <- function(model, which.item = 1, lower.groups = "all",
+                     grid.items = FALSE, observed = TRUE, error.bar = TRUE,
+                     error.level = 0.95,
+                     point.size = 1, line.size = 1, line.type = 1,
+                     errorbar.width = 0, errorbar.size = 1,
+                     lower.group.bg = NULL, legend.title = "", lower.group.col, ...) {
 
   if (!inherits(model, c("Rm", "eRm"))) {
     stop("Object must be of class Rm or eRm")
@@ -118,9 +131,9 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
 
   for (itm in ii) {
 
-    Tot.val <- 0:length(betas)
 
     #-------------------- Expected item response -------------------------------
+    Tot.val <- 0:length(betas)
 
     exp.val <- sapply(Tot.val, FUN = function(R) {
       l <- par.itemgrp[par.itemgrp!=itm]
@@ -194,10 +207,12 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
     data_obs <- data_obs[data_obs$n.val_grp != 0, ] #remove groups with no observations
 
     if (error.bar) {
-      data_obs$CI.bound <- 1.96*sqrt(data_obs[,3]/data_obs[,4])
+      z <- qnorm(error.level+(1-error.level)/2)
+      data_obs$CI.bound <- z*sqrt(data_obs[,3]/data_obs[,4])
     }
 
     col <- c("Expected" = "darkgrey", "Observed" = "orange")
+
     itmtit <- colnames(data)[itm]
 
     datalist <- list(data_exp, data_obs, rects)
@@ -207,18 +222,18 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
                               point.size,
                               line.size, line.type,
                               errorbar.width, errorbar.size,
-                              lower.group.bg, legend.title)#, ...)
+                              lower.group.bg, legend.title, lower.group.col)#, ...)
 
     plotidx <- plotidx+1
 
   }
 
-    if (grid.items) {
-      P <- ggpubr::ggarrange(plotlist = pp, ...)
-    } else {
-      P <- pp
-      names(P) <- itmnames[itmidx]
-    }
+  if (grid.items) {
+    P <- ggpubr::ggarrange(plotlist = pp, ...)
+  } else {
+    P <- pp
+    names(P) <- itmnames[itmidx]
+  }
 
   P
 
@@ -235,12 +250,20 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all", grid.items = F
 #' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
 #' @param lower.group.bg Background colours
 #' @param legend.title Legend title.
+#' @param lower.group.col Color
 #' @param ... optional parameters to be passed on to ggplot
 #' @noRd
-ciccplot <- function(df, itmtit, col, observed, point.size, line.size, line.type, errorbar.width, errorbar.size, lower.group.bg, legend.title, ...) {
+ciccplot <- function(df, itmtit, col, observed, point.size, line.size,
+                     line.type, errorbar.width, errorbar.size, lower.group.bg,
+                     legend.title, lower.group.col,...) {
+
+  if (!missing(lower.group.col)) {
+    df$lgrp <- factor(df$Tot.val_grp)
+    levels(df$lgrp) <- lower.group.col
+  }
 
   x <- ggplot(data = df, aes(x = .data$Tot.val, y= .data$exp.val, color = "Expected")) +
-    geom_line(linewidth = line.size, linetype = line.type, na.rm=TRUE, ...) +
+    geom_line(linewidth = line.size, linetype = line.type, na.rm=TRUE)+#, ...) +
     xlab("Total Score") +
     ylab("Item-Score")  +
     ggtitle(paste0("Item: ", itmtit))
@@ -265,21 +288,42 @@ ciccplot <- function(df, itmtit, col, observed, point.size, line.size, line.type
 
   }
 
+
   if (observed) {
-    x <- x +
-      geom_point(aes(x = .data$Tot.val_grp,
-                     y = .data$obs.val_grp,
-                     color = "Observed"),
-                 shape = 19,
-                 size = point.size, na.rm=TRUE, ...) +
-      scale_colour_manual(values = col) +
+    if (missing(lower.group.col)) {
+      x <- x +
+        geom_point(aes(x = .data$Tot.val_grp,
+                       y = .data$obs.val_grp,
+                       color = "Observed"),
+                   shape = 19,
+                   size = point.size, na.rm=TRUE, ...) +
+        scale_colour_manual(values = col) +
+        geom_errorbar(aes(x = .data$Tot.val_grp, y = .data$obs.val_grp,
+                          ymin = .data$obs.val_grp - .data$CI.bound,
+                          ymax = .data$obs.val_grp + .data$CI.bound,
+                          color = "Observed"),
+                      width = errorbar.width, linewidth = errorbar.size) +
+        guides(colour = guide_legend(override.aes = list(shape = c(NA, 19)))) +
+        guides(colour = guide_legend(title = legend.title))
+    } else {
+      col <- c("darkgrey", levels(factor(lower.group.col)))
+      names(col) <- c("Expected", levels(factor(lower.group.col)))
+      lbls <- c("Expected", rep("Observed", nlevels(factor(lower.group.col))))
+      x <- x +
+        geom_point(aes(x = .data$Tot.val_grp,
+                       y = .data$obs.val_grp,
+                       color = .data$lgrp),
+                   shape = 19,
+                   size = point.size, na.rm=TRUE)+#, ...) +
+      scale_colour_manual(values = col, limits = names(col), labels = lbls) +
       geom_errorbar(aes(x = .data$Tot.val_grp, y = .data$obs.val_grp,
                         ymin = .data$obs.val_grp - .data$CI.bound,
                         ymax = .data$obs.val_grp + .data$CI.bound,
-                        color = "Observed"),
+                        color = .data$lgrp),
                     width = errorbar.width, linewidth = errorbar.size) +
-      guides(colour = guide_legend(override.aes = list(shape = c(NA, 19)))) +
-      guides(colour = guide_legend(title = legend.title))
+        guides(colour = guide_legend(override.aes = list(shape = c(NA, 19), color = c(col[1], NA)))) +
+        guides(colour = guide_legend(title = legend.title))
+    }
   }
 
   x

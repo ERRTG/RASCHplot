@@ -133,3 +133,36 @@ DIFplot(model = fit, which.item = c(1,4), strat.vars = strat.vars, lower.groups 
 DIFplot(model = fit, which.item = c(1,2),
         strat.vars = strat.vars, lower.groups = lower.groups)
 ```
+
+
+```{r}
+cols <- c("#CFCFC2", "#95DA4C", "#3F8058")
+names(cols) <- c("Expected", levels(as.factor(strat.vars$over60)))
+
+strat.vars <- list(over60 = SPADI[, "over60"])
+pp <- DIFplot(model = fit, strat.vars = strat.vars)$`D1`$`over60`
+pp +
+  ggplot2::scale_colour_manual(values = cols, limits = names(col)) 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -11,6 +11,7 @@ CICCplot(
   grid.items = FALSE,
   observed = TRUE,
   error.bar = TRUE,
+  error.level = 0.95,
   point.size = 1,
   line.size = 1,
   line.type = 1,
@@ -18,6 +19,7 @@ CICCplot(
   errorbar.size = 1,
   lower.group.bg = NULL,
   legend.title = "",
+  lower.group.col,
   ...
 )
 }
@@ -34,6 +36,8 @@ CICCplot(
 
 \item{error.bar}{Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.}
 
+\item{error.level}{The confidence level required. Default is a 95% confidence level.}
+
 \item{point.size}{Size aesthetics for \code{geom_point()}.}
 
 \item{line.size}{Size aesthetics for \code{geom_line()}.}
@@ -47,6 +51,8 @@ CICCplot(
 \item{lower.group.bg}{Altering lower group background colour. Default is rgb(.6,.6,.6) and rgb(.8,.8,.8).}
 
 \item{legend.title}{Legend title. Defult is empty.}
+
+\item{lower.group.col}{Color of observed points.}
 
 \item{...}{Arguments to be passed to \code{ggarrange}. The arguments will only be used if 'grid.items = TRUE'.}
 }
@@ -71,6 +77,9 @@ CICCplot(model = model.SPADI)
 # Plot using score groups specifying lower end of grouping intervals
 lowerg <- c(0, 10, 20, 30)
 CICCplot(model = model.SPADI, lower.groups = lowerg)
+# Adding color
+lower.group.col <- 1:4
+CICCplot(model = model.SPADI, lower.groups = lowerg, lower.group.col = lower.group.col)
 # Plot item 3 and 4
 CICCplot(model = model.SPADI, which.item = c(3,4))
 # Combined CICC plot for four items and with a common legend
@@ -81,5 +90,8 @@ ciccobj <- CICCplot(model = model.SPADI, which.item = c(3,4))
 ciccobj$`3` +
   ggplot2::scale_colour_manual(values = c("burlywood","cornflowerblue")) +
     ggplot2::xlim(c(2,8))
+
+lower.group.col <- c(rep("red", 21), rep("blue", 20))
+CICCplot(model = model.SPADI, lower.group.col = lower.group.col)
 
 }

@@ -7,7 +7,7 @@
 rRMP(delta, theta, B)
 }
 \arguments{
-\item{delta}{Matrix K columns of item-category threshold parameters for K items with at most M categories and number of rows equal to (maximum) number of response categories and NA assigned to empty categories.}
+\item{delta}{Matrix (K x (1 + M)) with location (1st column) and K columns of item-category threshold parameters for K items with at most M categories and number of rows equal to (maximum) number of response categories and NA assigned to empty categories.}
 
 \item{theta}{Input person parameters.}
 
@@ -15,4 +15,17 @@ rRMP(delta, theta, B)
 }
 \description{
 Repeated random sampling to obtain item responses from estimated item and person parameters.
+}
+\examples{
+library(eRm)
+data(SPADI)
+SPADI.complete <- SPADI[complete.cases(SPADI), ]
+it.SPADI <- SPADI.complete[, 9:16]
+model.SPADI <- eRm::PCM(it.SPADI)
+
+betamat <- beta2mat(x = it.SPADI, beta = model.SPADI$betapar)
+delta <- beta2delta(beta = betamat)
+theta <- rnorm(100)
+obj <- rRMP(delta = delta, theta = theta, B = 2)
+
 }

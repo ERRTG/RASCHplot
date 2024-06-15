@@ -35,11 +35,16 @@ irffct <- function(delta, theta, ii){
 }
 #' PCM function
 #'
-#' @param delta Matrix (K x (1 + M)) with location (1st column) and K columns of item-category threshold parameters for K items with at most M categories and number of rows equal to (maximum) number of response categories and NA assigned to empty categories.
+#' @param delta Matrix (K x (1 + M)) with location (1st column) and K columns
+#' of item-category threshold parameters for K items with at most M categories
+#' and number of rows equal to (maximum) number of response categories and NA
+#' assigned to empty categories.
 #' @param theta Vector of person parameters.
 #' @param ii item index
 #'
-#' @references Mair, P., & Hatzinger, R. . (2007). Extended Rasch Modeling: The eRm Package for the Application of IRT Models in R. Journal of Statistical Software, 20(9), 1–20. https://doi.org/10.18637/jss.v020.i09
+#' @references Mair, P., & Hatzinger, R. . (2007). Extended Rasch Modeling:
+#' The eRm Package for the Application of IRT Models in R. Journal of
+#' Statistical Software, 20(9), 1–20. https://doi.org/10.18637/jss.v020.i09
 #'
 #' @noRd
 pcmfct <- function(delta, theta, ii){
@@ -48,13 +53,13 @@ pcmfct <- function(delta, theta, ii){
     stop("delta is not a matrix or data.frame")
   }
 
-  beta <- delta2beta(delta = delta)
+  beta <- t(delta)#delta2beta(delta = delta)
 
   N <- length(theta)  # number of persons
-  M <- nrow(beta)        # max number of categories - 1 for items
+  M <- nrow(beta)     # max number of categories - 1 for items
 
-  beta0 <- 0# - sum(beta[, i]) #
-  matb <- matrix(c(beta0, beta[, ii]), nrow = N, ncol = M+1, byrow = TRUE)
+  beta0 <- colMeans(beta)#0#- sum(beta[, ii]) #
+  matb <- matrix(c(beta0[ii], beta[, ii]), nrow = N, ncol = M+1, byrow = TRUE)
   matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
   eta <- exp(theta * matx + matb)
   pbs <- eta / rowSums(eta, na.rm=TRUE)

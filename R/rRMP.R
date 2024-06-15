@@ -2,18 +2,30 @@
 #'
 #' Repeated random sampling to obtain item responses from estimated item and person parameters.
 #'
-#' @param delta Matrix K columns of item-category threshold parameters for K items with at most M categories and number of rows equal to (maximum) number of response categories and NA assigned to empty categories.
+#' @param delta Matrix (K x (1 + M)) with location (1st column) and K columns of item-category threshold parameters for K items with at most M categories and number of rows equal to (maximum) number of response categories and NA assigned to empty categories.
 #' @param theta Input person parameters.
 #' @param B Number of simulations.
+#'
+#' @examples
+#' library(eRm)
+#' data(SPADI)
+#' SPADI.complete <- SPADI[complete.cases(SPADI), ]
+#' it.SPADI <- SPADI.complete[, 9:16]
+#' model.SPADI <- eRm::PCM(it.SPADI)
+#'
+#' betamat <- beta2mat(x = it.SPADI, beta = model.SPADI$betapar)
+#' delta <- beta2delta(beta = betamat)
+#' theta <- rnorm(100)
+#' obj <- rRMP(delta = delta, theta = theta, B = 2)
 #'
 #' @export rRMP
 #'
 rRMP <- function(delta, theta, B) {
 
   N <- length(theta)
-  K <- ncol(delta)
-  M <- nrow(delta)
-  mi <- apply(delta, 2, function(x) sum(!is.na(x)))
+  K <- nrow(delta)
+  M <- ncol(delta)
+  mi <- apply(delta, 1, function(x) sum(!is.na(x)))
 
   X <- vector(mode = "list", length = B)
   X <- lapply(X, function(x) matrix(nrow = N, ncol = K))
