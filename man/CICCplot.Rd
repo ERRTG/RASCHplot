@@ -104,6 +104,8 @@ lower.group.col <- c(rep("red", 21), rep("blue", 20))
 CICCplot(model = model.SPADI, lower.group.col = lower.group.col)
 # Plot first item with theoretical confidence band
 CICCplot(model = model.SPADI, error.band = TRUE)
-# hist(rowSums(it.SPADI))
+# hist(rowSums(it.SPADI)) # Check score distribution
+# Add smmooth theoretical confidence bands
+CICCplot(model = model.SPADI, error.band = TRUE, smooth.error.band = TRUE)
 
 }
