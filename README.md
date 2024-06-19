@@ -2,8 +2,6 @@
 
 We provide functions for visualisation of, e.g., Rasch item fit and DIF using a Conditional Item Characteristic Curve (CICC). 
 
-## Motivation and purpose
-
 ## Installation
 
 This is an *R* package. [*R*](https://www.r-project.org/) is required,
