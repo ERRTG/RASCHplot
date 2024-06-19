@@ -1,6 +1,34 @@
-# Plots for investigating item misfit
+# Plots for investigating Rasch model fit
 
-We provide functions for visualisation of Rasch item fit and DIF using a Conditional Item Characteristic Curve (CICC). 
+We provide functions for visualisation of, e.g., Rasch item fit and DIF using a Conditional Item Characteristic Curve (CICC). 
+
+## Motivation and purpose
+
+## Installation
+
+This is an *R* package. [*R*](https://www.r-project.org/) is required,
+[*RStudio*](https://www.rstudio.com/) is recommended.
+
+
+The package is available on GitHub. To install the package, start by installing the `devtools` package. The best way to do this is from CRAN, by typing:
+
+```{}
+install.packages("devtools")
+```
+
+Install the `RASCHplot` package from GitHub using the following code.
+
+```{}
+devtools::install_github("ERRTG/RASCHplot", build_vignettes = TRUE)
+```
+
+After installing the package has to be attached as usual:
+
+```{}
+library(RASCHplot)
+```
+
+And you are ready to go!
 
 # References
 
