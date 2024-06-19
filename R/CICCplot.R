@@ -11,7 +11,7 @@
 #' @param lower.groups A vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector, it will be added automatically. If \code{lower.groups = "all"} (default), the empirical expected item-score will be plotted for every possible total score.
 #' @param grid.items  Logical flag for arranging the items selected by which.item in grids using the \code{ggarrange} function from the \code{ggpubr} package. Default value is \code{FALSE}.
 #' @param observed Logical flag for adding observed average item scores. Default value is \code{TRUE}.
-#' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.
+#' @param error.bar Logical flag for adding error bars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.
 #' @param error.level The confidence level required. Default is a 95% confidence level.
 #' @param point.size Size aesthetics for \code{geom_point()}.
 #' @param line.size Size aesthetics for \code{geom_line()}.
@@ -19,8 +19,11 @@
 #' @param errorbar.width Width aesthetics for \code{geom_line()}.
 #' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
 #' @param lower.group.bg Altering lower group background colour. Default is rgb(.6,.6,.6) and rgb(.8,.8,.8).
-#' @param legend.title Legend title. Defult is empty.
-#' @param lower.group.col Color of observed points.
+#' @param legend.title Legend title. Default is empty.
+#' @param lower.group.col Colour of observed points.
+#' @param error.band Default is FALSE.
+#' @param error.band.col Colour of error band (if \code{error.band = TRUE}).
+#' @param smooth.error.band Logical flag.
 #' @param ... Arguments to be passed to \code{ggarrange}. The arguments will only be used if 'grid.items = TRUE'.
 #'
 #' @rawNamespace import(stats, except = filter)
@@ -60,6 +63,11 @@
 #'
 #' lower.group.col <- c(rep("red", 21), rep("blue", 20))
 #' CICCplot(model = model.SPADI, lower.group.col = lower.group.col)
+#' # Plot first item with theoretical confidence band
+#' CICCplot(model = model.SPADI, error.band = TRUE)
+#' # hist(rowSums(it.SPADI))
+#' # Add smmooth theoretical confidence bands
+#' CICCplot(model = model.SPADI, error.band = TRUE, smooth.error.band = TRUE)
 #'
 #' @export CICCplot
 #'
@@ -68,7 +76,9 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all",
                      error.level = 0.95,
                      point.size = 1, line.size = 1, line.type = 1,
                      errorbar.width = 0, errorbar.size = 1,
-                     lower.group.bg = NULL, legend.title = "", lower.group.col, ...) {
+                     lower.group.bg = NULL, legend.title = "", lower.group.col,
+                     error.band = FALSE, error.band.col = "gray",
+                     smooth.error.band = FALSE, ...) {
 
   if (!inherits(model, c("Rm", "eRm"))) {
     stop("Object must be of class Rm or eRm")
@@ -103,7 +113,8 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all",
   }
 
   if (grid.items & length(itmidx) <= 1) {
-    warning("option 'grid.items' works only if CICC-plot should be constructed for more than one item, so the argument is ignored")
+    warning("option 'grid.items' works only if CICC-plot should be constructed
+            for more than one item, so the argument is ignored")
   }
 
   n.itemcat <- apply(data, 2, FUN = function(x) {max(x, na.rm = T) - min(x, na.rm = T)})
@@ -135,19 +146,65 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all",
     #-------------------- Expected item response -------------------------------
     Tot.val <- 0:length(betas)
 
-    exp.val <- sapply(Tot.val, FUN = function(R) {
+    exp.val.both <- sapply(Tot.val, FUN = function(R) {
       l <- par.itemgrp[par.itemgrp!=itm]
       par.itemgrp_noitem <- ifelse(l > itm, l-1, l)
 
       #==================== call gamma polynomials (recursive formula) =========
       g1 <- gamma_r_rec_pcm(betas, R, par.itemgrp)
-      return(sum(sapply(1:sum(par.itemgrp==itm), FUN = function(X) {
+
+      EXP <- sum(sapply(1:sum(par.itemgrp==itm), FUN = function(X) {
         g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itm], R-X, par.itemgrp_noitem)
-        return(X*exp(betas[par.itemgrp==itm][X])*g2/g1)})))
+        X*exp(betas[par.itemgrp==itm][X])*g2/g1
+        }))
+
+      if (error.band) {
+        VAR <- sum(sapply(1:sum(par.itemgrp==itm), FUN = function(X) {
+          g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itm], R-X, par.itemgrp_noitem)
+          X^2*exp(betas[par.itemgrp==itm][X])*g2/g1
+        }))
+      } else {
+        VAR <- NULL
+      }
+      list(EXP = EXP, VAR = VAR)
       #=================== end call gamma polynomials ==========================
     })
 
+    exp.val <- unlist(exp.val.both["EXP",])
     data_exp <- data.frame(Tot.val, exp.val)
+
+    if (error.band) {
+
+      z <- qnorm(error.level+(1-error.level)/2)
+
+      n.vals <- sapply(0:length(betas), FUN = function(x) {
+        length(data[which(rowSums(data) == x), itm])
+      })
+
+      data_exp$LCI <- data_exp$exp.val - z * sqrt(unlist(exp.val.both["VAR",])/n.vals)
+      data_exp$UCI <- data_exp$exp.val + z * sqrt(unlist(exp.val.both["VAR",])/n.vals)
+
+      if(smooth.error.band) {
+
+        data_exp <- do.call(data.frame,lapply(data_exp, function(value) {
+          replace(value, is.infinite(value),NA)}))
+        dat <- data.frame(yL = data_exp$LCI, yU = data_exp$UCI, x = data_exp$Tot.val)
+        mL <- mgcv::gam(yL ~ s(x), data = dat)
+        mU <- mgcv::gam(yU ~ s(x), data = dat)
+
+        # define finer grid of predictor values
+        xnew <- data_exp$Tot.val
+
+        # apply predict() function to the fitted GAM model
+        # using the finer grid of x values
+        pL <- predict(mL, newdata = data.frame(x = xnew), se = TRUE)
+        pU <- predict(mU, newdata = data.frame(x = xnew), se = TRUE)
+
+        data_exp$LCIsmooth <- pL$fit
+        data_exp$UCIsmooth <- pU$fit
+      }
+    }
+
 
     #==================== Observed values (no grouping) ========================
 
@@ -222,7 +279,8 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all",
                               point.size,
                               line.size, line.type,
                               errorbar.width, errorbar.size,
-                              lower.group.bg, legend.title, lower.group.col)#, ...)
+                              lower.group.bg, legend.title, lower.group.col,
+                              error.band, error.band.col, smooth.error.band, ...)
 
     plotidx <- plotidx+1
 
@@ -251,11 +309,16 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all",
 #' @param lower.group.bg Background colours
 #' @param legend.title Legend title.
 #' @param lower.group.col Color
+#' @param error.band Logical flag for plotting theoretical CI
+#' @param error.band.col Color of \code{error.band}
+#' @param smooth.error.band Logical flag.
 #' @param ... optional parameters to be passed on to ggplot
 #' @noRd
 ciccplot <- function(df, itmtit, col, observed, point.size, line.size,
                      line.type, errorbar.width, errorbar.size, lower.group.bg,
-                     legend.title, lower.group.col,...) {
+                     legend.title, lower.group.col,
+                     error.band, error.band.col,
+                     smooth.error.band, ...) {
 
   if (!missing(lower.group.col)) {
     df$lgrp <- factor(df$Tot.val_grp)
@@ -267,6 +330,24 @@ ciccplot <- function(df, itmtit, col, observed, point.size, line.size,
     xlab("Total Score") +
     ylab("Item-Score")  +
     ggtitle(paste0("Item: ", itmtit))
+
+  if (error.band) {
+
+    if(smooth.error.band) {
+      x <- x +
+        geom_ribbon(aes(ymin = .data$LCIsmooth,
+                        ymax = .data$UCIsmooth),
+                    fill = error.band.col, alpha = 0.5) +
+        geom_line(linewidth = line.size, linetype = line.type, na.rm=TRUE)
+    } else {
+      x <- x +
+        geom_ribbon(aes(ymin = .data$LCI,
+                        ymax = .data$UCI),
+                    fill = error.band.col, alpha = 0.5) +
+        geom_line(linewidth = line.size, linetype = line.type, na.rm=TRUE)
+    }
+
+  }
 
 
   if (!all(is.na(df$bg))) {

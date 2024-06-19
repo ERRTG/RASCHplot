@@ -20,6 +20,9 @@ CICCplot(
   lower.group.bg = NULL,
   legend.title = "",
   lower.group.col,
+  error.band = FALSE,
+  error.band.col = "gray",
+  smooth.error.band = FALSE,
   ...
 )
 }
@@ -34,7 +37,7 @@ CICCplot(
 
 \item{observed}{Logical flag for adding observed average item scores. Default value is \code{TRUE}.}
 
-\item{error.bar}{Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.}
+\item{error.bar}{Logical flag for adding error bars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.}
 
 \item{error.level}{The confidence level required. Default is a 95% confidence level.}
 
@@ -50,9 +53,15 @@ CICCplot(
 
 \item{lower.group.bg}{Altering lower group background colour. Default is rgb(.6,.6,.6) and rgb(.8,.8,.8).}
 
-\item{legend.title}{Legend title. Defult is empty.}
+\item{legend.title}{Legend title. Default is empty.}
 
-\item{lower.group.col}{Color of observed points.}
+\item{lower.group.col}{Colour of observed points.}
+
+\item{error.band}{Default is FALSE.}
+
+\item{error.band.col}{Colour of error band (if \code{error.band = TRUE}).}
+
+\item{smooth.error.band}{Logical flag.}
 
 \item{...}{Arguments to be passed to \code{ggarrange}. The arguments will only be used if 'grid.items = TRUE'.}
 }
@@ -93,5 +102,8 @@ ciccobj$`3` +
 
 lower.group.col <- c(rep("red", 21), rep("blue", 20))
 CICCplot(model = model.SPADI, lower.group.col = lower.group.col)
+# Plot first item with theoretical confidence band
+CICCplot(model = model.SPADI, error.band = TRUE)
+# hist(rowSums(it.SPADI))
 
 }

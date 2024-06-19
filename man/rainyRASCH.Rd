@@ -32,7 +32,10 @@ rainyRASCH(
 \item{delta}{Input delta (item-category threshold) parameters.
 This must be a matrix or list of matrices in case of stratification.}
 
-\item{which.item}{Either \code{NULL} (default) for constructing a joint rain cloud plot for all items, an integer or vector of integers giving the item(s), for which separate plots should be constructed. Or a character string \code{"all"} for constructing separate plots for all items in the data.}
+\item{which.item}{Either \code{NULL} (default) for constructing a joint rain
+cloud plot for all items, an integer or vector of integers giving the item(s),
+for which separate plots should be constructed. Or a character string \code{"all"}
+for constructing separate plots for all items in the data.}
 
 \item{rain.title}{Label of axis for the latent dimension.}
 

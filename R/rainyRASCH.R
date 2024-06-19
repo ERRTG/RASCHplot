@@ -5,7 +5,10 @@
 #' @param theta The person parameters to use for creating the marginal plots.
 #' @param delta Input delta (item-category threshold) parameters.
 #' This must be a matrix or list of matrices in case of stratification.
-#' @param which.item Either \code{NULL} (default) for constructing a joint rain cloud plot for all items, an integer or vector of integers giving the item(s), for which separate plots should be constructed. Or a character string \code{"all"} for constructing separate plots for all items in the data.
+#' @param which.item Either \code{NULL} (default) for constructing a joint rain
+#' cloud plot for all items, an integer or vector of integers giving the item(s),
+#' for which separate plots should be constructed. Or a character string \code{"all"}
+#' for constructing separate plots for all items in the data.
 #' @param rain.title Label of axis for the latent dimension.
 #' @param cloud.title Label of axis for the person parameter distribution.
 #' @param rain.colour The color of the outline of the points.
@@ -37,7 +40,8 @@
 #'
 #' @export rainyRASCH
 #'
-rainyRASCH <- function(theta, delta, which.item = NULL, rain.title, cloud.title, rain.colour, rain.fill, cloud.colour, cloud.fill, drop.size,
+rainyRASCH <- function(theta, delta, which.item = NULL, rain.title, cloud.title,
+                       rain.colour, rain.fill, cloud.colour, cloud.fill, drop.size,
                        facets.nrow = NULL,
                        facets.ncol = NULL,
                        facets.scales =  "free",
@@ -85,7 +89,7 @@ rainyRASCH <- function(theta, delta, which.item = NULL, rain.title, cloud.title,
         stop("some values of which.item are smaller than 1 or greater than number of items in the model")
       }
     }
-    thr <- delta[which.item, ]
+    thr <- matrix(delta[which.item, ], nrow = length(which.item))
     rownames(thr) <- paste0("Item ", which.item)
   } else {
     thr <- delta
@@ -118,6 +122,7 @@ rainyRASCH <- function(theta, delta, which.item = NULL, rain.title, cloud.title,
     scale_x_continuous(rain.title,
                        sec.axis = sec_axis(~ . , name=cloud.title))
 
+  ylim <- c(-max(ggplot_build(p)$data[[1]]$ymax, na.rm = TRUE),max(ggplot_build(p)$data[[1]]$ymax, na.rm = TRUE))
   # Thresholds
   p <- p +
     stat_dots(
@@ -133,7 +138,8 @@ rainyRASCH <- function(theta, delta, which.item = NULL, rain.title, cloud.title,
     colour = rain.colour,
     fill = rain.fill,
     dotsize = drop.size
-  )
+  ) +
+    coord_cartesian(ylim = ylim)
 
   p <- p + theme(axis.title.y = element_blank(),
                  axis.text.y=element_blank(),
