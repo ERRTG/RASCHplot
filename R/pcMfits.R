@@ -35,13 +35,14 @@ pcMfits <- function(method.item, method.person, dat) {
     item.fit <- eRm::PCM(dat, sum0 = TRUE)
     cl <- call("eRm::PCM", X = dat, sum0 = TRUE)
 
-    beta.vec <- - item.fit$betapar
+    beta.vec <- item.fit$betapar
     rows <- do.call(c, lapply(1:K, function(i) 1:mi[i]))
     cols <- do.call(c, lapply(1:K, function(i) rep(i, mi[i])))
-    beta.sim <- matrix(NA, nrow = max(dat), ncol = ncol(dat))
-    for (i in 1:length(beta.vec)) {
-      beta.sim[rows[i], cols[i]] <- beta.vec[i]
-    }
+    #beta.sim <- matrix(NA, nrow = max(dat), ncol = ncol(dat))
+    #for (i in 1:length(beta.vec)) {
+    #  beta.sim[rows[i], cols[i]] <- beta.vec[i]
+    #}
+    beta.sim <- beta2mat(x = dat, beta = beta.vec)
   }
   if (method.item == "JML") {
     item.fit <- TAM::tam.jml(resp = dat,
@@ -107,11 +108,23 @@ pcMfits <- function(method.item, method.person, dat) {
         stop("b is not a matrix or data.frame")
       }
 
-      N <- length(theta)  # number of persons
-      M <- nrow(b)        # max number of categories - 1 for items
+      #N <- length(theta)  # number of persons
+      #M <- nrow(b)        # max number of categories - 1 for items
 
-      beta0 <- 0# - sum(beta[, i]) #
-      matb <- matrix(c(beta0, b[, ii]), nrow = N, ncol = M+1, byrow = TRUE)
+      #beta0 <- colMeans(beta)#0# - sum(beta[, i]) #
+      #matb <- matrix(c(beta0[ii], b[, ii]), nrow = N, ncol = M+1, byrow = TRUE)
+      #matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
+      #eta <- exp(theta * matx + matb)
+      #pbs <- eta / rowSums(eta, na.rm=TRUE)
+      #return(pbs)
+
+      beta <- t(b)#delta2beta(delta = delta)
+
+      N <- length(theta)  # number of persons
+      M <- nrow(beta)     # max number of categories - 1 for items
+
+      beta0 <- colMeans(beta)#0#- sum(beta[, ii]) #
+      matb <- matrix(c(beta0[ii], beta[, ii]), nrow = N, ncol = M+1, byrow = TRUE)
       matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
       eta <- exp(theta * matx + matb)
       pbs <- eta / rowSums(eta, na.rm=TRUE)
@@ -130,7 +143,7 @@ pcMfits <- function(method.item, method.person, dat) {
 
   #============= End fit person parameters ===========================
 
-  delta.sim <- beta2delta(beta = beta.sim)
+  delta.sim <- beta2delta(beta = beta.sim, x = dat)
 
   out <- list(delta = delta.sim, theta = theta.sim,
               item.fit = item.fit, person.fit = person.fit)

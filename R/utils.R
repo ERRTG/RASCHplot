@@ -25,6 +25,35 @@ gamma_r_rec_pcm <- memoise::memoise(function(pars, r, par.grp){
 
   }
 })
+#' Function for computing moments
+#' @param x A vector of total scores
+#'
+#' @noRd
+momfct <- function(Tot.val, par.itemgrp, betas, R, itm, error.band) {
+  sapply(Tot.val, FUN = function(R) {
+    l <- par.itemgrp[par.itemgrp!=itm]
+    par.itemgrp_noitem <- ifelse(l > itm, l-1, l)
+
+    #==================== call gamma polynomials (recursive formula) =========
+    g1 <- gamma_r_rec_pcm(betas, R, par.itemgrp)
+
+    EXP <- sum(sapply(1:sum(par.itemgrp==itm), FUN = function(X) {
+      g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itm], R-X, par.itemgrp_noitem)
+      X*exp(betas[par.itemgrp==itm][X])*g2/g1
+    }))
+
+    if (error.band) {
+      VAR <- sum(sapply(1:sum(par.itemgrp==itm), FUN = function(X) {
+        g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itm], R-X, par.itemgrp_noitem)
+        X^2*exp(betas[par.itemgrp==itm][X])*g2/g1
+      }))
+    } else {
+      VAR <- NULL
+    }
+    list(EXP = EXP, VAR = VAR)
+    #=================== end call gamma polynomials ==========================
+  })
+}
 #' A function factory for getting integer y-axis values.
 #' @param n n
 #' @noRd

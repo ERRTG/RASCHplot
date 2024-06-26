@@ -11,12 +11,17 @@ DIFplot(
   lower.groups = "all",
   grid.items = FALSE,
   error.bar = TRUE,
+  error.level = 0.95,
   dodge.width = 0.5,
+  group.connect = FALSE,
   point.size = 1,
   line.size = 1,
   line.type = 1,
   errorbar.width = 0,
   errorbar.size = 1,
+  error.band = FALSE,
+  error.band.col = "gray",
+  smooth.error.band = FALSE,
   ...
 )
 }
@@ -31,9 +36,13 @@ DIFplot(
 
 \item{grid.items}{Logical flag for arranging the items selected by which.item in grids using the \code{ggarrange} function from the \code{ggpubr} package. Default value is \code{FALSE}.}
 
-\item{error.bar}{Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.}
+\item{error.bar}{Logical flag for adding error bars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.}
+
+\item{error.level}{The confidence level required. Default is a 95% confidence level.}
 
 \item{dodge.width}{Dodging width of error bars. To prevent overlapping error bars, dodging (jittering) preserves the vertical position of error bars while adjusting the horizontal position. Default is \code{dodge.width = 0.5}.}
+
+\item{group.connect}{Logical flag for connecting grouped total scores. Default value is \code{FALSE}.}
 
 \item{point.size}{Size aesthetics for \code{geom_point()}.}
 
@@ -44,6 +53,12 @@ DIFplot(
 \item{errorbar.width}{Width aesthetics for \code{geom_line()}.}
 
 \item{errorbar.size}{Size aesthetics for \code{geom_errorbar()}.}
+
+\item{error.band}{Default is FALSE.}
+
+\item{error.band.col}{Colour of error band (if \code{error.band = TRUE}).}
+
+\item{smooth.error.band}{Logical flag.}
 
 \item{...}{Arguments to be passed to \code{ggarrange}. The arguments will only be used if \code{grid.items = TRUE}.}
 }
@@ -77,4 +92,10 @@ lower.groups <- list(gender = list("1" = c(0, 5, 15, 20, 30, 40),
                                    "1" = c(0,  5, 10)))
 DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
 
+DIFplot(model = model.SPADI, strat.vars = strat.vars,
+        lower.groups = lower.groups, group.connect = TRUE)
+
+DIFplot(model = model.SPADI, strat.vars = strat.vars,
+        lower.groups = lower.groups, group.connect = TRUE,
+        error.band = TRUE, smooth.error.band = TRUE)
 }

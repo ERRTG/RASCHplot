@@ -9,13 +9,18 @@
 #' @param strat.vars A named list of categorical variables for stratification.
 #' @param lower.groups A named list of length \code{length(strat.vars)} of lists, vectors or a single vector for grouping the set of possible total scores into intervals, for which the empirical expected item-score will be calculated and added to the plot. The vector(s) should contain the lower points of the intervals, that the set of possible total scores should be divided into. If zero does not appear in the vector(s), it will be added automatically. If \code{lower.groups = "all"} (default), the empirical expected item-score will be plotted for every possible total score. If a list is provided, the arguments should be named corresponding to the \code{strat.vars}. If the arguments are lists, they should be named corresponding to the levels of the \code{strat.vars}.
 #' @param grid.items  Logical flag for arranging the items selected by which.item in grids using the \code{ggarrange} function from the \code{ggpubr} package. Default value is \code{FALSE}.
-#' @param error.bar Logical flag for adding errorbars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.
+#' @param error.bar Logical flag for adding error bars illustrating the empirical confidence interval of the observed means of the conditional item score. The confidence intervals are calculated as follows: For each interval l of the total score, induced by the lower-groups argument, the mean x_l, variance var(x_l), and number of observations n_l within the interval of the total score will be calculated. The confidence interval for the mean x_l is then found as \eqn{x_l \pm 2\cdot \sqrt(\frac{var(x_l)}{n_l})}. Default value is \code{TRUE}.
+#' @param error.level The confidence level required. Default is a 95% confidence level.
 #' @param dodge.width Dodging width of error bars. To prevent overlapping error bars, dodging (jittering) preserves the vertical position of error bars while adjusting the horizontal position. Default is \code{dodge.width = 0.5}.
+#' @param group.connect Logical flag for connecting grouped total scores. Default value is \code{FALSE}.
 #' @param point.size Size aesthetics for \code{geom_point()}.
 #' @param line.size Size aesthetics for \code{geom_line()}.
 #' @param line.type Linetype aesthetics for \code{geom_line()}.
 #' @param errorbar.width Width aesthetics for \code{geom_line()}.
 #' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
+#' @param error.band Default is FALSE.
+#' @param error.band.col Colour of error band (if \code{error.band = TRUE}).
+#' @param smooth.error.band Logical flag.
 #' @param ... Arguments to be passed to \code{ggarrange}. The arguments will only be used if \code{grid.items = TRUE}.
 #'
 #' @rawNamespace import(stats, except = filter)
@@ -49,12 +54,22 @@
 #'                                    "1" = c(0,  5, 10)))
 #' DIFplot(model = model.SPADI, strat.vars = strat.vars, lower.groups = lower.groups)
 #'
+#' DIFplot(model = model.SPADI, strat.vars = strat.vars,
+#'         lower.groups = lower.groups, group.connect = TRUE)
+#'
+#' DIFplot(model = model.SPADI, strat.vars = strat.vars,
+#'         lower.groups = lower.groups, group.connect = TRUE,
+#'         error.band = TRUE, smooth.error.band = TRUE)
 #' @export DIFplot
 #'
 DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all",
-                    grid.items = FALSE, error.bar = TRUE, dodge.width = 0.5,
+                    grid.items = FALSE, error.bar = TRUE,
+                    error.level = 0.95, dodge.width = 0.5,
+                    group.connect = FALSE,
                     point.size= 1, line.size = 1, line.type = 1,
-                    errorbar.width = 0, errorbar.size = 1, ...) {
+                    errorbar.width = 0, errorbar.size = 1,
+                    error.band = FALSE, error.band.col = "gray",
+                    smooth.error.band = FALSE, ...) {
 
   if (!inherits(model, c("Rm", "eRm"))) {
     stop("Object must be of class Rm or eRm")
@@ -146,18 +161,42 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all",
 
   for (itm in ii) {
 
-    exp.val <- sapply(Tot.val, FUN = function(R) {
-      l <- par.itemgrp[par.itemgrp!=itm]
-      par.itemgrp_noitem <- ifelse(l > itm, l-1, l)
-      g1 <- gamma_r_rec_pcm(betas, R, par.itemgrp)
-      return(sum(sapply(1:sum(par.itemgrp==itm), FUN = function(X) {
-        g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itm], R-X, par.itemgrp_noitem)
-        return(X*exp(betas[par.itemgrp==itm][X])*g2/g1)
-        })
-      ))
-    })
+    exp.val.both <- momfct(Tot.val, par.itemgrp, betas, R, itm, error.band)
 
+    exp.val <- unlist(exp.val.both["EXP",])
     data_exp <- data.frame(Tot.val, exp.val)
+
+    if (error.band) {
+
+      z <- qnorm(error.level+(1-error.level)/2)
+
+      n.vals <- sapply(0:length(betas), FUN = function(x) {
+        length(data[which(rowSums(data) == x), itm])
+      })
+
+      data_exp$LCI <- data_exp$exp.val - z * sqrt(unlist(exp.val.both["VAR",])/n.vals)
+      data_exp$UCI <- data_exp$exp.val + z * sqrt(unlist(exp.val.both["VAR",])/n.vals)
+
+      if(smooth.error.band) {
+
+        data_exp <- do.call(data.frame,lapply(data_exp, function(value) {
+          replace(value, is.infinite(value),NA)}))
+        dat <- data.frame(yL = data_exp$LCI, yU = data_exp$UCI, x = data_exp$Tot.val)
+        mL <- mgcv::gam(yL ~ s(x), data = dat)
+        mU <- mgcv::gam(yU ~ s(x), data = dat)
+
+        # define finer grid of predictor values
+        xnew <- data_exp$Tot.val
+
+        # apply predict() function to the fitted GAM model
+        # using the finer grid of x values
+        pL <- predict(mL, newdata = data.frame(x = xnew), se = TRUE)
+        pU <- predict(mU, newdata = data.frame(x = xnew), se = TRUE)
+
+        data_exp$LCIsmooth <- pL$fit
+        data_exp$UCIsmooth <- pU$fit
+      }
+    }
 
     pp[[plotidx]] <- vector(mode = "list", length(strat.vars))
     names(pp[[plotidx]]) <- names(strat.vars)
@@ -275,7 +314,8 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all",
                          strat.var = levstrat[j])
         df <- df[df$n.val_grp != 0, ]
         if (error.bar) {
-          df$CI.bound <- 1.96*sqrt(df[,"var.val_grp"]/df[,"n.val_grp"])
+          z <- qnorm(error.level+(1-error.level)/2)
+          df$CI.bound <- z*sqrt(df[,"var.val_grp"]/df[,"n.val_grp"])
         }
         df
       })
@@ -292,8 +332,10 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all",
       df <- dplyr::bind_rows(datalist, .id="data_frame")
 
       pp[[plotidx]][[l]] <- difplot(df, itmtit, stratname, col, dodge.width,
+                                    group.connect,
                                     point.size, line.size, line.type,
-                                    errorbar.width, errorbar.size)#, ...)
+                                    errorbar.width, errorbar.size,
+                                    error.band, error.band.col, smooth.error.band, ...)
 
     }
 
@@ -315,14 +357,22 @@ DIFplot <- function(model, which.item = 1, strat.vars, lower.groups = "all",
 #' @param stratname stratname
 #' @param col col
 #' @param dodge.width dodge.width
+#' @param group.connect Connect grouped total sores?
 #' @param point.size Size aesthetics for \code{geom_point()}.
 #' @param line.size Size aesthetics for \code{geom_line()}.
 #' @param line.type Linetype aesthetics for \code{geom_line()}.
 #' @param errorbar.width Width aesthetics for \code{geom_line()}.
 #' @param errorbar.size Size aesthetics for \code{geom_errorbar()}.
+#' @param error.band Logical flag for plotting theoretical CI
+#' @param error.band.col Color of \code{error.band}
+#' @param smooth.error.band Logical flag.
+#' @param ... optional parameters to be passed on to ggplot
 #' @noRd
-difplot <- function(df, itmtit, stratname, col, dodge.width, point.size,
-                    line.size, line.type, errorbar.width, errorbar.size, ...) {
+difplot <- function(df, itmtit, stratname, col, dodge.width, group.connect,
+                    point.size,
+                    line.size, line.type, errorbar.width, errorbar.size,
+                    error.band, error.band.col,
+                    smooth.error.band, ...) {
 
   nlev <- nlevels(as.factor(df$strat.var))
 
@@ -331,7 +381,33 @@ difplot <- function(df, itmtit, stratname, col, dodge.width, point.size,
     xlab("Total Score") +
     ylab("Item-Score") +
     scale_x_continuous(breaks = integer_breaks(), minor_breaks = df$Tot.val) +
-    geom_line(aes(color = "Expected"), linewidth = line.size, linetype = line.type, na.rm = TRUE)+#, ...) +
+    geom_line(aes(color = "Expected"),
+              linewidth = line.size, linetype = line.type,
+              na.rm = TRUE)
+
+    if (error.band) {
+
+      if(smooth.error.band) {
+        x <- x +
+          geom_ribbon(aes(ymin = .data$LCIsmooth,
+                          ymax = .data$UCIsmooth),
+                      fill = error.band.col, alpha = 0.5) +
+          geom_line(aes(color = "Expected"),
+                    linewidth = line.size, linetype = line.type,
+                    na.rm = TRUE)#, ...)
+      } else {
+        x <- x +
+          geom_ribbon(aes(ymin = .data$LCI,
+                          ymax = .data$UCI),
+                      fill = error.band.col, alpha = 0.5) +
+          geom_line(aes(color = "Expected"),
+                    linewidth = line.size, linetype = line.type,
+                    na.rm = TRUE)#, ...)
+      }
+
+    }
+
+  x <- x +
     geom_point(aes(x = .data$Tot.val_grp,
                    y = .data$obs.val_grp,
                    color = .data$strat.var),
@@ -366,6 +442,15 @@ difplot <- function(df, itmtit, stratname, col, dodge.width, point.size,
 
     }
 
+  }
+
+  if (group.connect) {
+    x <- x  +
+      geom_line(aes(x = .data$Tot.val_grp,
+                    y = .data$obs.val_grp,
+                    colour = .data$strat.var),
+                linetype = line.type,
+                linewidth = line.size)
   }
 
   x

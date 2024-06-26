@@ -26,7 +26,7 @@
 #' pp <- eRm::person.parameter(object)
 #' delta <- beta2delta(beta = object$betapar, x = it.SPADI)
 #' theta <- pp$thetapar$NAgroup1
-#' obj <- rRMPstats(delta, theta, method.item = "CML", method.person = "WML", B = 2)
+#' obj <- rRMPstats(delta, theta, method.item = "CML", method.person = "WML", B = 100)
 #' plot(obj)
 #'
 #' @export rRMPstats

@@ -144,31 +144,9 @@ CICCplot <- function(model, which.item = 1, lower.groups = "all",
 
 
     #-------------------- Expected item response -------------------------------
-    Tot.val <- 0:length(betas)
+    #Tot.val <- 0:length(betas)
 
-    exp.val.both <- sapply(Tot.val, FUN = function(R) {
-      l <- par.itemgrp[par.itemgrp!=itm]
-      par.itemgrp_noitem <- ifelse(l > itm, l-1, l)
-
-      #==================== call gamma polynomials (recursive formula) =========
-      g1 <- gamma_r_rec_pcm(betas, R, par.itemgrp)
-
-      EXP <- sum(sapply(1:sum(par.itemgrp==itm), FUN = function(X) {
-        g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itm], R-X, par.itemgrp_noitem)
-        X*exp(betas[par.itemgrp==itm][X])*g2/g1
-        }))
-
-      if (error.band) {
-        VAR <- sum(sapply(1:sum(par.itemgrp==itm), FUN = function(X) {
-          g2 <- gamma_r_rec_pcm(betas[par.itemgrp!=itm], R-X, par.itemgrp_noitem)
-          X^2*exp(betas[par.itemgrp==itm][X])*g2/g1
-        }))
-      } else {
-        VAR <- NULL
-      }
-      list(EXP = EXP, VAR = VAR)
-      #=================== end call gamma polynomials ==========================
-    })
+    exp.val.both <- momfct(Tot.val, par.itemgrp, betas, R, itm, error.band)
 
     exp.val <- unlist(exp.val.both["EXP",])
     data_exp <- data.frame(Tot.val, exp.val)
