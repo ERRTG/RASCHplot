@@ -53,13 +53,13 @@ pcmfct <- function(delta, theta, ii){
     stop("delta is not a matrix or data.frame")
   }
 
-  beta <- t(delta)#delta2beta(delta = delta)
-
   N <- length(theta)  # number of persons
-  M <- nrow(beta)     # max number of categories - 1 for items
+  M <- ncol(delta)     # max number of categories - 1 for items
 
-  beta0 <- colMeans(beta)#0#- sum(beta[, ii]) #
-  matb <- matrix(c(beta0[ii], beta[, ii]), nrow = N, ncol = M+1, byrow = TRUE)
+  beta <- delta2beta(delta = delta)
+
+  beta0 <- 0#colMeans(beta)#- sum(beta[, ii]) #
+  matb <- matrix(c(beta0, beta[ii, ]), nrow = N, ncol = M+1, byrow = TRUE)
   matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
   eta <- exp(theta * matx + matb)
   pbs <- eta / rowSums(eta, na.rm=TRUE)

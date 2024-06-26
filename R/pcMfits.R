@@ -108,16 +108,6 @@ pcMfits <- function(method.item, method.person, dat) {
         stop("b is not a matrix or data.frame")
       }
 
-      #N <- length(theta)  # number of persons
-      #M <- nrow(b)        # max number of categories - 1 for items
-
-      #beta0 <- colMeans(beta)#0# - sum(beta[, i]) #
-      #matb <- matrix(c(beta0[ii], b[, ii]), nrow = N, ncol = M+1, byrow = TRUE)
-      #matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
-      #eta <- exp(theta * matx + matb)
-      #pbs <- eta / rowSums(eta, na.rm=TRUE)
-      #return(pbs)
-
       beta <- t(b)#delta2beta(delta = delta)
 
       N <- length(theta)  # number of persons
