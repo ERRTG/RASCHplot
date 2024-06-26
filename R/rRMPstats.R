@@ -26,9 +26,14 @@
 #' pp <- eRm::person.parameter(object)
 #' delta <- beta2delta(beta = object$betapar, x = it.SPADI)
 #' theta <- pp$thetapar$NAgroup1
-#' obj <- rRMPstats(delta, theta, method.item = "CML", method.person = "WML", B = 1)
+#' obj <- rRMPstats(delta, theta, method.item = "CML", method.person = "WML", B = 20)
 #' plot(obj)
 #'
+#' fitres <- RMPstats(delta, theta, dat = it.SPADI[-pp$pers.ex,])
+#' outfits <- data.frame(x = fitres$Outfit, y = 0)
+#' plot(obj) +
+#' geom_point(data = outfits,
+#'            colour = "white", size = 1.5)
 #' @export rRMPstats
 rRMPstats <- function(delta, theta, method.item = c("PCML", "CML", "JML", "MML"), method.person = c("WML", "MLE"), B, trace.it = 0){
 
