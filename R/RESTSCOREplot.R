@@ -4,7 +4,7 @@
 #'
 #' ...
 #'
-#' @param model A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()}, \code{PCM()}, or \code{RSM()} from the \code{eRm} package.
+#' @param model Either a model object or a list of model objects of class \code{Rm} or \code{eRm} returned from the functions \code{RM()}, \code{PCM()}, or \code{RSM()} from the \code{eRm} package.
 #' @param color.expected Colour of expected restscore point and confidence interval.
 #' @param color.observed Colour of observed restscore point.
 #' @param size Colour of points.
@@ -36,26 +36,71 @@
 #'
 #' RESTSCOREplot(model.SPADI.pain)
 #'
+#' it.SPADI.pain.0 <- SPADI.comp[SPADI.comp$over60 == 0, 4:8]
+#' it.SPADI.pain.1 <- SPADI.comp[SPADI.comp$over60 == 1, 4:8]
+#'
+#' model.SPADI.pain.0 <- eRm::PCM(it.SPADI.pain.0)
+#' model.SPADI.pain.1 <- eRm::PCM(it.SPADI.pain.1)
+#'
+#' irt.list <- list("Under 60" = model.SPADI.pain.0,
+#'                  "Over 60" = model.SPADI.pain.1)
+#'
+#' RESTSCOREplot(irt.list)
+#'
 #' @export RESTSCOREplot
 #'
 RESTSCOREplot <- function(model, color.expected = "grey", color.observed = "orange", size = 4, linewidth = 1) {
 
-  irs <- item_restscore(model)
-  irs <- as.data.frame(cbind(Item = rownames(irs), irs))
-  irs[, 2:6] <- apply(irs[, 2:6], 2, function(x) as.numeric(as.character(x)))
-  irs$num <- seq_along(irs$Item)
+  if (is.list(model)) {
 
-  ggplot(irs, aes(x = num, y = observed)) +
-    geom_segment(data = irs, aes(xend = num,
-                                 y = expected - 1.96 * se,
-                                 yend = expected + 1.96 * se),
-                 color = color.expected, linewidth = linewidth) +
-    geom_point(aes(x = num, y = expected), color = color.expected, size = size) +
-    geom_point(color = color.observed, size = size) +
-    scale_x_continuous(breaks = irs$num,label = irs$Item, name = NULL) +
-    coord_flip() +
-    theme_minimal() +
-    ylab("Item restscore")
+    strat.names <- names(model)
+    irs.list <- lapply(seq_along(model), function(i) {
+      irs0 <- item_restscore(model[[i]])
+      irs0 <- as.data.frame(cbind(Item = rownames(irs0), irs0))
+      irs0[, 2:6] <- apply(irs0[, 2:6], 2, function(x) as.numeric(as.character(x)))
+      irs0$num <- i
+      irs0$strat <- strat.names[i]
+      irs0
+    })
+
+    irs <- do.call(rbind, irs.list)
+
+    ggplot(irs, aes(x = num, y = observed)) +
+      geom_segment(data = irs, aes(xend = num,
+                                   y = expected - 1.96 * se,
+                                   yend = expected + 1.96 * se),
+                   color = color.expected, linewidth = linewidth) +
+      geom_point(aes(x = num, y = expected), color = color.expected, size = size) +
+      geom_point(color = color.observed, size = size) +
+      scale_x_continuous(breaks = irs$num, label = irs$strat, name = NULL,
+                         expand = expansion(add = 1)) +
+      facet_grid(Item ~.) +
+      coord_flip() +
+      theme_minimal() +
+      ylab("Item restscore") +
+      theme(strip.background = element_rect(color = "white", fill = "lightgrey"))
+
+  } else {
+
+    irs <- item_restscore(model)
+    irs <- as.data.frame(cbind(Item = rownames(irs), irs))
+    irs[, 2:6] <- apply(irs[, 2:6], 2, function(x) as.numeric(as.character(x)))
+    irs$num <- seq_along(irs$Item)
+
+    ggplot(irs, aes(x = num, y = observed)) +
+      geom_segment(data = irs, aes(xend = num,
+                                   y = expected - 1.96 * se,
+                                   yend = expected + 1.96 * se),
+                   color = color.expected, linewidth = linewidth) +
+      geom_point(aes(x = num, y = expected), color = color.expected, size = size) +
+      geom_point(color = color.observed, size = size) +
+      scale_x_continuous(breaks = irs$num,label = irs$Item, name = NULL) +
+      coord_flip() +
+      theme_minimal() +
+      ylab("Item restscore")
+
+  }
+
 
 }
 

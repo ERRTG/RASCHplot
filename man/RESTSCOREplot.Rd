@@ -13,7 +13,7 @@ RESTSCOREplot(
 )
 }
 \arguments{
-\item{model}{A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()}, \code{PCM()}, or \code{RSM()} from the \code{eRm} package.}
+\item{model}{Either a model object or a list of model objects of class \code{Rm} or \code{eRm} returned from the functions \code{RM()}, \code{PCM()}, or \code{RSM()} from the \code{eRm} package.}
 
 \item{color.expected}{Colour of expected restscore point and confidence interval.}
 
@@ -51,5 +51,16 @@ DIFplot(model = model.SPADI.pain,
         lower.groups = lower.groups)
 
 RESTSCOREplot(model.SPADI.pain)
+
+it.SPADI.pain.0 <- SPADI.comp[SPADI.comp$over60 == 0, 4:8]
+it.SPADI.pain.1 <- SPADI.comp[SPADI.comp$over60 == 1, 4:8]
+
+model.SPADI.pain.0 <- eRm::PCM(it.SPADI.pain.0)
+model.SPADI.pain.1 <- eRm::PCM(it.SPADI.pain.1)
+
+irt.list <- list("Under 60" = model.SPADI.pain.0,
+                 "Over 60" = model.SPADI.pain.1)
+
+RESTSCOREplot(irt.list)
 
 }
