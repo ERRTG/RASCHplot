@@ -25,7 +25,9 @@ model.SPADI <- eRm::PCM(it.SPADI)
 
 betamat <- beta2mat(x = it.SPADI, beta = model.SPADI$betapar)
 delta <- beta2delta(beta = betamat)
-theta <- rnorm(100)
+theta <- rnorm(1000)
 obj <- rRMP(delta = delta, theta = theta, B = 2)
+fit <- eRm::PCM(obj[[1]])
+thresholds(fit)
 
 }

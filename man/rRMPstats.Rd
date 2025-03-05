@@ -48,7 +48,12 @@ object <- eRm::PCM(it.SPADI)
 pp <- eRm::person.parameter(object)
 delta <- beta2delta(beta = object$betapar, x = it.SPADI)
 theta <- pp$thetapar$NAgroup1
-obj <- rRMPstats(delta, theta, method.item = "CML", method.person = "WML", B = 2)
+obj <- rRMPstats(delta, theta, method.item = "CML", method.person = "WML", B = 20)
 plot(obj)
 
+fitres <- RMPstats(delta, theta, dat = it.SPADI[-pp$pers.ex,])
+outfits <- data.frame(x = fitres$Outfit, y = 0)
+plot(obj) +
+geom_point(data = outfits,
+           colour = "white", size = 1.5)
 }
