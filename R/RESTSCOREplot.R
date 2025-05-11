@@ -49,9 +49,9 @@
 #'
 #' @export RESTSCOREplot
 #'
-RESTSCOREplot <- function(model, color.expected = "grey", color.observed = "orange", size = 4, linewidth = 1) {
+RESTSCOREplot <- function(model, color.expected = "grey", color.observed = "orange", size = 2, linewidth = 1) {
 
-  if (is.list(model)) {
+  if ("list" %in% class(model)) {
 
     strat.names <- names(model)
     irs.list <- lapply(seq_along(model), function(i) {
@@ -80,7 +80,7 @@ RESTSCOREplot <- function(model, color.expected = "grey", color.observed = "oran
       ylab("Item restscore") +
       theme(strip.background = element_rect(color = "white", fill = "lightgrey"))
 
-  } else {
+  } else if ("eRm" %in% class(model)) {
 
     irs <- item_restscore(model)
     irs <- as.data.frame(cbind(Item = rownames(irs), irs))

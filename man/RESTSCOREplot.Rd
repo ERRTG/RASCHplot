@@ -8,7 +8,7 @@ RESTSCOREplot(
   model,
   color.expected = "grey",
   color.observed = "orange",
-  size = 4,
+  size = 2,
   linewidth = 1
 )
 }
