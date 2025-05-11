@@ -391,18 +391,20 @@ difplot <- function(df, itmtit, stratname, col, dodge.width, group.connect,
         x <- x +
           geom_ribbon(aes(ymin = .data$LCIsmooth,
                           ymax = .data$UCIsmooth),
-                      fill = error.band.col, alpha = 0.5) +
+                      fill = error.band.col, alpha = 0.5,
+                      na.rm = TRUE) +
           geom_line(aes(color = "Expected"),
                     linewidth = line.size, linetype = line.type,
-                    na.rm = TRUE)#, ...)
+                    na.rm = TRUE, ...)
       } else {
         x <- x +
           geom_ribbon(aes(ymin = .data$LCI,
                           ymax = .data$UCI),
-                      fill = error.band.col, alpha = 0.5) +
+                      fill = error.band.col, alpha = 0.5,
+                      na.rm = TRUE) +
           geom_line(aes(color = "Expected"),
                     linewidth = line.size, linetype = line.type,
-                    na.rm = TRUE)#, ...)
+                    na.rm = TRUE, ...)
       }
 
     }
@@ -412,7 +414,7 @@ difplot <- function(df, itmtit, stratname, col, dodge.width, group.connect,
                    y = .data$obs.val_grp,
                    color = .data$strat.var),
                position = position_dodge(width = dodge.width),
-               size = point.size, na.rm = TRUE)+#, ...) +
+               size = point.size, na.rm = TRUE, ...) +
     geom_errorbar(aes(x = .data$Tot.val_grp,
                       y = .data$obs.val_grp,
                       ymin = .data$obs.val_grp - .data$CI.bound,
@@ -420,17 +422,16 @@ difplot <- function(df, itmtit, stratname, col, dodge.width, group.connect,
                       color = .data$strat.var),
                   width = errorbar.width,
                   linewidth = errorbar.size,
-                  position = position_dodge(width = dodge.width)) +
+                  position = position_dodge(width = dodge.width),
+                  na.rm = TRUE) +
     scale_colour_manual(values = col, limits = names(col)) +
     guides(colour = guide_legend(title = stratname,
                                  override.aes = list(shape = c(NA, rep(19, nlev)))))
-  #+ guides(colour = guide_legend(stratname)) #
-  #+ #+ labs(fill = stratname)
-  #+ #+ theme(legend.title=element_blank()) #scale_color_discrete(name = "")
 
-  if (!all(is.na(df$bg))) {#(!all(is.na(df$bg))) {
 
-    if (FALSE) {#(identicalValue) {
+  if (!all(is.na(df$bg))) {
+
+    if (FALSE) {
 
       x <- x +
         geom_rect(aes(ymin = 0, ymax = max(.data$exp.val, na.rm = TRUE),
