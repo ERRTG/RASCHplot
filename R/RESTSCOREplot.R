@@ -72,7 +72,7 @@ RESTSCOREplot <- function(model, color.expected = "grey", color.observed = "oran
                    color = color.expected, linewidth = linewidth) +
       geom_point(aes(x = num, y = expected), color = color.expected, size = size) +
       geom_point(color = color.observed, size = size) +
-      scale_x_continuous(breaks = irs$num, label = irs$strat, name = NULL,
+      scale_x_continuous(breaks = irs$num, labels = irs$strat, name = NULL,
                          expand = expansion(add = 1)) +
       facet_grid(Item ~.) +
       coord_flip() +
@@ -94,7 +94,7 @@ RESTSCOREplot <- function(model, color.expected = "grey", color.observed = "oran
                    color = color.expected, linewidth = linewidth) +
       geom_point(aes(x = num, y = expected), color = color.expected, size = size) +
       geom_point(color = color.observed, size = size) +
-      scale_x_continuous(breaks = irs$num,label = irs$Item, name = NULL) +
+      scale_x_continuous(breaks = irs$num, labels = irs$Item, name = NULL) +
       coord_flip() +
       theme_minimal() +
       ylab("Item restscore")

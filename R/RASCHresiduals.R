@@ -31,7 +31,7 @@ RASCHresiduals <- function(delta, theta, data, standardize = TRUE) {
 
     N <- nrow(data)
     K <- ncol(data)
-    M <- max(data, na.rm = TRUE)            # max number of categories - 1 for items
+    M <- max(data, na.rm = TRUE)             # max number of categories - 1 for items
     mi <- apply(data, 2, max, na.rm = TRUE) # number of categories - 1 for each item
 
     E <- matrix(nrow = N, ncol = K)

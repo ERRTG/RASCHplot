@@ -42,7 +42,7 @@ pcMfits <- function(method.item, method.person, dat) {
     #for (i in 1:length(beta.vec)) {
     #  beta.sim[rows[i], cols[i]] <- beta.vec[i]
     #}
-    beta.sim <- beta2mat(x = dat, beta = beta.vec)
+    beta.sim <- t(beta2mat(x = dat, beta = beta.vec))
   }
   if (method.item == "JML") {
     item.fit <- TAM::tam.jml(resp = dat,
@@ -108,7 +108,7 @@ pcMfits <- function(method.item, method.person, dat) {
         stop("b is not a matrix or data.frame")
       }
 
-      beta <- t(b)#delta2beta(delta = delta)
+      beta <- b#delta2beta(delta = delta)
 
       N <- length(theta)  # number of persons
       M <- nrow(beta)     # max number of categories - 1 for items

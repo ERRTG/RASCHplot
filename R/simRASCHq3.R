@@ -55,7 +55,7 @@ simRASCHq3 <- function(delta, theta, method.item = c("PCML", "CML", "JML", "MML"
   if (model == "RMD") {
 
     N <- length(theta)
-    K <- length(beta)
+    K <- length(delta)
 
     #------------- Simulate item responses (0/1) -----------------------
     X <- rRMD(delta = delta, theta = theta, B = B)
