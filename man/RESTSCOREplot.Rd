@@ -6,14 +6,18 @@
 \usage{
 RESTSCOREplot(
   model,
+  model.overall = NULL,
   color.expected = "grey",
   color.observed = "orange",
   size = 2,
-  linewidth = 1
+  linewidth = 1,
+  ...
 )
 }
 \arguments{
 \item{model}{Either a model object or a list of model objects of class \code{Rm} or \code{eRm} returned from the functions \code{RM()}, \code{PCM()}, or \code{RSM()} from the \code{eRm} package.}
+
+\item{model.overall}{A model object of class \code{Rm} or \code{eRm} returned from the functions \code{RM()}, \code{PCM()}, or \code{RSM()} from the \code{eRm} package.}
 
 \item{color.expected}{Colour of expected restscore point and confidence interval.}
 
@@ -22,6 +26,8 @@ RESTSCOREplot(
 \item{size}{Colour of points.}
 
 \item{linewidth}{Width of confidence interval.}
+
+\item{...}{Additional arguments}
 }
 \value{
 Item restscore plot
@@ -41,16 +47,7 @@ it.SPADI.pain <- SPADI.comp[, 4:8]
 model.SPADI.pain <- eRm::PCM(it.SPADI.pain)
 strat.vars <- list(gender = SPADI.comp[, "gender"])
 
-br <- cut(rowSums(it.SPADI.pain), quantile(rowSums(it.SPADI.pain), seq(0, 1, 0.25)))
-table(br)
-strat.vars <- list(over60 = SPADI.comp[, "over60"])
-lower.groups <- c(0, 10.5, 16, 19, 25)
-DIFplot(model = model.SPADI.pain,
-        which.item = 1,
-        strat.vars = strat.vars,
-        lower.groups = lower.groups)
-
-RESTSCOREplot(model.SPADI.pain)
+RESTSCOREplot(model = model.SPADI.pain)
 
 it.SPADI.pain.0 <- SPADI.comp[SPADI.comp$over60 == 0, 4:8]
 it.SPADI.pain.1 <- SPADI.comp[SPADI.comp$over60 == 1, 4:8]
@@ -62,5 +59,14 @@ irt.list <- list("Under 60" = model.SPADI.pain.0,
                  "Over 60" = model.SPADI.pain.1)
 
 RESTSCOREplot(irt.list)
+
+br <- cut(rowSums(it.SPADI.pain), quantile(rowSums(it.SPADI.pain), seq(0, 1, 0.25)))
+table(br)
+strat.vars <- list(over60 = SPADI.comp[, "over60"])
+lower.groups <- c(0, 10.5, 16, 19, 25)
+DIFplot(model = model.SPADI.pain,
+        which.item = 1,
+        strat.vars = strat.vars,
+        lower.groups = lower.groups)
 
 }
