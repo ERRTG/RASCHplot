@@ -30,8 +30,8 @@
 #' RESTSCOREplot(model = model.SPADI.pain)
 #'
 #' RESTSCOREplot(model = model.SPADI.pain)  +
-#'     scale_color_manual(values = c("Observed" = "#FF91BC, "Expected" = "black"))+
-#'   theme_minimal()
+#'     scale_color_manual(values = c("Observed" = "#FF91BC", "Expected" = "black")) +
+#'     theme_minimal()
 #'
 #' it.SPADI.pain.0 <- SPADI.comp[SPADI.comp$over60 == 0, 4:8]
 #' it.SPADI.pain.1 <- SPADI.comp[SPADI.comp$over60 == 1, 4:8]
@@ -79,7 +79,7 @@ RESTSCOREplot <- function(model, model.overall = NULL, color.expected = "grey", 
       irs0 <- item_restscore(model[[i]])
       irs0 <- as.data.frame(cbind(Item = rownames(irs0), irs0))
       irs0[, 2:6] <- apply(irs0[, 2:6], 2, function(x) as.numeric(as.character(x)))
-      irs0$num <- i
+      irs0$Stratification <- strat.names[i] #i
       irs0$strat <- strat.names[i]
       if (!is.null(model.overall)) irs0$expected <- irs_overall$expected
       irs0
@@ -92,12 +92,11 @@ RESTSCOREplot <- function(model, model.overall = NULL, color.expected = "grey", 
       dplyr::mutate(name = paste0(toupper(substr(name, 1, 1)), substr(name, 2, nchar(name)))) |>
       dplyr::mutate(id = dplyr::row_number())
 
-    ggplot(irs_long, aes(x = num, y = name, color = name)) +
-      geom_segment(data = irs_long |> subset(name == "Expected"), aes(xend = num,
+    ggplot(irs_long, aes(x = Stratification, y = name, color = name)) +
+      geom_segment(data = irs_long |> subset(name == "Expected"), aes(xend = Stratification,
                                                                       y = value - 1.96 * se,
                                                                       yend = value + 1.96 * se), ...) +
-      geom_point(aes(x = num, y = value), size = size, ...) +
-      scale_x_continuous(breaks = irs_long$num, labels = irs_long$Item, name = NULL) +
+      geom_point(aes(x = Stratification, y = value), size = size, ...) +
       coord_flip() +
       ylab("Item restscore") +
       facet_grid(Item ~.) +
