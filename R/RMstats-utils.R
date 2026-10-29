@@ -54,14 +54,16 @@ pcmfct <- function(delta, theta, ii){
   }
 
   N <- length(theta)  # number of persons
-  M <- nrow(delta)     # max number of categories - 1 for items
+  M <- ncol(delta)     # max number of thresholds (= max categories) for items; delta is items x thresholds
 
   beta <- delta2beta(delta = delta)
 
-  beta0 <- 0#colMeans(beta)#- sum(beta[, ii]) #
-  matb <- matrix(c(beta0, beta[, ii]), nrow = N, ncol = M+1, byrow = TRUE)
+  beta0 <- 0
+  matb <- matrix(c(beta0, beta[ii, ]), nrow = N, ncol = M+1, byrow = TRUE)
   matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
-  eta <- exp(theta * matx + matb)
-  pbs <- eta / rowSums(eta, na.rm=TRUE)
+  logit <- theta * matx + matb
+  logit <- logit - apply(logit, 1, max, na.rm = TRUE)   # numerically stable softmax
+  eta <- exp(logit)
+  pbs <- eta / rowSums(eta, na.rm = TRUE)
   return(pbs)
 }
