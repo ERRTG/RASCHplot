@@ -75,6 +75,8 @@ simRASCHq3 <- function(delta, theta, method.item = c("PCML", "CML", "JML", "MML"
 
     #============= Compute Q3 statistics =======================================
 
+    # polytomous delta is returned thresholds x items; RASCHresiduals() expects items x thresholds
+    delta.sim <- if (is.matrix(delta.sim)) t(delta.sim) else delta.sim
     resids <- RASCHresiduals(delta = delta.sim, theta = theta.sim, data = X[[b]])
     fitQ3 <- Q3(items = X[[b]], method.item = method.item, method.person = method.person,
                 model = model, standardize = standardize)

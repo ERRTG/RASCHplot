@@ -121,3 +121,10 @@ test_that("rRMPstats runs end to end and records attempts", {
   expect_true(all(obj$attempts >= 1))
   expect_true(all(is.finite(sapply(obj$statobj, function(s) max(s$Outfit)))))
 })
+
+test_that("Q3 runs on polytomous data (thresholds x items delta is transposed correctly)", {
+  dat <- sim_pcm(400, tau_uniform, seed = 10)
+  q <- Q3(items = dat, method.item = "CML", method.person = "WML", model = "RMP", standardize = FALSE)
+  expect_true(is.finite(q$Q3max))
+  expect_equal(dim(q$Q3matrix), c(8L, 8L))
+})
