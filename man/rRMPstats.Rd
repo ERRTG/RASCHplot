@@ -10,11 +10,13 @@ rRMPstats(
   method.item = c("PCML", "CML", "JML", "MML"),
   method.person = c("WML", "MLE"),
   B,
-  trace.it = 0
+  trace.it = 0,
+  max_retries = 10,
+  timeout_secs = Inf
 )
 }
 \arguments{
-\item{delta}{Input item-category threshold parameters. Should be a matrix or data.frame with number of columns equal to number of items and number of rows equal to (maximum) number of response categories and NA assigned to empty categories.}
+\item{delta}{Input item-category threshold parameters. Should be a matrix or data.frame with one row per item and one column per threshold (number of columns equal to the maximum number of response categories minus one), with NA assigned to empty categories.}
 
 \item{theta}{Input person parameters.}
 
@@ -25,6 +27,10 @@ rRMPstats(
 \item{B}{Number of simulations.}
 
 \item{trace.it}{If \code{trace.it=1}, then progress bars are displayed.}
+
+\item{max_retries}{Maximum number of attempts for one replicate. A replicate fails if fitting errors or a person estimate is undefined; it is then redrawn. If all attempts fail, an error is raised.}
+
+\item{timeout_secs}{Wall-clock limit in seconds for one attempt. Default \code{Inf} (no limit).}
 }
 \value{
 An object with S3 class \code{"RASCHstats"}.  \item{call}{the call
