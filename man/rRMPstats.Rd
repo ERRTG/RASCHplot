@@ -47,6 +47,7 @@ For more details see the help vignette:
 }
 \examples{
 
+library(ggplot2)
 data(SPADI)
 SPADI.complete <- SPADI[complete.cases(SPADI), ]
 it.SPADI <- SPADI.complete[, 9:16]
