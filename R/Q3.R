@@ -46,7 +46,9 @@ Q3 <- function(items, method.item = c("PCML", "CML", "JML", "MML"), method.perso
 
   #============= Compute residuals ==========================================
 
-  resids  <- RASCHresiduals(delta = fit$delta,
+  # polytomous delta is returned thresholds x items; RASCHresiduals() expects items x thresholds
+  delta <- if (is.matrix(fit$delta)) t(fit$delta) else fit$delta
+  resids  <- RASCHresiduals(delta = delta,
                             theta = fit$theta,
                             data = items,
                             standardize = standardize)

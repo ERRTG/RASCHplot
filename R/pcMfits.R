@@ -66,12 +66,14 @@ pcMfits <- function(method.item, method.person, dat) {
                         verbose = FALSE)
     cl <- call("TAM::tam.mml", resp = dat, irtmodel = "PCM", verbose = FALSE)
 
-    beta.vec <- item.fit$xsi$xsi #- mean(item.fit$xsi$xsi, na.rm = TRUE)
-    rows <- do.call(c, lapply(1:K, function(i) 1:mi[i]))
-    cols <- do.call(c, lapply(1:K, function(i) rep(i, mi[i])))
+    # TAM's xsi are the item-category thresholds (delta), item by item, so the
+    # cumulative beta needed below is -cumsum(xsi) within each item.
+    xsi <- item.fit$xsi$xsi
     beta.sim <- matrix(NA, nrow = max(dat), ncol = ncol(dat))
-    for (i in 1:length(beta.vec)) {
-      beta.sim[rows[i], cols[i]] <- beta.vec[i]
+    pos <- 0
+    for (i in 1:K) {
+      beta.sim[1:mi[i], i] <- -cumsum(xsi[pos + 1:mi[i]])
+      pos <- pos + mi[i]
     }
   }
   if (method.item == "PCML") {
@@ -108,32 +110,37 @@ pcMfits <- function(method.item, method.person, dat) {
         stop("b is not a matrix or data.frame")
       }
 
-      beta <- b#delta2beta(delta = delta)
+      beta <- b           # thresholds x items
 
       N <- length(theta)  # number of persons
       M <- nrow(beta)     # max number of categories - 1 for items
 
-      beta0 <- colMeans(beta)#0#- sum(beta[, ii]) #
-      matb <- matrix(c(beta0[ii], beta[, ii]), nrow = N, ncol = M+1, byrow = TRUE)
+      # category 0 has beta = 0 by the model's identification (as pcmfct() and delta2beta())
+      matb <- matrix(c(0, beta[, ii]), nrow = N, ncol = M+1, byrow = TRUE)
       matx <- matrix(0:M, nrow = N, ncol = M+1, byrow = TRUE)
-      eta <- exp(theta * matx + matb)
-      pbs <- eta / rowSums(eta, na.rm=TRUE)
+      logit <- theta * matx + matb
+      logit <- logit - apply(logit, 1, max, na.rm = TRUE)   # numerically stable softmax
+      eta <- exp(logit)
+      pbs <- eta / rowSums(eta, na.rm = TRUE)
       return(pbs)
     }
 
+    # sirt knows "WLE" (Warm's weighted ML), not "WML"; "WML" silently gave plain ML before
+    person.type <- if (method.person == "WML") "WLE" else method.person
     person.fit <- sirt::IRT.mle(data = dat, irffct = pcmfct0, arg.list = arg.list,
-                                type = method.person, progress = FALSE)
+                                type = person.type, progress = FALSE)
     theta.sim <- person.fit$est
     theta.sim[theta.sim %in% c(Inf, -Inf)] <- NA
   } else {
     theta.sim <- NULL
-    preson.fit <- NULL
+    person.fit <- NULL
   }
 
 
   #============= End fit person parameters ===========================
 
-  delta.sim <- beta2delta(beta = beta.sim, x = dat)
+  # beta.sim is thresholds x items; beta2delta() works on items x thresholds
+  delta.sim <- t(beta2delta(beta = t(beta.sim)))
 
   out <- list(delta = delta.sim, theta = theta.sim,
               item.fit = item.fit, person.fit = person.fit)

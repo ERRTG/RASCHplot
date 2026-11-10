@@ -24,62 +24,48 @@
 #'
 rRMP <- function(delta, theta, B) {
 
+  if (!all(any(class(delta) %in% c("matrix", "data.frame")))) {
+    stop("delta is not a matrix or data.frame")
+  }
+  if (anyNA(theta)) {
+    stop("theta contains NA (undefined person estimates); remove those persons before simulating")
+  }
+  delta <- as.matrix(delta)
+
   N <- length(theta)
   K <- nrow(delta)
-  M <- ncol(delta)
-  mi <- apply(delta, 1, function(x) sum(!is.na(x)))
+  mi <- apply(delta, 1, function(x) sum(!is.na(x)))   # number of categories - 1 per item
+  max_total <- sum(mi)                                 # largest possible total score
+
+  #-------------------- Compute probabilities ----------------------------
+  probs <- vector(mode = "list", length = K)
+  for (i in 1:K) {
+    probs[[i]] <- pcmfct(delta = delta, theta = theta, ii = i)
+  }
 
   X <- vector(mode = "list", length = B)
-  X <- lapply(X, function(x) matrix(nrow = N, ncol = K))
 
   for (b in 1:B) {
 
     #------------- Simulate polytomous item responses --------------------------
-
-    if (!all(any(class(delta) %in% c("matrix", "data.frame")))) {
-      stop("delta is not a matrix or data.frame")
-    }
-
-    #-------------------- Compute probabilities ----------------------------
-    probs <- vector(mode = "list", length = K)
-    for (i in 1:K) {
-      probs[[i]] <- pcmfct(delta = delta, theta = theta, ii = i)
-    }
-
-    #------------- Simulate polytomous item responses --------------------------
-    novar <- TRUE
-    while (novar) {
-      PP <- matrix(runif(n = N * K, 0, 1), nrow = N, ncol = K)
+    # Redraw the whole replicate until no item is constant (as before), starting
+    # from a fresh matrix each time; extreme scorers are removed.
+    repeat {
+      Xb <- matrix(NA, nrow = N, ncol = K)
       for (i in 1:K) {
-        for (j in 1:N) {
-          cumprop <- cumsum(probs[[i]][j, ])
-          U <- PP[j,i] #PP[[b]][j, i]
-          for (x in 1:(mi[i]+1)) {
-            if (all(is.na(cumprop))) {
-              break
-            } else {
-              if (U <= cumprop[x]) {
-                X[[b]][j,i] <- x-1
-                break
-              }
-            }
-          }
+        cumprop <- t(apply(probs[[i]], 1, cumsum))
+        U <- runif(N)
+        for (x in 0:mi[i]) {
+          Xb[, i] <- ifelse(is.na(Xb[, i]) & U <= cumprop[, x + 1], x, Xb[, i])
         }
+        Xb[is.na(Xb[, i]), i] <- mi[i]   # guard against rounding: cumulative probability sums to 1
       }
-      #------------- Remove obs. with extreme scores -----------------------------
-      test <- which(rowSums(X[[b]]) %in% c(0, M*K))
-      if (!identical(test, integer(0))) {
-        X[[b]] <- X[[b]][-test,]
-      }
-      if (all(is.na(cumprop))) {
-        novar <- TRUE
-      } else {
-        novar <- any(apply(X[[b]], 2, function(x) var(x) == 0))
-      }
-
+      Xb <- Xb[!(rowSums(Xb) %in% c(0, max_total)), , drop = FALSE]
+      if (nrow(Xb) > 1 && !any(apply(Xb, 2, function(x) var(x) == 0))) break
     }
 
-    colnames(X[[b]]) <- paste0("I", 1:K)
+    colnames(Xb) <- paste0("I", 1:K)
+    X[[b]] <- Xb
   }
   return(X)
 }

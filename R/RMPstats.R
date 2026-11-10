@@ -7,6 +7,10 @@
 #' @export RMPstats
 RMPstats <- function(delta, theta, dat) {
 
+  if (anyNA(theta)) {
+    stop("theta contains NA (undefined person estimates); remove those persons before computing fit statistics")
+  }
+
   N <- nrow(dat)
   K <- ncol(dat)
   M <- max(dat, na.rm = TRUE)            # max number of categories - 1 for items
